@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dynamic electricity tariffs — a hands-on demo</title>
+  <!--
+    The tariff demo (milestone 3). The project one-pager lives at index.html.
+    Design decision: NO backend, NO live API call from the browser.
+    It reads results.json, which a GitHub Actions workflow regenerates daily
+    from real market data. This sidesteps browser CORS limits and means the
+    page is just static files anyone can host. See README "Design decisions".
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --accent:#4c9f70; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--ink); max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem;
+      line-height: 1.55;
+    }
+    h1 { margin-bottom: .2rem; }
+    .sub { color: var(--muted); margin-top: 0; }
+    .cards { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.5rem 0; }
+    .card {
+      flex: 1 1 180px; border: 1px solid var(--line); border-radius: 10px;
+      padding: 1rem;
+    }
+    .card .n { font-size: 1.6rem; font-weight: 700; }
+    .card .l { color: var(--muted); font-size: .85rem; }
+    .accent { color: var(--accent); }
+    section { margin: 2.25rem 0; }
+    canvas { max-width: 100%; }
+    .note { background:#f7f7f5; border-left:3px solid var(--accent); padding:.75rem 1rem;
+            border-radius:6px; color:#333; font-size:.92rem; }
+    footer { color: var(--muted); font-size: .8rem; margin-top: 3rem;
+             border-top:1px solid var(--line); padding-top:1rem; }
+    code { background:#f0f0ee; padding:.1rem .3rem; border-radius:4px; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; project overview</a></p>
+  <h1>Dynamic electricity tariffs</h1>
+  <p class="sub">A hands-on look at day-ahead prices and what smart timing is worth.
+     Data: aWATTar (Germany) = EPEX SPOT day-ahead. Refreshed daily.</p>
+  <p><a href="worldcup.html" style="color:#c1436d">Side study: does the World Cup move prices? &rarr;</a></p>
+
+  <div class="cards" id="cards"><!-- filled by JS --></div>
+
+  <section>
+    <h2>Today's day-ahead price</h2>
+    <p>The wholesale price for each hour, set by the merit-order auction. Dips
+       toward or below zero happen when wind and solar flood the grid — the
+       cheap hours a dynamic tariff exists to exploit.</p>
+    <canvas id="priceChart" height="140"></canvas>
+  </section>
+
+  <section>
+    <h2>What smart timing is worth</h2>
+    <p>One household over one day, including an 11 kWh EV charge, under three
+       scenarios. "Smart" means charging the EV in the cheapest hours instead
+       of the evening peak.</p>
+    <canvas id="costChart" height="140"></canvas>
+    <p class="note" id="honesty"></p>
+  </section>
+
+  <footer id="footer"></footer>
+
+  <script>
+    // Load the committed data and render. Kept deliberately simple.
+    fetch('results.json')
+      .then(r => r.json())
+      .then(render)
+      .catch(e => {
+        document.body.insertAdjacentHTML('beforeend',
+          '<p style="color:#b00">Could not load results.json — run ' +
+          '<code>python fetch_prices.py &amp;&amp; python cost_model.py</code> first.</p>');
+      });
+
+    function euro(n) { return '€' + n.toFixed(2); }
+
+    function render(d) {
+      const c = d.cost_eur, s = d.savings_eur;
+
+      // Summary cards
+      document.getElementById('cards').innerHTML = [
+        card(euro(s.dynamic_smart_vs_flat_per_day) + '/day', 'Saved vs flat tariff', true),
+        card('€' + Math.round(s.dynamic_smart_vs_flat_per_year), 'Per year (today ×365 — indicative only; seasonal spreads differ)', false),
+        card(euro(s.from_shifting_ev_per_day) + '/day', 'From shifting the EV alone', false),
+      ].join('');
+
+      // Price curve
+      new Chart(document.getElementById('priceChart'), {
+        type: 'line',
+        data: {
+          labels: d.hour_labels,
+          datasets: [{
+            label: 'Wholesale (ct/kWh)', data: d.wholesale_ct_per_kwh,
+            borderColor: '#4c9f70', backgroundColor: 'rgba(76,159,112,.1)',
+            tension: .25, fill: true, pointRadius: 2,
+          }]
+        },
+        options: { plugins:{legend:{display:false}},
+          scales:{ y:{ title:{display:true,text:'ct/kWh'} } } }
+      });
+
+      // Cost bars
+      new Chart(document.getElementById('costChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Flat tariff', 'Dynamic (dumb charging)', 'Dynamic (smart charging)'],
+          datasets: [{
+            data: [c.flat_tariff, c.dynamic_naive_charging, c.dynamic_smart_charging],
+            backgroundColor: ['#888', '#e0a458', '#4c9f70'],
+          }]
+        },
+        options: { plugins:{legend:{display:false}},
+          scales:{ y:{ title:{display:true,text:'EUR / day'} } } }
+      });
+
+      // Honesty note, driven by the actual assumptions
+      document.getElementById('honesty').textContent =
+        'Honest caveat: a dynamic bill is wholesale + a fixed adder (' +
+        d.assumptions.fixed_adder_ct_per_kwh + ' ct/kWh of grid fees, levies, ' +
+        'tax and margin) that is identical every hour. Shifting load only moves ' +
+        'the wholesale part, so savings are real but bounded — not unlimited.';
+
+      document.getElementById('footer').textContent =
+        'Data generated ' + (d.generated_at || 'unknown') +
+        '. Wholesale prices from aWATTar / EPEX SPOT. Costs are modelled with ' +
+        'stated assumptions, not a real bill.';
+    }
+
+    function card(n, l, accent) {
+      return '<div class="card"><div class="n' + (accent ? ' accent' : '') +
+             '">' + n + '</div><div class="l">' + l + '</div></div>';
+    }
+  </script>
+</body>
+</html>

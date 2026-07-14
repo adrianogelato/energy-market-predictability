@@ -1,0 +1,24 @@
+{
+  "data_source": "live",
+  "assumptions": {
+    "ev_kwh_per_day": 11.0,
+    "days_per_year": 365,
+    "n_cheap_hours": 3,
+    "backtest_days": 38
+  },
+  "caveat": "annualized at SUMMER rates: the backtest window is 38 early-summer days with maximal solar spreads; winter spreads differ, so read the per-year figures as a summer-rate extrapolation, not a calendar-year estimate",
+  "annual_cost_eur": {
+    "perfect": 100.29,
+    "model": 108.36,
+    "climatology": 109.05,
+    "persistence": 115.27,
+    "all_day": 416.96
+  },
+  "value": {
+    "smart_timing_vs_anytime_eur_yr": 308.6,
+    "model_vs_best_naive_eur_yr": 0.69,
+    "best_naive_used": "climatology",
+    "gap_model_to_perfect_eur_yr": 8.07,
+    "perfect_vs_anytime_ceiling_eur_yr": 316.67
+  }
+}

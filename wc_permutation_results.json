@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-07-14T13:11",
+  "data_source": "live",
+  "n_permutations": 2000,
+  "matching": {
+    "features": [
+      "temp_mean",
+      "temp_max",
+      "rad_mean",
+      "wind_mean"
+    ],
+    "k_controls": 5,
+    "day_type_classes": [
+      "weekday",
+      "saturday",
+      "sunlike (Sun or public holiday)"
+    ],
+    "season_gap_max_days": null,
+    "distance": "euclidean over z-scored features"
+  },
+  "subsets": {
+    "all": {
+      "n_match_days": 31,
+      "real_t": 1.33,
+      "real_delta_mw": 486.8,
+      "p_value_two_sided": 0.342,
+      "p_value_one_sided": 0.157,
+      "null_t_95pct": 2.82
+    },
+    "prime": {
+      "n_match_days": 31,
+      "real_t": 0.85,
+      "real_delta_mw": 376.1,
+      "p_value_two_sided": 0.549,
+      "p_value_one_sided": 0.241,
+      "null_t_95pct": 2.79
+    },
+    "overnight": {
+      "n_match_days": 25,
+      "real_t": 1.99,
+      "real_delta_mw": 792.3,
+      "p_value_two_sided": 0.159,
+      "p_value_one_sided": 0.095,
+      "null_t_95pct": 2.73
+    }
+  },
+  "family_wise": {
+    "real_max_abs_t": 1.99,
+    "p_value": 0.279,
+    "null_max_t_95pct": 3.17,
+    "note": "null of max|t| across the three subsets from joint draws; this is the correct reference when the most extreme of several examined subsets is the one being reported"
+  }
+}

@@ -1,0 +1,2225 @@
+{
+  "generated_at": "2026-07-14T13:10",
+  "data_source": "live",
+  "n_control_pool": 28,
+  "k_controls_per_day": 5,
+  "matching": {
+    "features": [
+      "temp_mean",
+      "temp_max",
+      "rad_mean",
+      "wind_mean"
+    ],
+    "k_controls": 5,
+    "day_type_classes": [
+      "weekday",
+      "saturday",
+      "sunlike (Sun or public holiday)"
+    ],
+    "season_gap_max_days": null,
+    "distance": "euclidean over z-scored features"
+  },
+  "mean_load_mw": 50508.0,
+  "effect": {
+    "n_match_days": 31,
+    "mean_delta_mw": 486.8,
+    "mean_delta_pct_of_load": 0.96,
+    "std_mw": 2042.5,
+    "t_stat": 1.33,
+    "mde_mw_80pct_power": 1027.0,
+    "interpretation": "no statistically clear deviation from comparable days (a null result is a real finding; only deviations of about 1027 MW or more were detectable at 80% power, so this rules out a large effect, not any effect)"
+  },
+  "subsets": {
+    "all": {
+      "n_match_days": 31,
+      "mean_delta_mw": 486.8,
+      "mean_delta_pct_of_load": 0.96,
+      "std_mw": 2042.5,
+      "t_stat": 1.33,
+      "mde_mw_80pct_power": 1027.0,
+      "interpretation": "no statistically clear deviation from comparable days (a null result is a real finding; only deviations of about 1027 MW or more were detectable at 80% power, so this rules out a large effect, not any effect)"
+    },
+    "prime": {
+      "n_match_days": 31,
+      "mean_delta_mw": 376.1,
+      "mean_delta_pct_of_load": 0.74,
+      "std_mw": 2466.3,
+      "t_stat": 0.85,
+      "mde_mw_80pct_power": 1240.0,
+      "interpretation": "no statistically clear deviation from comparable days (a null result is a real finding; only deviations of about 1240 MW or more were detectable at 80% power, so this rules out a large effect, not any effect)"
+    },
+    "overnight": {
+      "n_match_days": 25,
+      "mean_delta_mw": 883.3,
+      "mean_delta_pct_of_load": 1.75,
+      "std_mw": 1943.0,
+      "t_stat": 2.27,
+      "mde_mw_80pct_power": 1088.0,
+      "interpretation": "demand ran 883 MW above the forecast beyond comparable days (t=2.3); do not read anything into this before checking the permutation test (wc_permutation.py)"
+    }
+  },
+  "robustness_within_day": {
+    "all": {
+      "n": 31,
+      "mean_delta_mw": -1000.5,
+      "std_mw": 852.3,
+      "t_stat": -6.54,
+      "note": "within-day contrast (match hours minus same-day non-match hours), match day vs weather-matched controls; nets out day-level drift in the forecast-error series"
+    },
+    "prime": {
+      "n": 31,
+      "mean_delta_mw": -1111.2,
+      "std_mw": 1206.0,
+      "t_stat": -5.13,
+      "note": "within-day contrast (match hours minus same-day non-match hours), match day vs weather-matched controls; nets out day-level drift in the forecast-error series"
+    },
+    "overnight": {
+      "n": 25,
+      "mean_delta_mw": -791.0,
+      "std_mw": 798.0,
+      "t_stat": -4.96,
+      "note": "within-day contrast (match hours minus same-day non-match hours), match day vs weather-matched controls; nets out day-level drift in the forecast-error series"
+    }
+  },
+  "hourly_profile": {
+    "hours": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "match_days_error_mw": [
+      1018.0,
+      1244.3,
+      1261.6,
+      1461.4,
+      1188.9,
+      925.2,
+      847.5,
+      431.0,
+      -188.3,
+      -1029.5,
+      -1280.3,
+      -1183.6,
+      -1137.0,
+      -1034.2,
+      -1178.4,
+      -1300.4,
+      -1065.1,
+      -663.2,
+      -64.1,
+      64.6,
+      -61.0,
+      -35.8,
+      861.8,
+      968.0
+    ],
+    "comparable_days_error_mw": [
+      446.1,
+      497.5,
+      378.5,
+      509.1,
+      375.9,
+      88.8,
+      164.5,
+      -589.9,
+      -1677.7,
+      -2869.9,
+      -3524.9,
+      -3503.2,
+      -3774.4,
+      -3528.7,
+      -3541.5,
+      -3184.0,
+      -2778.6,
+      -2432.5,
+      -1508.6,
+      -559.6,
+      -384.3,
+      28.2,
+      655.4,
+      488.3
+    ],
+    "match_hour_flags": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "match_hour_share": [
+      0.42,
+      0.45,
+      0.35,
+      0.58,
+      0.61,
+      0.32,
+      0.23,
+      0.1,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.16,
+      0.42,
+      0.29,
+      0.48,
+      0.77,
+      0.48
+    ]
+  },
+  "per_day": [
+    {
+      "date": "2026-06-11",
+      "match_hours": [
+        21,
+        22
+      ],
+      "error_match_mw": -184.3,
+      "error_comparable_mw": 748.5,
+      "delta_mw": -932.9
+    },
+    {
+      "date": "2026-06-12",
+      "match_hours": [
+        4,
+        5,
+        21,
+        22
+      ],
+      "error_match_mw": -1454.1,
+      "error_comparable_mw": 398.6,
+      "delta_mw": -1852.7
+    },
+    {
+      "date": "2026-06-13",
+      "match_hours": [
+        3,
+        4,
+        21,
+        22
+      ],
+      "error_match_mw": -1465.1,
+      "error_comparable_mw": -477.4,
+      "delta_mw": -987.7
+    },
+    {
+      "date": "2026-06-14",
+      "match_hours": [
+        0,
+        1,
+        3,
+        4,
+        6,
+        7,
+        19,
+        20,
+        22,
+        23
+      ],
+      "error_match_mw": -3861.4,
+      "error_comparable_mw": -544.1,
+      "delta_mw": -3317.3
+    },
+    {
+      "date": "2026-06-15",
+      "match_hours": [
+        1,
+        2,
+        4,
+        5,
+        18,
+        19,
+        21,
+        22
+      ],
+      "error_match_mw": -3158.4,
+      "error_comparable_mw": -839.2,
+      "delta_mw": -2319.2
+    },
+    {
+      "date": "2026-06-16",
+      "match_hours": [
+        0,
+        1,
+        3,
+        4,
+        21,
+        22
+      ],
+      "error_match_mw": -600.0,
+      "error_comparable_mw": 524.4,
+      "delta_mw": -1124.4
+    },
+    {
+      "date": "2026-06-17",
+      "match_hours": [
+        0,
+        1,
+        3,
+        4,
+        6,
+        7,
+        19,
+        20,
+        22,
+        23
+      ],
+      "error_match_mw": 928.6,
+      "error_comparable_mw": 566.1,
+      "delta_mw": 362.5
+    },
+    {
+      "date": "2026-06-18",
+      "match_hours": [
+        1,
+        2,
+        4,
+        5,
+        18,
+        19,
+        21,
+        22
+      ],
+      "error_match_mw": 3350.8,
+      "error_comparable_mw": 275.9,
+      "delta_mw": 3074.9
+    },
+    {
+      "date": "2026-06-19",
+      "match_hours": [
+        0,
+        1,
+        3,
+        4,
+        21,
+        22
+      ],
+      "error_match_mw": 3019.3,
+      "error_comparable_mw": 769.8,
+      "delta_mw": 2249.5
+    },
+    {
+      "date": "2026-06-20",
+      "match_hours": [
+        0,
+        1,
+        3,
+        4,
+        5,
+        6,
+        19,
+        20,
+        22,
+        23
+      ],
+      "error_match_mw": 2804.4,
+      "error_comparable_mw": 386.6,
+      "delta_mw": 2417.8
+    },
+    {
+      "date": "2026-06-21",
+      "match_hours": [
+        2,
+        3,
+        6,
+        7,
+        18,
+        19,
+        21,
+        22
+      ],
+      "error_match_mw": 1109.6,
+      "error_comparable_mw": -843.1,
+      "delta_mw": 1952.7
+    },
+    {
+      "date": "2026-06-22",
+      "match_hours": [
+        0,
+        1,
+        3,
+        4,
+        19,
+        20,
+        23
+      ],
+      "error_match_mw": 2165.7,
+      "error_comparable_mw": 974.9,
+      "delta_mw": 1190.8
+    },
+    {
+      "date": "2026-06-23",
+      "match_hours": [
+        0,
+        2,
+        3,
+        5,
+        6,
+        19,
+        20,
+        22,
+        23
+      ],
+      "error_match_mw": 1506.5,
+      "error_comparable_mw": 485.8,
+      "delta_mw": 1020.7
+    },
+    {
+      "date": "2026-06-24",
+      "match_hours": [
+        1,
+        2,
+        4,
+        5,
+        21,
+        22
+      ],
+      "error_match_mw": 2791.3,
+      "error_comparable_mw": 621.2,
+      "delta_mw": 2170.1
+    },
+    {
+      "date": "2026-06-25",
+      "match_hours": [
+        0,
+        1,
+        3,
+        4,
+        22,
+        23
+      ],
+      "error_match_mw": 5260.1,
+      "error_comparable_mw": 1206.0,
+      "delta_mw": 4054.1
+    },
+    {
+      "date": "2026-06-26",
+      "match_hours": [
+        1,
+        2,
+        4,
+        5,
+        21,
+        22
+      ],
+      "error_match_mw": 4910.5,
+      "error_comparable_mw": 939.8,
+      "delta_mw": 3970.7
+    },
+    {
+      "date": "2026-06-27",
+      "match_hours": [
+        2,
+        3,
+        5,
+        6,
+        23
+      ],
+      "error_match_mw": 4551.9,
+      "error_comparable_mw": 881.3,
+      "delta_mw": 3670.6
+    },
+    {
+      "date": "2026-06-28",
+      "match_hours": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        21,
+        22
+      ],
+      "error_match_mw": 3589.8,
+      "error_comparable_mw": -79.9,
+      "delta_mw": 3669.8
+    },
+    {
+      "date": "2026-06-29",
+      "match_hours": [
+        19,
+        20,
+        22,
+        23
+      ],
+      "error_match_mw": -419.0,
+      "error_comparable_mw": 302.0,
+      "delta_mw": -721.0
+    },
+    {
+      "date": "2026-06-30",
+      "match_hours": [
+        3,
+        4,
+        19,
+        20,
+        23
+      ],
+      "error_match_mw": 201.0,
+      "error_comparable_mw": 668.2,
+      "delta_mw": -467.2
+    },
+    {
+      "date": "2026-07-01",
+      "match_hours": [
+        0,
+        3,
+        4,
+        18,
+        19,
+        22,
+        23
+      ],
+      "error_match_mw": 283.4,
+      "error_comparable_mw": 304.5,
+      "delta_mw": -21.0
+    },
+    {
+      "date": "2026-07-02",
+      "match_hours": [
+        2,
+        3,
+        21,
+        22
+      ],
+      "error_match_mw": 402.7,
+      "error_comparable_mw": 150.6,
+      "delta_mw": 252.2
+    },
+    {
+      "date": "2026-07-03",
+      "match_hours": [
+        1,
+        2,
+        5,
+        6,
+        20,
+        21
+      ],
+      "error_match_mw": -2369.5,
+      "error_comparable_mw": -65.1,
+      "delta_mw": -2304.4
+    },
+    {
+      "date": "2026-07-04",
+      "match_hours": [
+        0,
+        1,
+        3,
+        4,
+        19,
+        20,
+        23
+      ],
+      "error_match_mw": -257.6,
+      "error_comparable_mw": -1197.7,
+      "delta_mw": 940.1
+    },
+    {
+      "date": "2026-07-05",
+      "match_hours": [
+        0,
+        22,
+        23
+      ],
+      "error_match_mw": -2397.8,
+      "error_comparable_mw": 117.6,
+      "delta_mw": -2515.4
+    },
+    {
+      "date": "2026-07-06",
+      "match_hours": [
+        3,
+        4,
+        21,
+        22
+      ],
+      "error_match_mw": -580.8,
+      "error_comparable_mw": -182.1,
+      "delta_mw": -398.7
+    },
+    {
+      "date": "2026-07-07",
+      "match_hours": [
+        2,
+        3,
+        18,
+        19,
+        22,
+        23
+      ],
+      "error_match_mw": -1472.1,
+      "error_comparable_mw": -88.1,
+      "delta_mw": -1384.1
+    },
+    {
+      "date": "2026-07-09",
+      "match_hours": [
+        22,
+        23
+      ],
+      "error_match_mw": 1613.1,
+      "error_comparable_mw": 1599.7,
+      "delta_mw": 13.4
+    },
+    {
+      "date": "2026-07-10",
+      "match_hours": [
+        21,
+        22
+      ],
+      "error_match_mw": 1285.3,
+      "error_comparable_mw": 794.8,
+      "delta_mw": 490.5
+    },
+    {
+      "date": "2026-07-11",
+      "match_hours": [
+        23
+      ],
+      "error_match_mw": 1738.3,
+      "error_comparable_mw": -78.4,
+      "delta_mw": 1816.7
+    },
+    {
+      "date": "2026-07-12",
+      "match_hours": [
+        0,
+        3,
+        4
+      ],
+      "error_match_mw": -16.6,
+      "error_comparable_mw": -135.6,
+      "delta_mw": 119.0
+    }
+  ],
+  "pairings": [
+    {
+      "date": "2026-06-11",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-28",
+          "day_type": "weekday",
+          "distance": 0.64,
+          "temp_mean": 16.1,
+          "temp_max": 20.9,
+          "rad_mean": 324.5,
+          "wind_mean": 8.3
+        },
+        {
+          "date": "2026-05-18",
+          "day_type": "weekday",
+          "distance": 0.75,
+          "temp_mean": 13.7,
+          "temp_max": 19.1,
+          "rad_mean": 265.5,
+          "wind_mean": 9.2
+        },
+        {
+          "date": "2026-05-19",
+          "day_type": "weekday",
+          "distance": 1.02,
+          "temp_mean": 14.9,
+          "temp_max": 19.9,
+          "rad_mean": 281.2,
+          "wind_mean": 5.8
+        },
+        {
+          "date": "2026-05-21",
+          "day_type": "weekday",
+          "distance": 1.05,
+          "temp_mean": 16.5,
+          "temp_max": 20.8,
+          "rad_mean": 250.0,
+          "wind_mean": 9.2
+        },
+        {
+          "date": "2026-06-01",
+          "day_type": "weekday",
+          "distance": 1.16,
+          "temp_mean": 17.8,
+          "temp_max": 22.4,
+          "rad_mean": 260.4,
+          "wind_mean": 8.4
+        }
+      ]
+    },
+    {
+      "date": "2026-06-12",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-06-03",
+          "day_type": "weekday",
+          "distance": 1.06,
+          "temp_mean": 18.1,
+          "temp_max": 20.9,
+          "rad_mean": 123.1,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-05-20",
+          "day_type": "weekday",
+          "distance": 1.18,
+          "temp_mean": 16.9,
+          "temp_max": 21.6,
+          "rad_mean": 209.8,
+          "wind_mean": 9.1
+        },
+        {
+          "date": "2026-06-05",
+          "day_type": "weekday",
+          "distance": 1.68,
+          "temp_mean": 17.1,
+          "temp_max": 20.7,
+          "rad_mean": 244.9,
+          "wind_mean": 10.3
+        },
+        {
+          "date": "2026-06-10",
+          "day_type": "weekday",
+          "distance": 1.76,
+          "temp_mean": 15.6,
+          "temp_max": 19.8,
+          "rad_mean": 236.0,
+          "wind_mean": 6.1
+        },
+        {
+          "date": "2026-05-21",
+          "day_type": "weekday",
+          "distance": 1.76,
+          "temp_mean": 16.5,
+          "temp_max": 20.8,
+          "rad_mean": 250.0,
+          "wind_mean": 9.2
+        }
+      ]
+    },
+    {
+      "date": "2026-06-13",
+      "day_type": "saturday",
+      "controls": [
+        {
+          "date": "2026-05-30",
+          "day_type": "saturday",
+          "distance": 1.06,
+          "temp_mean": 20.1,
+          "temp_max": 22.2,
+          "rad_mean": 239.0,
+          "wind_mean": 13.6
+        },
+        {
+          "date": "2026-06-07",
+          "day_type": "sunlike",
+          "distance": 1.45,
+          "temp_mean": 18.5,
+          "temp_max": 21.6,
+          "rad_mean": 287.7,
+          "wind_mean": 12.2
+        },
+        {
+          "date": "2026-05-31",
+          "day_type": "sunlike",
+          "distance": 2.09,
+          "temp_mean": 17.9,
+          "temp_max": 22.4,
+          "rad_mean": 268.5,
+          "wind_mean": 7.7
+        },
+        {
+          "date": "2026-05-16",
+          "day_type": "saturday",
+          "distance": 2.47,
+          "temp_mean": 10.5,
+          "temp_max": 13.6,
+          "rad_mean": 289.5,
+          "wind_mean": 9.8
+        },
+        {
+          "date": "2026-05-24",
+          "day_type": "sunlike",
+          "distance": 2.52,
+          "temp_mean": 22.6,
+          "temp_max": 27.6,
+          "rad_mean": 293.0,
+          "wind_mean": 11.0
+        }
+      ]
+    },
+    {
+      "date": "2026-06-14",
+      "day_type": "sunlike",
+      "controls": [
+        {
+          "date": "2026-06-07",
+          "day_type": "sunlike",
+          "distance": 2.47,
+          "temp_mean": 18.5,
+          "temp_max": 21.6,
+          "rad_mean": 287.7,
+          "wind_mean": 12.2
+        },
+        {
+          "date": "2026-05-31",
+          "day_type": "sunlike",
+          "distance": 3.28,
+          "temp_mean": 17.9,
+          "temp_max": 22.4,
+          "rad_mean": 268.5,
+          "wind_mean": 7.7
+        },
+        {
+          "date": "2026-05-17",
+          "day_type": "sunlike",
+          "distance": 3.33,
+          "temp_mean": 12.0,
+          "temp_max": 17.0,
+          "rad_mean": 265.6,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-05-24",
+          "day_type": "sunlike",
+          "distance": 3.62,
+          "temp_mean": 22.6,
+          "temp_max": 27.6,
+          "rad_mean": 293.0,
+          "wind_mean": 11.0
+        },
+        {
+          "date": "2026-05-25",
+          "day_type": "sunlike",
+          "distance": 4.04,
+          "temp_mean": 19.9,
+          "temp_max": 25.4,
+          "rad_mean": 321.8,
+          "wind_mean": 6.9
+        }
+      ]
+    },
+    {
+      "date": "2026-06-15",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-07-08",
+          "day_type": "weekday",
+          "distance": 1.52,
+          "temp_mean": 17.1,
+          "temp_max": 21.8,
+          "rad_mean": 289.5,
+          "wind_mean": 18.3
+        },
+        {
+          "date": "2026-06-09",
+          "day_type": "weekday",
+          "distance": 1.67,
+          "temp_mean": 18.5,
+          "temp_max": 20.8,
+          "rad_mean": 248.2,
+          "wind_mean": 14.2
+        },
+        {
+          "date": "2026-06-04",
+          "day_type": "weekday",
+          "distance": 2.08,
+          "temp_mean": 18.7,
+          "temp_max": 24.1,
+          "rad_mean": 235.3,
+          "wind_mean": 13.1
+        },
+        {
+          "date": "2026-06-05",
+          "day_type": "weekday",
+          "distance": 2.33,
+          "temp_mean": 17.1,
+          "temp_max": 20.7,
+          "rad_mean": 244.9,
+          "wind_mean": 10.3
+        },
+        {
+          "date": "2026-05-18",
+          "day_type": "weekday",
+          "distance": 2.57,
+          "temp_mean": 13.7,
+          "temp_max": 19.1,
+          "rad_mean": 265.5,
+          "wind_mean": 9.2
+        }
+      ]
+    },
+    {
+      "date": "2026-06-16",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-18",
+          "day_type": "weekday",
+          "distance": 0.65,
+          "temp_mean": 13.7,
+          "temp_max": 19.1,
+          "rad_mean": 265.5,
+          "wind_mean": 9.2
+        },
+        {
+          "date": "2026-05-28",
+          "day_type": "weekday",
+          "distance": 0.76,
+          "temp_mean": 16.1,
+          "temp_max": 20.9,
+          "rad_mean": 324.5,
+          "wind_mean": 8.3
+        },
+        {
+          "date": "2026-05-21",
+          "day_type": "weekday",
+          "distance": 0.76,
+          "temp_mean": 16.5,
+          "temp_max": 20.8,
+          "rad_mean": 250.0,
+          "wind_mean": 9.2
+        },
+        {
+          "date": "2026-06-01",
+          "day_type": "weekday",
+          "distance": 0.87,
+          "temp_mean": 17.8,
+          "temp_max": 22.4,
+          "rad_mean": 260.4,
+          "wind_mean": 8.4
+        },
+        {
+          "date": "2026-06-05",
+          "day_type": "weekday",
+          "distance": 0.9,
+          "temp_mean": 17.1,
+          "temp_max": 20.7,
+          "rad_mean": 244.9,
+          "wind_mean": 10.3
+        }
+      ]
+    },
+    {
+      "date": "2026-06-17",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 0.54,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-06-01",
+          "day_type": "weekday",
+          "distance": 0.56,
+          "temp_mean": 17.8,
+          "temp_max": 22.4,
+          "rad_mean": 260.4,
+          "wind_mean": 8.4
+        },
+        {
+          "date": "2026-05-28",
+          "day_type": "weekday",
+          "distance": 0.95,
+          "temp_mean": 16.1,
+          "temp_max": 20.9,
+          "rad_mean": 324.5,
+          "wind_mean": 8.3
+        },
+        {
+          "date": "2026-05-21",
+          "day_type": "weekday",
+          "distance": 0.97,
+          "temp_mean": 16.5,
+          "temp_max": 20.8,
+          "rad_mean": 250.0,
+          "wind_mean": 9.2
+        },
+        {
+          "date": "2026-05-19",
+          "day_type": "weekday",
+          "distance": 1.05,
+          "temp_mean": 14.9,
+          "temp_max": 19.9,
+          "rad_mean": 281.2,
+          "wind_mean": 5.8
+        }
+      ]
+    },
+    {
+      "date": "2026-06-18",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 0.81,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 0.97,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 1.05,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-05-29",
+          "day_type": "weekday",
+          "distance": 1.32,
+          "temp_mean": 19.6,
+          "temp_max": 26.5,
+          "rad_mean": 333.8,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-06-01",
+          "day_type": "weekday",
+          "distance": 1.69,
+          "temp_mean": 17.8,
+          "temp_max": 22.4,
+          "rad_mean": 260.4,
+          "wind_mean": 8.4
+        }
+      ]
+    },
+    {
+      "date": "2026-06-19",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 1.47,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        },
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 1.73,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 2.23,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-05-29",
+          "day_type": "weekday",
+          "distance": 2.26,
+          "temp_mean": 19.6,
+          "temp_max": 26.5,
+          "rad_mean": 333.8,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-06-04",
+          "day_type": "weekday",
+          "distance": 2.78,
+          "temp_mean": 18.7,
+          "temp_max": 24.1,
+          "rad_mean": 235.3,
+          "wind_mean": 13.1
+        }
+      ]
+    },
+    {
+      "date": "2026-06-20",
+      "day_type": "saturday",
+      "controls": [
+        {
+          "date": "2026-05-23",
+          "day_type": "saturday",
+          "distance": 1.79,
+          "temp_mean": 21.2,
+          "temp_max": 27.7,
+          "rad_mean": 316.6,
+          "wind_mean": 5.7
+        },
+        {
+          "date": "2026-05-24",
+          "day_type": "sunlike",
+          "distance": 1.84,
+          "temp_mean": 22.6,
+          "temp_max": 27.6,
+          "rad_mean": 293.0,
+          "wind_mean": 11.0
+        },
+        {
+          "date": "2026-06-06",
+          "day_type": "saturday",
+          "distance": 2.09,
+          "temp_mean": 18.4,
+          "temp_max": 24.1,
+          "rad_mean": 289.0,
+          "wind_mean": 5.0
+        },
+        {
+          "date": "2026-05-25",
+          "day_type": "sunlike",
+          "distance": 2.18,
+          "temp_mean": 19.9,
+          "temp_max": 25.4,
+          "rad_mean": 321.8,
+          "wind_mean": 6.9
+        },
+        {
+          "date": "2026-05-31",
+          "day_type": "sunlike",
+          "distance": 2.26,
+          "temp_mean": 17.9,
+          "temp_max": 22.4,
+          "rad_mean": 268.5,
+          "wind_mean": 7.7
+        }
+      ]
+    },
+    {
+      "date": "2026-06-21",
+      "day_type": "sunlike",
+      "controls": [
+        {
+          "date": "2026-05-24",
+          "day_type": "sunlike",
+          "distance": 1.85,
+          "temp_mean": 22.6,
+          "temp_max": 27.6,
+          "rad_mean": 293.0,
+          "wind_mean": 11.0
+        },
+        {
+          "date": "2026-05-31",
+          "day_type": "sunlike",
+          "distance": 1.85,
+          "temp_mean": 17.9,
+          "temp_max": 22.4,
+          "rad_mean": 268.5,
+          "wind_mean": 7.7
+        },
+        {
+          "date": "2026-05-25",
+          "day_type": "sunlike",
+          "distance": 1.96,
+          "temp_mean": 19.9,
+          "temp_max": 25.4,
+          "rad_mean": 321.8,
+          "wind_mean": 6.9
+        },
+        {
+          "date": "2026-06-07",
+          "day_type": "sunlike",
+          "distance": 2.55,
+          "temp_mean": 18.5,
+          "temp_max": 21.6,
+          "rad_mean": 287.7,
+          "wind_mean": 12.2
+        },
+        {
+          "date": "2026-05-17",
+          "day_type": "sunlike",
+          "distance": 3.3,
+          "temp_mean": 12.0,
+          "temp_max": 17.0,
+          "rad_mean": 265.6,
+          "wind_mean": 6.3
+        }
+      ]
+    },
+    {
+      "date": "2026-06-22",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-29",
+          "day_type": "weekday",
+          "distance": 0.58,
+          "temp_mean": 19.6,
+          "temp_max": 26.5,
+          "rad_mean": 333.8,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 0.78,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 1.26,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 1.42,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-05-28",
+          "day_type": "weekday",
+          "distance": 1.54,
+          "temp_mean": 16.1,
+          "temp_max": 20.9,
+          "rad_mean": 324.5,
+          "wind_mean": 8.3
+        }
+      ]
+    },
+    {
+      "date": "2026-06-23",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-29",
+          "day_type": "weekday",
+          "distance": 0.65,
+          "temp_mean": 19.6,
+          "temp_max": 26.5,
+          "rad_mean": 333.8,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 1.16,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 1.34,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        },
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 1.52,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-06-01",
+          "day_type": "weekday",
+          "distance": 1.8,
+          "temp_mean": 17.8,
+          "temp_max": 22.4,
+          "rad_mean": 260.4,
+          "wind_mean": 8.4
+        }
+      ]
+    },
+    {
+      "date": "2026-06-24",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 1.55,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        },
+        {
+          "date": "2026-05-29",
+          "day_type": "weekday",
+          "distance": 1.58,
+          "temp_mean": 19.6,
+          "temp_max": 26.5,
+          "rad_mean": 333.8,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 2.2,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 2.21,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-06-01",
+          "day_type": "weekday",
+          "distance": 2.89,
+          "temp_mean": 17.8,
+          "temp_max": 22.4,
+          "rad_mean": 260.4,
+          "wind_mean": 8.4
+        }
+      ]
+    },
+    {
+      "date": "2026-06-25",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 1.66,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        },
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 2.35,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-05-29",
+          "day_type": "weekday",
+          "distance": 2.51,
+          "temp_mean": 19.6,
+          "temp_max": 26.5,
+          "rad_mean": 333.8,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 2.77,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-05-27",
+          "day_type": "weekday",
+          "distance": 3.14,
+          "temp_mean": 19.3,
+          "temp_max": 22.6,
+          "rad_mean": 335.3,
+          "wind_mean": 13.3
+        }
+      ]
+    },
+    {
+      "date": "2026-06-26",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 1.77,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        },
+        {
+          "date": "2026-05-29",
+          "day_type": "weekday",
+          "distance": 2.34,
+          "temp_mean": 19.6,
+          "temp_max": 26.5,
+          "rad_mean": 333.8,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 2.57,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 2.83,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-05-27",
+          "day_type": "weekday",
+          "distance": 3.29,
+          "temp_mean": 19.3,
+          "temp_max": 22.6,
+          "rad_mean": 335.3,
+          "wind_mean": 13.3
+        }
+      ]
+    },
+    {
+      "date": "2026-06-27",
+      "day_type": "saturday",
+      "controls": [
+        {
+          "date": "2026-05-24",
+          "day_type": "sunlike",
+          "distance": 3.0,
+          "temp_mean": 22.6,
+          "temp_max": 27.6,
+          "rad_mean": 293.0,
+          "wind_mean": 11.0
+        },
+        {
+          "date": "2026-05-23",
+          "day_type": "saturday",
+          "distance": 3.32,
+          "temp_mean": 21.2,
+          "temp_max": 27.7,
+          "rad_mean": 316.6,
+          "wind_mean": 5.7
+        },
+        {
+          "date": "2026-05-25",
+          "day_type": "sunlike",
+          "distance": 3.77,
+          "temp_mean": 19.9,
+          "temp_max": 25.4,
+          "rad_mean": 321.8,
+          "wind_mean": 6.9
+        },
+        {
+          "date": "2026-06-06",
+          "day_type": "saturday",
+          "distance": 4.2,
+          "temp_mean": 18.4,
+          "temp_max": 24.1,
+          "rad_mean": 289.0,
+          "wind_mean": 5.0
+        },
+        {
+          "date": "2026-05-30",
+          "day_type": "saturday",
+          "distance": 4.3,
+          "temp_mean": 20.1,
+          "temp_max": 22.2,
+          "rad_mean": 239.0,
+          "wind_mean": 13.6
+        }
+      ]
+    },
+    {
+      "date": "2026-06-28",
+      "day_type": "sunlike",
+      "controls": [
+        {
+          "date": "2026-05-24",
+          "day_type": "sunlike",
+          "distance": 3.2,
+          "temp_mean": 22.6,
+          "temp_max": 27.6,
+          "rad_mean": 293.0,
+          "wind_mean": 11.0
+        },
+        {
+          "date": "2026-05-25",
+          "day_type": "sunlike",
+          "distance": 3.94,
+          "temp_mean": 19.9,
+          "temp_max": 25.4,
+          "rad_mean": 321.8,
+          "wind_mean": 6.9
+        },
+        {
+          "date": "2026-05-31",
+          "day_type": "sunlike",
+          "distance": 4.61,
+          "temp_mean": 17.9,
+          "temp_max": 22.4,
+          "rad_mean": 268.5,
+          "wind_mean": 7.7
+        },
+        {
+          "date": "2026-06-07",
+          "day_type": "sunlike",
+          "distance": 4.64,
+          "temp_mean": 18.5,
+          "temp_max": 21.6,
+          "rad_mean": 287.7,
+          "wind_mean": 12.2
+        },
+        {
+          "date": "2026-05-17",
+          "day_type": "sunlike",
+          "distance": 6.25,
+          "temp_mean": 12.0,
+          "temp_max": 17.0,
+          "rad_mean": 265.6,
+          "wind_mean": 6.3
+        }
+      ]
+    },
+    {
+      "date": "2026-06-29",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 1.59,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-06-04",
+          "day_type": "weekday",
+          "distance": 2.05,
+          "temp_mean": 18.7,
+          "temp_max": 24.1,
+          "rad_mean": 235.3,
+          "wind_mean": 13.1
+        },
+        {
+          "date": "2026-05-22",
+          "day_type": "weekday",
+          "distance": 2.07,
+          "temp_mean": 18.3,
+          "temp_max": 22.6,
+          "rad_mean": 219.5,
+          "wind_mean": 6.0
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 2.09,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-05-20",
+          "day_type": "weekday",
+          "distance": 2.22,
+          "temp_mean": 16.9,
+          "temp_max": 21.6,
+          "rad_mean": 209.8,
+          "wind_mean": 9.1
+        }
+      ]
+    },
+    {
+      "date": "2026-06-30",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 0.73,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        },
+        {
+          "date": "2026-05-29",
+          "day_type": "weekday",
+          "distance": 1.23,
+          "temp_mean": 19.6,
+          "temp_max": 26.5,
+          "rad_mean": 333.8,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 1.42,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 1.61,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-05-27",
+          "day_type": "weekday",
+          "distance": 2.24,
+          "temp_mean": 19.3,
+          "temp_max": 22.6,
+          "rad_mean": 335.3,
+          "wind_mean": 13.3
+        }
+      ]
+    },
+    {
+      "date": "2026-07-01",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-22",
+          "day_type": "weekday",
+          "distance": 1.32,
+          "temp_mean": 18.3,
+          "temp_max": 22.6,
+          "rad_mean": 219.5,
+          "wind_mean": 6.0
+        },
+        {
+          "date": "2026-05-20",
+          "day_type": "weekday",
+          "distance": 1.47,
+          "temp_mean": 16.9,
+          "temp_max": 21.6,
+          "rad_mean": 209.8,
+          "wind_mean": 9.1
+        },
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 1.54,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-06-03",
+          "day_type": "weekday",
+          "distance": 1.67,
+          "temp_mean": 18.1,
+          "temp_max": 20.9,
+          "rad_mean": 123.1,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-06-04",
+          "day_type": "weekday",
+          "distance": 1.75,
+          "temp_mean": 18.7,
+          "temp_max": 24.1,
+          "rad_mean": 235.3,
+          "wind_mean": 13.1
+        }
+      ]
+    },
+    {
+      "date": "2026-07-02",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 0.79,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-06-04",
+          "day_type": "weekday",
+          "distance": 1.0,
+          "temp_mean": 18.7,
+          "temp_max": 24.1,
+          "rad_mean": 235.3,
+          "wind_mean": 13.1
+        },
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 1.47,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        },
+        {
+          "date": "2026-06-09",
+          "day_type": "weekday",
+          "distance": 1.5,
+          "temp_mean": 18.5,
+          "temp_max": 20.8,
+          "rad_mean": 248.2,
+          "wind_mean": 14.2
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 1.51,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        }
+      ]
+    },
+    {
+      "date": "2026-07-03",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-07-08",
+          "day_type": "weekday",
+          "distance": 1.16,
+          "temp_mean": 17.1,
+          "temp_max": 21.8,
+          "rad_mean": 289.5,
+          "wind_mean": 18.3
+        },
+        {
+          "date": "2026-06-09",
+          "day_type": "weekday",
+          "distance": 2.02,
+          "temp_mean": 18.5,
+          "temp_max": 20.8,
+          "rad_mean": 248.2,
+          "wind_mean": 14.2
+        },
+        {
+          "date": "2026-06-04",
+          "day_type": "weekday",
+          "distance": 2.33,
+          "temp_mean": 18.7,
+          "temp_max": 24.1,
+          "rad_mean": 235.3,
+          "wind_mean": 13.1
+        },
+        {
+          "date": "2026-05-27",
+          "day_type": "weekday",
+          "distance": 2.56,
+          "temp_mean": 19.3,
+          "temp_max": 22.6,
+          "rad_mean": 335.3,
+          "wind_mean": 13.3
+        },
+        {
+          "date": "2026-06-05",
+          "day_type": "weekday",
+          "distance": 2.97,
+          "temp_mean": 17.1,
+          "temp_max": 20.7,
+          "rad_mean": 244.9,
+          "wind_mean": 10.3
+        }
+      ]
+    },
+    {
+      "date": "2026-07-04",
+      "day_type": "saturday",
+      "controls": [
+        {
+          "date": "2026-05-30",
+          "day_type": "saturday",
+          "distance": 2.11,
+          "temp_mean": 20.1,
+          "temp_max": 22.2,
+          "rad_mean": 239.0,
+          "wind_mean": 13.6
+        },
+        {
+          "date": "2026-06-07",
+          "day_type": "sunlike",
+          "distance": 2.9,
+          "temp_mean": 18.5,
+          "temp_max": 21.6,
+          "rad_mean": 287.7,
+          "wind_mean": 12.2
+        },
+        {
+          "date": "2026-05-31",
+          "day_type": "sunlike",
+          "distance": 3.05,
+          "temp_mean": 17.9,
+          "temp_max": 22.4,
+          "rad_mean": 268.5,
+          "wind_mean": 7.7
+        },
+        {
+          "date": "2026-05-17",
+          "day_type": "sunlike",
+          "distance": 3.33,
+          "temp_mean": 12.0,
+          "temp_max": 17.0,
+          "rad_mean": 265.6,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-05-16",
+          "day_type": "saturday",
+          "distance": 3.5,
+          "temp_mean": 10.5,
+          "temp_max": 13.6,
+          "rad_mean": 289.5,
+          "wind_mean": 9.8
+        }
+      ]
+    },
+    {
+      "date": "2026-07-05",
+      "day_type": "sunlike",
+      "controls": [
+        {
+          "date": "2026-06-07",
+          "day_type": "sunlike",
+          "distance": 1.5,
+          "temp_mean": 18.5,
+          "temp_max": 21.6,
+          "rad_mean": 287.7,
+          "wind_mean": 12.2
+        },
+        {
+          "date": "2026-05-24",
+          "day_type": "sunlike",
+          "distance": 2.18,
+          "temp_mean": 22.6,
+          "temp_max": 27.6,
+          "rad_mean": 293.0,
+          "wind_mean": 11.0
+        },
+        {
+          "date": "2026-05-31",
+          "day_type": "sunlike",
+          "distance": 2.51,
+          "temp_mean": 17.9,
+          "temp_max": 22.4,
+          "rad_mean": 268.5,
+          "wind_mean": 7.7
+        },
+        {
+          "date": "2026-05-25",
+          "day_type": "sunlike",
+          "distance": 2.96,
+          "temp_mean": 19.9,
+          "temp_max": 25.4,
+          "rad_mean": 321.8,
+          "wind_mean": 6.9
+        },
+        {
+          "date": "2026-05-17",
+          "day_type": "sunlike",
+          "distance": 3.35,
+          "temp_mean": 12.0,
+          "temp_max": 17.0,
+          "rad_mean": 265.6,
+          "wind_mean": 6.3
+        }
+      ]
+    },
+    {
+      "date": "2026-07-06",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-06-03",
+          "day_type": "weekday",
+          "distance": 1.4,
+          "temp_mean": 18.1,
+          "temp_max": 20.9,
+          "rad_mean": 123.1,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-05-20",
+          "day_type": "weekday",
+          "distance": 2.47,
+          "temp_mean": 16.9,
+          "temp_max": 21.6,
+          "rad_mean": 209.8,
+          "wind_mean": 9.1
+        },
+        {
+          "date": "2026-06-04",
+          "day_type": "weekday",
+          "distance": 2.7,
+          "temp_mean": 18.7,
+          "temp_max": 24.1,
+          "rad_mean": 235.3,
+          "wind_mean": 13.1
+        },
+        {
+          "date": "2026-06-09",
+          "day_type": "weekday",
+          "distance": 2.76,
+          "temp_mean": 18.5,
+          "temp_max": 20.8,
+          "rad_mean": 248.2,
+          "wind_mean": 14.2
+        },
+        {
+          "date": "2026-06-05",
+          "day_type": "weekday",
+          "distance": 2.88,
+          "temp_mean": 17.1,
+          "temp_max": 20.7,
+          "rad_mean": 244.9,
+          "wind_mean": 10.3
+        }
+      ]
+    },
+    {
+      "date": "2026-07-07",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-06-04",
+          "day_type": "weekday",
+          "distance": 1.84,
+          "temp_mean": 18.7,
+          "temp_max": 24.1,
+          "rad_mean": 235.3,
+          "wind_mean": 13.1
+        },
+        {
+          "date": "2026-06-09",
+          "day_type": "weekday",
+          "distance": 1.89,
+          "temp_mean": 18.5,
+          "temp_max": 20.8,
+          "rad_mean": 248.2,
+          "wind_mean": 14.2
+        },
+        {
+          "date": "2026-07-08",
+          "day_type": "weekday",
+          "distance": 2.3,
+          "temp_mean": 17.1,
+          "temp_max": 21.8,
+          "rad_mean": 289.5,
+          "wind_mean": 18.3
+        },
+        {
+          "date": "2026-06-03",
+          "day_type": "weekday",
+          "distance": 2.42,
+          "temp_mean": 18.1,
+          "temp_max": 20.9,
+          "rad_mean": 123.1,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-05-20",
+          "day_type": "weekday",
+          "distance": 2.51,
+          "temp_mean": 16.9,
+          "temp_max": 21.6,
+          "rad_mean": 209.8,
+          "wind_mean": 9.1
+        }
+      ]
+    },
+    {
+      "date": "2026-07-09",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-27",
+          "day_type": "weekday",
+          "distance": 0.29,
+          "temp_mean": 19.3,
+          "temp_max": 22.6,
+          "rad_mean": 335.3,
+          "wind_mean": 13.3
+        },
+        {
+          "date": "2026-05-28",
+          "day_type": "weekday",
+          "distance": 1.37,
+          "temp_mean": 16.1,
+          "temp_max": 20.9,
+          "rad_mean": 324.5,
+          "wind_mean": 8.3
+        },
+        {
+          "date": "2026-07-08",
+          "day_type": "weekday",
+          "distance": 1.4,
+          "temp_mean": 17.1,
+          "temp_max": 21.8,
+          "rad_mean": 289.5,
+          "wind_mean": 18.3
+        },
+        {
+          "date": "2026-06-09",
+          "day_type": "weekday",
+          "distance": 1.49,
+          "temp_mean": 18.5,
+          "temp_max": 20.8,
+          "rad_mean": 248.2,
+          "wind_mean": 14.2
+        },
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 1.61,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        }
+      ]
+    },
+    {
+      "date": "2026-07-10",
+      "day_type": "weekday",
+      "controls": [
+        {
+          "date": "2026-05-26",
+          "day_type": "weekday",
+          "distance": 0.69,
+          "temp_mean": 22.7,
+          "temp_max": 28.7,
+          "rad_mean": 326.0,
+          "wind_mean": 10.1
+        },
+        {
+          "date": "2026-06-02",
+          "day_type": "weekday",
+          "distance": 0.7,
+          "temp_mean": 21.1,
+          "temp_max": 27.2,
+          "rad_mean": 261.5,
+          "wind_mean": 9.5
+        },
+        {
+          "date": "2026-06-08",
+          "day_type": "weekday",
+          "distance": 1.09,
+          "temp_mean": 19.5,
+          "temp_max": 25.1,
+          "rad_mean": 271.9,
+          "wind_mean": 7.2
+        },
+        {
+          "date": "2026-05-29",
+          "day_type": "weekday",
+          "distance": 1.3,
+          "temp_mean": 19.6,
+          "temp_max": 26.5,
+          "rad_mean": 333.8,
+          "wind_mean": 6.3
+        },
+        {
+          "date": "2026-05-27",
+          "day_type": "weekday",
+          "distance": 1.35,
+          "temp_mean": 19.3,
+          "temp_max": 22.6,
+          "rad_mean": 335.3,
+          "wind_mean": 13.3
+        }
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "day_type": "saturday",
+      "controls": [
+        {
+          "date": "2026-05-24",
+          "day_type": "sunlike",
+          "distance": 0.46,
+          "temp_mean": 22.6,
+          "temp_max": 27.6,
+          "rad_mean": 293.0,
+          "wind_mean": 11.0
+        },
+        {
+          "date": "2026-05-23",
+          "day_type": "saturday",
+          "distance": 0.95,
+          "temp_mean": 21.2,
+          "temp_max": 27.7,
+          "rad_mean": 316.6,
+          "wind_mean": 5.7
+        },
+        {
+          "date": "2026-05-25",
+          "day_type": "sunlike",
+          "distance": 1.01,
+          "temp_mean": 19.9,
+          "temp_max": 25.4,
+          "rad_mean": 321.8,
+          "wind_mean": 6.9
+        },
+        {
+          "date": "2026-06-06",
+          "day_type": "saturday",
+          "distance": 1.51,
+          "temp_mean": 18.4,
+          "temp_max": 24.1,
+          "rad_mean": 289.0,
+          "wind_mean": 5.0
+        },
+        {
+          "date": "2026-05-31",
+          "day_type": "sunlike",
+          "distance": 1.55,
+          "temp_mean": 17.9,
+          "temp_max": 22.4,
+          "rad_mean": 268.5,
+          "wind_mean": 7.7
+        }
+      ]
+    },
+    {
+      "date": "2026-07-12",
+      "day_type": "sunlike",
+      "controls": [
+        {
+          "date": "2026-05-24",
+          "day_type": "sunlike",
+          "distance": 0.89,
+          "temp_mean": 22.6,
+          "temp_max": 27.6,
+          "rad_mean": 293.0,
+          "wind_mean": 11.0
+        },
+        {
+          "date": "2026-05-25",
+          "day_type": "sunlike",
+          "distance": 1.93,
+          "temp_mean": 19.9,
+          "temp_max": 25.4,
+          "rad_mean": 321.8,
+          "wind_mean": 6.9
+        },
+        {
+          "date": "2026-06-07",
+          "day_type": "sunlike",
+          "distance": 2.21,
+          "temp_mean": 18.5,
+          "temp_max": 21.6,
+          "rad_mean": 287.7,
+          "wind_mean": 12.2
+        },
+        {
+          "date": "2026-05-31",
+          "day_type": "sunlike",
+          "distance": 2.54,
+          "temp_mean": 17.9,
+          "temp_max": 22.4,
+          "rad_mean": 268.5,
+          "wind_mean": 7.7
+        },
+        {
+          "date": "2026-05-17",
+          "day_type": "sunlike",
+          "distance": 4.1,
+          "temp_mean": 12.0,
+          "temp_max": 17.0,
+          "rad_mean": 265.6,
+          "wind_mean": 6.3
+        }
+      ]
+    }
+  ]
+}

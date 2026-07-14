@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Energy market predictability — findings at a glance</title>
+  <!--
+    The project one-pager: the summary a first-time visitor should land on.
+    Every number on this page is computed live from the committed result
+    JSONs (the same files the analyses write), so the page updates itself
+    when the pipeline reruns. Only the verdict sentences are hand-written.
+    The detail pages: tariff.html (the daily demo) and worldcup.html (the
+    event study).
+  -->
+  <style>
+    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --accent:#4c9f70; --alt:#c1436d; }
+    * { box-sizing: border-box; }
+    body { font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--ink); max-width:860px; margin:0 auto; padding:2rem 1.25rem; line-height:1.55; }
+    h1 { margin-bottom:.2rem; }
+    h2 { margin-bottom:.4rem; }
+    .sub { color:var(--muted); margin-top:0; }
+    .finding { border:1px solid var(--line); border-radius:10px; padding:1.1rem 1.25rem; margin:1.25rem 0; }
+    .finding .verdict { font-size:1.15rem; font-weight:700; margin:0 0 .4rem; }
+    .finding p { margin:.4rem 0; }
+    .num { font-weight:700; color:var(--accent); }
+    .num.alt { color:var(--alt); }
+    .implication { background:#f7f7f5; border-left:3px solid var(--accent);
+      padding:.6rem .9rem; border-radius:6px; font-size:.95rem; margin-top:.6rem; }
+    .links a { display:inline-block; border:1px solid var(--line); border-radius:8px;
+      padding:.5rem .9rem; margin:.25rem .35rem .25rem 0; text-decoration:none; color:var(--accent); }
+    .links a.alt { color:var(--alt); }
+    .status { background:#fff5e6; border-left:3px solid #e0a458; padding:.6rem .9rem;
+      border-radius:6px; font-size:.92rem; }
+    footer { color:var(--muted); font-size:.8rem; margin-top:3rem;
+      border-top:1px solid var(--line); padding-top:1rem; }
+    .muted { color:var(--muted); font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <h1>Energy market predictability</h1>
+  <p class="sub">Forecasting the German day-ahead power market, and measuring
+     where forecasts fail. Real market data, explicit baselines, statistics
+     that are allowed to say "no effect".</p>
+
+  <p>Three questions drove this project: can you predict tomorrow's cheapest
+     electricity hours, what is that prediction worth in euros, and can a
+     scheduled mega-event (the 2026 World Cup) move the market? The answers,
+     computed live from the latest pipeline run:</p>
+
+  <p class="status" id="status">Interim results: the World Cup runs until
+     19 July 2026; all event-study numbers will be re-run after the final.</p>
+
+  <div class="finding" id="f1">
+    <p class="verdict">1 &nbsp;Smart timing is worth real money. The forecasting model is not.</p>
+    <p>Shifting a daily EV charge into the cheapest hours saves
+       <span class="num" id="f1-timing">…</span>/year versus charging anytime
+       (summer-rate annualization). But a trivial lookup table, "charge at the
+       usual cheap times", captures <span class="num" id="f1-share">…</span> of
+       that value; the weather-driven model adds
+       <span class="num alt" id="f1-model">…</span>/year against it.</p>
+    <p class="implication"><strong>Product implication:</strong> a smart-charging
+       feature on this market needs automation and UX, not machine learning.
+       The cheap hours are that stable, in summer. Whether this holds in winter
+       is an open, testable question.</p>
+  </div>
+
+  <div class="finding" id="f2">
+    <p class="verdict">2 &nbsp;<span id="f2-headline">The World Cup did not detectably move the German market.</span></p>
+    <p>Prices during match hours: <span class="num alt" id="f2-price">…</span>
+       versus weather-comparable days, statistically unclear, and collapsing to
+       <span class="num alt" id="f2-did">…</span> once day-level seasonal drift
+       is netted out. Demand: the one suggestive subset (overnight kickoffs)
+       fails a placebo test (<span class="num alt" id="f2-perm">…</span>).</p>
+    <p>The study states its own limits: it could only have detected a price
+       effect of about <span class="num alt" id="f2-mde">…</span> or larger, so
+       the honest claim is "no large effect", not "no effect".
+       <a href="worldcup.html">Full study with charts and methods &rarr;</a></p>
+  </div>
+
+  <div class="finding" id="f3">
+    <p class="verdict">3 &nbsp;The instrument works: it finds the effect that is certainly there.</p>
+    <p>The same engine detects the weekend effect at
+       <span class="num" id="f3-weekend">…</span> in daytime prices
+       (placebo p <span class="num" id="f3-p">…</span>). A method that can find
+       a real event is what makes the World Cup null a finding rather than a
+       broken tool.</p>
+  </div>
+
+  <h2>Explore</h2>
+  <p class="links">
+    <a href="tariff.html">Daily tariff demo (auto-refreshing) &rarr;</a>
+    <a class="alt" href="worldcup.html">The World Cup study &rarr;</a>
+    <!-- TODO: replace your-github-username after creating the repository -->
+    <a href="https://github.com/your-github-username/energy-market-predictability">
+      Source, write-up &amp; backlog on GitHub &rarr;</a>
+  </p>
+
+  <p class="muted">Built as a portfolio project for product management /
+     product ownership roles in the energy domain. The pipeline: aWATTar and
+     ENTSO-E data, a walk-forward backtest against naive baselines, matched
+     comparable-day event studies with placebo tests, published as a static
+     page a GitHub Actions job refreshes daily. Every design decision is
+     argued in the README.</p>
+
+  <footer id="footer">Numbers on this page are read from the committed
+     result JSONs at load time.</footer>
+
+  <script>
+    const get = url => fetch(url).then(r => { if (!r.ok) throw 0; return r.json(); });
+    const set = (id, text) => { document.getElementById(id).textContent = text; };
+    const eur = n => '€' + Math.round(Math.abs(n));
+    const sign = n => (n > 0 ? '+' : n < 0 ? '−' : '±');
+
+    // Finding 1: the forecast's money value
+    get('forecast_value.json').then(v => {
+      const c = v.annual_cost_eur, val = v.value;
+      set('f1-timing', eur(val.smart_timing_vs_anytime_eur_yr));
+      const share = (c.all_day - c.climatology) / (c.all_day - c.perfect);
+      set('f1-share', Math.round(100 * share) + '%');
+      const m = val.model_vs_best_naive_eur_yr;
+      set('f1-model', (m >= 0 ? '+€' : '−€') + Math.abs(m).toFixed(2));
+    }).catch(() => set('f1-timing', '(run the pipeline)'));
+
+    // Finding 2: the World Cup studies
+    Promise.all([
+      get('wc_results.json'),
+      get('wc_permutation_results.json').catch(() => null),
+    ]).then(([wc, perm]) => {
+      const e = wc.effect;
+      set('f2-price', sign(e.mean_delta_ct_per_kwh) +
+        Math.abs(e.mean_delta_ct_per_kwh).toFixed(2) + ' ct/kWh (t=' + e.t_stat + ')');
+      if (wc.robustness_within_day) {
+        const d = wc.robustness_within_day.mean_delta_ct;
+        set('f2-did', sign(d) + Math.abs(d).toFixed(2) + ' ct/kWh');
+      }
+      if (e.mde_ct_80pct_power) set('f2-mde', e.mde_ct_80pct_power + ' ct/kWh');
+      if (perm && perm.family_wise) set('f2-perm', 'family-wise p=' + perm.family_wise.p_value);
+      // Let the data overrule the hand-written headline if a rerun changes it.
+      const clear = Math.abs(e.t_stat || 0) >= 2 &&
+                    perm && perm.family_wise && perm.family_wise.p_value < 0.05;
+      if (clear) set('f2-headline',
+        'The World Cup measurably moved the German market (see the full study).');
+    }).catch(() => set('f2-price', '(run the pipeline)'));
+
+    // Finding 3: the weekend positive control
+    get('event_study_results.json').then(es => {
+      const w = es.studies.find(s => s.name === 'weekend_vs_weekday');
+      set('f3-weekend', w.mean_delta_ct.toFixed(2) + ' ct/kWh (t=' + w.t_stat + ')');
+      set('f3-p', w.permutation_p_str || w.permutation_p);
+    }).catch(() => set('f3-weekend', '(run the pipeline)'));
+
+    // Footer freshness
+    get('wc_results.json').then(wc => {
+      document.getElementById('footer').textContent =
+        'Numbers computed at page load from the committed result JSONs. ' +
+        'Event-study window ' + wc.window.start + ' to ' + wc.window.end +
+        ', generated ' + (wc.generated_at || 'unknown') + '.';
+    }).catch(() => {});
+  </script>
+</body>
+</html>

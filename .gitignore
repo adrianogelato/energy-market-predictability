@@ -1,0 +1,34 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets - never commit the real token. .env.example (a template) IS committed.
+.env
+.env.local
+*.token
+
+# Generated outputs (regenerate by running the scripts)
+prices.csv
+prices.png
+cost_comparison.png
+wc_prices.csv
+wc_weather.csv
+wc_analysis.png
+wc_meta.json
+forecast_backtest.png
+forecast_results.json
+wc_load.csv
+wc_load_meta.json
+wc_load_effect.png
+wc_permutation.png
+forecast_value.png
+
+# Intentionally tracked result JSONs (the pages read them in the browser):
+#   wc_load_results.json, wc_permutation_results.json  -> worldcup.html
+#   forecast_value.json, event_study_results.json      -> index.html (one-pager)
+
+# NOTE: these are intentionally NOT ignored and should be committed:
+#   results.json      demo page data, refreshed daily by the workflow
+#   wc_results.json   World Cup study output, read by worldcup.html
+#   wc_matches.csv    the (user-edited) match schedule

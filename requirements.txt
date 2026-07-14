@@ -1,0 +1,5 @@
+# Version floors, not exact pins: resilient for anyone cloning while staying
+# reproducible. Tested with requests 2.34 / matplotlib 3.10 on Python 3.10.
+requests>=2.31
+matplotlib>=3.8
+numpy>=1.24
