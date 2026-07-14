@@ -41,8 +41,7 @@ with the caveat that detecting a 6 ct effect does not prove sensitivity to
 small ones, which is why every null above carries its minimum detectable
 effect. ([details](#the-generic-event-study-milestone-9))
 
-**Live demo:** `https://<your-github-username>.github.io/energy-market-predictability/`
-(fill in after you enable GitHub Pages, see "Deploy your own" below).
+**Live demo:** https://adrianogelato.github.io/energy-market-predictability/
 
 ## The story, and the logic of the sequence
 
@@ -149,7 +148,7 @@ table captures about 97% of it.
 ## Quickstart
 
 ```bash
-git clone https://github.com/<your-github-username>/energy-market-predictability.git
+git clone https://github.com/adrianogelato/energy-market-predictability.git
 cd energy-market-predictability
 bash setup.sh                     # creates .venv and installs dependencies
 source .venv/bin/activate
