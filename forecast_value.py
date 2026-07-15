@@ -30,6 +30,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from plot_utils import add_caption
+
 HERE = Path(__file__).parent
 EV_KWH_PER_DAY = 11.0   # energy shifted into the cheap hours each day (one EV charge)
 DAYS_PER_YEAR = 365
@@ -87,6 +89,16 @@ def plot(cost_year):
     ax.bar_label(bars, fmt="€%.0f")
     ax.grid(True, axis="y", alpha=0.3)
     fig.tight_layout()
+    add_caption(fig, f"EUR = euros; each bar is one strategy's cost for "
+                f"{EV_KWH_PER_DAY:.0f} kWh/day of EV charging, extrapolated to a "
+                "year from a backtest over early-summer days with unusually wide "
+                "solar-driven price swings — read these as a summer-rate "
+                "estimate, not a calendar-year one. \"Perfect foresight\" is an "
+                "oracle baseline that already knows the real prices. \"Model\" is "
+                "the trained forecaster. \"Climatology\" predicts each hour's "
+                "historical average price. \"Persistence\" predicts tomorrow "
+                "will repeat today. \"Charge anytime\" ignores price entirely.")
+    fig.subplots_adjust(bottom=0.30)
     fig.savefig(HERE / "forecast_value.png", dpi=120)
 
 

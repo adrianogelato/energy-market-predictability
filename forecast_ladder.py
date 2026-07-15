@@ -47,6 +47,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from matching import load_holidays
+from plot_utils import add_caption
 
 HERE = Path(__file__).parent
 N_CHEAP = 3
@@ -297,6 +298,16 @@ def diagnostics(day_curves, rungs, mode):
     fig.suptitle("Predicted vs actual prices: each rung's best and worst day"
                  + ("  [SMOKE TEST]" if mode != "full-year" else ""))
     fig.tight_layout()
+    add_caption(fig, "Each row is one \"rung\": a forecasting model on the "
+                "complexity ladder, from climatology (predicts each hour's "
+                "historical average) and persistence (predicts tomorrow repeats "
+                "today) through linear regression (linear, and linear_rich with "
+                "extra weather features), knn (k-nearest-neighbour, a "
+                "non-parametric model) to gbm (gradient boosting, a tree "
+                "ensemble). Left column: the day that rung fit best; right: its "
+                "worst. RMSE = root-mean-square error in ct/kWh (euro-cents per "
+                "kilowatt-hour) between predicted and actual hourly prices.")
+    fig.subplots_adjust(bottom=min(0.22, 1.3 / (2.6 * len(rungs))))
     fig.savefig(HERE / "forecast_ladder_days.png", dpi=110)
 
     seasons = sorted({c["season"] for c in day_curves})
@@ -320,6 +331,15 @@ def diagnostics(day_curves, rungs, mode):
     axes[-1].legend(fontsize=8)
     fig.suptitle("Where each model systematically misses, by hour and season")
     fig.tight_layout()
+    add_caption(fig, "ct/kWh = euro-cents per kilowatt-hour. Residual = mean "
+                "predicted-minus-actual price by hour, averaged over all days in "
+                "that season; above zero means the model overpredicts that "
+                "hour, below means it underpredicts. Panels are the four "
+                "meteorological seasons: DJF = Dec-Jan-Feb, MAM = Mar-Apr-May, "
+                "JJA = Jun-Jul-Aug, SON = Sep-Oct-Nov. Lines are the ladder's "
+                "rungs (models): climatology, persistence, linear, linear_rich, "
+                "knn (k-nearest-neighbour) and gbm (gradient boosting).")
+    fig.subplots_adjust(bottom=0.28)
     fig.savefig(HERE / "forecast_ladder_residuals.png", dpi=110)
 
     with open(HERE / "forecast_ladder_diagnostics.json", "w") as f:
@@ -346,6 +366,17 @@ def plot(res):
     ax.grid(True, alpha=.3)
     ax.legend()
     fig.tight_layout()
+    add_caption(fig, "ct/kWh = euro-cents per kilowatt-hour. \"Regret\" is how "
+                "much more a strategy's chosen hours cost than perfect "
+                "foresight (an oracle baseline that already knows real prices) "
+                "— lower is better. The x-axis is the value-of-complexity "
+                "ladder, from the simplest model (climatology: predicts each "
+                "hour's historical average) through persistence, linear, "
+                "linear_rich, knn (k-nearest-neighbour) to gbm (gradient "
+                "boosting, the most complex). Colored lines break the same "
+                "curve out by meteorological season: DJF = Dec-Jan-Feb, "
+                "MAM = Mar-Apr-May, JJA = Jun-Jul-Aug, SON = Sep-Oct-Nov.")
+    fig.subplots_adjust(bottom=0.26)
     fig.savefig(HERE / "forecast_ladder.png", dpi=120)
 
 

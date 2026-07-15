@@ -241,6 +241,15 @@ In priority order. The first block matters most; the older ideas follow.
    decisions. Same transparency standard the matching engine got with its
    pairings table.
 
+9. Finding 1 shows that a lookup table covers 93% of a perfect foresight approach. 
+   What are the economic consequences? What does this mean for individual users 
+   (smart tariffs are worth it, what else?) and what does it mean to smart tariffs 
+   companies (computational resources/requirements)? Analyze the effect for the 
+   stakeholders.
+
+10. Finding 1 extension: Run the numbers for different configurations regarding their 
+    electricity consumers (not everybody owns an EV). Define the relevant consumers.
+
 Older ideas, still parked:
 
 Module separation beyond matching: aWATTar price data, ENTSO-E load data, and

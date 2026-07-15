@@ -21,8 +21,11 @@ from zoneinfo import ZoneInfo
 
 import requests
 import matplotlib
+
 matplotlib.use("Agg")  # no display needed, just save a file
 import matplotlib.pyplot as plt
+
+from plot_utils import add_caption
 
 HERE = Path(__file__).parent
 API = "https://api.awattar.de/v1/marketdata"
@@ -72,6 +75,13 @@ def plot(rows, path):
     ax.grid(True, alpha=0.3)
     fig.autofmt_xdate()
     fig.tight_layout()
+    add_caption(fig, "ct/kWh = euro-cents per kilowatt-hour, the retail-scale "
+                "unit (wholesale is quoted in EUR/MWh; divide by 10 to convert). "
+                "\"Day-ahead\" means this hour's price was set the previous day "
+                "in the EPEX SPOT auction, via the aWATTar API. The dashed red "
+                "line marks 0 ct/kWh: hours below it are negative-price, when "
+                "supply (often wind/solar) outstrips demand.")
+    fig.subplots_adjust(bottom=0.28)
     fig.savefig(path, dpi=120)
 
 

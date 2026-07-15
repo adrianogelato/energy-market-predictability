@@ -42,6 +42,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from matching import load_weather_daily, Matcher, K_CONTROLS
+from plot_utils import add_caption
 
 HERE = Path(__file__).parent
 PRIME_HOURS = set(range(18, 24))       # 18:00-23:59 CEST kickoffs
@@ -295,6 +296,16 @@ def plot(res):
     ax.grid(True, alpha=0.3)
     ax.legend()
     fig.tight_layout()
+    add_caption(fig, "MW = megawatts. \"Load forecast error\" = actual grid "
+                "demand minus the day-ahead demand forecast, i.e. how surprised "
+                "the grid was; a positive spike means real demand ran above "
+                "what was predicted. CEST = Central European Summer Time. "
+                "\"Weather-comparable days\" are non-match days matched on "
+                "temperature, solar, wind and day type (matching.py). Pink "
+                "shading marks hours that were live-match hours on some match "
+                "days; darker = a larger share of match days had a match that "
+                "hour.")
+    fig.subplots_adjust(bottom=0.28)
     fig.savefig(HERE / "wc_load_effect.png", dpi=120)
 
 

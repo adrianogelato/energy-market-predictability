@@ -49,6 +49,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from plot_utils import add_caption
+
 HERE = Path(__file__).parent
 N_CHEAP = 3          # how many cheap hours we care about (the EV-charge window)
 INIT_TRAIN_DAYS = 21  # warm-up before the first prediction
@@ -207,6 +209,16 @@ def plot(s):
     ax.bar_label(bars, fmt="%.1f")
     ax.grid(True, axis="y", alpha=0.3)
     fig.tight_layout()
+    add_caption(fig, f"ct/kWh = euro-cents per kilowatt-hour. Each bar is the "
+                f"average wholesale price paid for {s['n_cheap_hours']} EV-charging "
+                "hours a day, backtested walk-forward (a strategy only sees data "
+                "from before the day it predicts). \"Perfect foresight\" is an "
+                "oracle baseline that already knows the real prices (the best "
+                "possible score). \"Model\" is the trained forecaster. "
+                "\"Climatology\" predicts each hour's historical average price. "
+                "\"Persistence\" predicts tomorrow will repeat today. \"Charge "
+                "anytime\" picks hours with no price information at all.")
+    fig.subplots_adjust(bottom=0.30)
     fig.savefig(HERE / "forecast_backtest.png", dpi=120)
 
 

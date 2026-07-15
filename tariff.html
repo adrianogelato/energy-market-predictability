@@ -37,6 +37,8 @@
     footer { color: var(--muted); font-size: .8rem; margin-top: 3rem;
              border-top:1px solid var(--line); padding-top:1rem; }
     code { background:#f0f0ee; padding:.1rem .3rem; border-radius:4px; }
+    figure { margin: 0; }
+    figcaption { color: var(--muted); font-size: .82rem; margin-top: .5rem; }
   </style>
 </head>
 <body>
@@ -53,7 +55,14 @@
     <p>The wholesale price for each hour, set by the merit-order auction. Dips
        toward or below zero happen when wind and solar flood the grid — the
        cheap hours a dynamic tariff exists to exploit.</p>
-    <canvas id="priceChart" height="140"></canvas>
+    <figure>
+      <canvas id="priceChart" height="140"></canvas>
+      <figcaption>Today's day-ahead wholesale electricity price by hour, in
+        ct/kWh (euro-cents per kilowatt-hour — the unit your bill uses).
+        "Day-ahead" means each hour's price was fixed the day before, in the
+        EPEX SPOT auction (data via aWATTar, Germany). Dips toward or below
+        zero mark hours when wind and solar generation exceeds demand.</figcaption>
+    </figure>
   </section>
 
   <section>
@@ -61,7 +70,15 @@
     <p>One household over one day, including an 11 kWh EV charge, under three
        scenarios. "Smart" means charging the EV in the cheapest hours instead
        of the evening peak.</p>
-    <canvas id="costChart" height="140"></canvas>
+    <figure>
+      <canvas id="costChart" height="140"></canvas>
+      <figcaption>Modelled cost in EUR for one household's electricity on one
+        day, including an 11 kWh EV charge, under three scenarios. "Flat
+        tariff" = one fixed price all day. "Dynamic" tracks the wholesale
+        day-ahead price hour by hour; "dumb charging" plugs the EV in at a
+        fixed time, "smart charging" shifts that charge into the cheapest
+        hours. Not a real bill — see the note below for the assumptions.</figcaption>
+    </figure>
     <p class="note" id="honesty"></p>
   </section>
 
@@ -101,7 +118,8 @@
             tension: .25, fill: true, pointRadius: 2,
           }]
         },
-        options: { plugins:{legend:{display:false}},
+        options: { plugins:{legend:{display:false},
+            title:{display:true,text:"Today's day-ahead price (ct/kWh, wholesale)"}},
           scales:{ y:{ title:{display:true,text:'ct/kWh'} } } }
       });
 
@@ -115,7 +133,8 @@
             backgroundColor: ['#888', '#e0a458', '#4c9f70'],
           }]
         },
-        options: { plugins:{legend:{display:false}},
+        options: { plugins:{legend:{display:false},
+            title:{display:true,text:'One household, one day: flat vs. dynamic tariff, dumb vs. smart EV charging'}},
           scales:{ y:{ title:{display:true,text:'EUR / day'} } } }
       });
 

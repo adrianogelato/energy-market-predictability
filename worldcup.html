@@ -28,6 +28,8 @@
     footer { color:var(--muted); font-size:.8rem; margin-top:3rem;
       border-top:1px solid var(--line); padding-top:1rem; }
     code { background:#f0f0ee; padding:.1rem .3rem; border-radius:4px; }
+    figure { margin: 0; }
+    figcaption { color: var(--muted); font-size: .82rem; margin-top: .5rem; }
   </style>
 </head>
 <body>
@@ -108,7 +110,16 @@
     <p>Bigger points mark hours that were match hours on a larger share of
        match days (CEST). Because the 2026 tournament is in North America,
        watchable-in-Europe matches fall in the late evening and overnight.</p>
-    <canvas id="profileChart" height="150"></canvas>
+    <figure>
+      <canvas id="profileChart" height="150"></canvas>
+      <figcaption>Average wholesale price (ct/kWh, euro-cents per
+        kilowatt-hour) by hour of day, CEST (Central European Summer Time).
+        "Match days" = days with a live match; "weather-comparable days" =
+        non-match days matched on temperature, solar, wind and day type
+        (see matching.py), used as the counterfactual. Bigger/darker points
+        mark hours that were live-match hours on a larger share of match
+        days.</figcaption>
+    </figure>
   </section>
 
   <section>
@@ -137,7 +148,15 @@
        forecast). A positive spike during match hours means real demand ran above
        the forecast, which is the market being surprised.</p>
     <div class="cards" id="loadCards"></div>
-    <canvas id="loadChart" height="150"></canvas>
+    <figure>
+      <canvas id="loadChart" height="150"></canvas>
+      <figcaption>Load forecast error by hour of day, CEST (Central European
+        Summer Time) — actual grid demand minus the day-ahead demand
+        forecast, in MW (megawatts). A positive spike means real demand ran
+        above what was forecast, i.e. the grid was surprised. "Match days"
+        vs. "weather-comparable days" (matched non-match days, see
+        matching.py) as above.</figcaption>
+    </figure>
     <p class="note" id="loadInterp"></p>
   </section>
 
@@ -195,7 +214,8 @@
           { label:'Weather-comparable days', data:hp.comparable_days_error_mw,
             borderColor:'#4c9f70', pointRadius:2, tension:.25 },
         ]},
-        options: { plugins:{legend:{display:true}},
+        options: { plugins:{legend:{display:true},
+            title:{display:true,text:'Load forecast error by hour: match days vs. weather-comparable days'}},
           scales:{ x:{ title:{display:true,text:'Hour of day (CEST)'} },
                    y:{ title:{display:true,text:'Actual minus forecast (MW)'} } } }
       });
@@ -256,7 +276,9 @@
           { label:'Weather-comparable days', data:hp.comparable_days_avg,
             borderColor:'#4c9f70', pointRadius:2, tension:.25 },
         ]},
-        options: { scales:{ x:{ title:{display:true,text:'Hour of day (CEST)'} },
+        options: { plugins:{title:{display:true,
+            text:'Average price by hour: match days vs. weather-comparable days'}},
+          scales:{ x:{ title:{display:true,text:'Hour of day (CEST)'} },
           y:{ title:{display:true,text:'ct/kWh'} } } }
       });
 

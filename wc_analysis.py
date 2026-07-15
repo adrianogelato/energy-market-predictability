@@ -43,6 +43,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from matching import load_weather_daily, Matcher, K_CONTROLS
+from plot_utils import add_caption
 
 HERE = Path(__file__).parent
 
@@ -290,6 +291,15 @@ def plot(res):
     ax.grid(True, alpha=0.3)
     ax.legend()
     fig.tight_layout()
+    add_caption(fig, "ct/kWh = euro-cents per kilowatt-hour, the wholesale "
+                "day-ahead price. CEST = Central European Summer Time. "
+                "\"Weather-comparable days\" are non-match days matched on "
+                "temperature, solar, wind and day type (see matching.py), used "
+                "as the counterfactual for what prices would have looked like "
+                "without a match. Pink shading marks hours that were live-match "
+                "hours on some match days; darker = a larger share of match "
+                "days had a match that hour.")
+    fig.subplots_adjust(bottom=0.26)
     fig.savefig(HERE / "wc_analysis.png", dpi=120)
 
 

@@ -40,6 +40,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from plot_utils import add_caption
+
 HERE = Path(__file__).parent
 
 # ---- Assumptions you can change (all in ct/kWh unless noted) ----------------
@@ -183,6 +185,14 @@ def main():
     ax.bar_label(bars, fmt="€%.2f")
     ax.grid(True, axis="y", alpha=0.3)
     fig.tight_layout()
+    add_caption(fig, "Modelled cost for one household's electricity on one day "
+                f"({total_kwh:.1f} kWh total, including an {EV_KWH:.0f} kWh EV "
+                "charge), not a real bill. \"Flat tariff\" = one fixed ct/kWh "
+                "price all day. \"Dynamic tariff\" tracks the day-ahead "
+                "wholesale price hour by hour. \"Dumb charging\" plugs the EV "
+                "in at a fixed time regardless of price; \"smart charging\" "
+                "shifts that charge into the cheapest hours of the day.")
+    fig.subplots_adjust(bottom=0.26)
     fig.savefig(HERE / "cost_comparison.png", dpi=120)
 
     # Console readout

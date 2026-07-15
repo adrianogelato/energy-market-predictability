@@ -46,6 +46,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from matching import load_weather_daily, Matcher
+from plot_utils import add_caption
 from wc_load_effect import (
     load_error_and_actual, load_match_hours_split, compute_effect,
 )
@@ -164,6 +165,18 @@ def plot(null_overnight, null_max, ov, family):
     ax.set_xlabel("max|t| from random 'match' days")
     ax.legend()
     fig.tight_layout()
+    add_caption(fig, "A placebo (permutation) test: relabel random days as "
+                "\"match days\" thousands of times and recompute the effect, "
+                "building a null distribution of what pure chance produces. "
+                "t = a t-statistic, the estimated effect divided by its "
+                "sampling noise; the pink line is the real observed value "
+                "against that null. p = the share of random reruns that look "
+                "at least as extreme as the real result — small p means the "
+                "real effect is unlikely to be chance. Left: the overnight-kickoff "
+                "subset only. Right: \"family-wise\" takes the largest |t| across "
+                "3 subsets per random draw, correcting for having examined "
+                "several subsets and reported the most extreme one.")
+    fig.subplots_adjust(bottom=0.30)
     fig.savefig(HERE / "wc_permutation.png", dpi=120)
 
 
