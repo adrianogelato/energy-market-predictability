@@ -3,3 +3,7 @@
 requests>=2.31
 matplotlib>=3.8
 numpy>=1.24
+
+# Optional: enables the gradient-boosting rung in forecast_ladder.py.
+# Everything else runs without it.
+# scikit-learn>=1.3

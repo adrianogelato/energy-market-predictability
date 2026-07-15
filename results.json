@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-14T15:16",
+  "generated_at": "2026-07-14T18:34",
   "assumptions": {
     "flat_rate_ct_per_kwh": 35.0,
     "fixed_adder_ct_per_kwh": 20.0,
@@ -51,7 +51,7 @@
     6.29,
     7.31,
     9.71,
-    11.74,
+    11.82,
     13.83,
     15.9,
     18.25,
@@ -77,7 +77,7 @@
     26.29,
     27.31,
     29.71,
-    31.74,
+    31.82,
     33.83,
     35.9,
     38.25,
@@ -96,7 +96,7 @@
     20
   ],
   "cost_eur": {
-    "flat_tariff": 6.97,
+    "flat_tariff": 6.96,
     "dynamic_naive_charging": 6.94,
     "dynamic_smart_charging": 5.91
   },

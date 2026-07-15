@@ -52,17 +52,21 @@
      19 July 2026; all event-study numbers will be re-run after the final.</p>
 
   <div class="finding" id="f1">
-    <p class="verdict">1 &nbsp;Smart timing is worth real money. The forecasting model is not.</p>
-    <p>Shifting a daily EV charge into the cheapest hours saves
-       <span class="num" id="f1-timing">…</span>/year versus charging anytime
-       (summer-rate annualization). But a trivial lookup table, "charge at the
-       usual cheap times", captures <span class="num" id="f1-share">…</span> of
-       that value; the weather-driven model adds
-       <span class="num alt" id="f1-model">…</span>/year against it.</p>
+    <p class="verdict">1 &nbsp;Smart timing is worth real money. The algorithm barely matters.</p>
+    <p>Over a full backtested year (<span class="num" id="f1-days">…</span> days),
+       shifting a daily EV charge into the cheapest hours saves
+       <span class="num" id="f1-timing">…</span>/year versus charging anytime.
+       A 28-day lookup table wins a six-model ladder up to gradient boosting,
+       capturing <span class="num" id="f1-share">…</span> of the
+       perfect-foresight ceiling; no model beats it overall.</p>
     <p class="implication"><strong>Product implication:</strong> a smart-charging
        feature on this market needs automation and UX, not machine learning.
-       The cheap hours are that stable, in summer. Whether this holds in winter
-       is an open, testable question.</p>
+       The algorithm choice moves a few euros a year; automated timing at all
+       moves about two hundred.</p>
+    <p class="muted">More:
+       <a href="https://github.com/adrianogelato/energy-market-predictability#the-value-of-complexity-ladder-milestone-10">study &amp; methodology</a> ·
+       <a href="https://github.com/adrianogelato/energy-market-predictability#the-cheapest-hours-forecaster-milestone-5">the forecaster</a> ·
+       <a href="https://github.com/adrianogelato/energy-market-predictability/blob/main/forecast_ladder.json">raw results</a></p>
   </div>
 
   <div class="finding" id="f2">
@@ -74,8 +78,11 @@
        fails a placebo test (<span class="num alt" id="f2-perm">…</span>).</p>
     <p>The study states its own limits: it could only have detected a price
        effect of about <span class="num alt" id="f2-mde">…</span> or larger, so
-       the honest claim is "no large effect", not "no effect".
-       <a href="worldcup.html">Full study with charts and methods &rarr;</a></p>
+       the honest claim is "no large effect", not "no effect".</p>
+    <p class="muted">More:
+       <a href="worldcup.html">full study with charts</a> ·
+       <a href="https://github.com/adrianogelato/energy-market-predictability#the-world-cup-price-study-milestone-4">price-test methodology</a> ·
+       <a href="https://github.com/adrianogelato/energy-market-predictability#the-forecast-error-study-milestone-7">demand-test methodology</a></p>
   </div>
 
   <div class="finding" id="f3">
@@ -85,6 +92,9 @@
        (placebo p <span class="num" id="f3-p">…</span>). A method that can find
        a real event is what makes the World Cup null a finding rather than a
        broken tool.</p>
+    <p class="muted">More:
+       <a href="https://github.com/adrianogelato/energy-market-predictability#the-generic-event-study-milestone-9">event-study engine</a> ·
+       <a href="https://github.com/adrianogelato/energy-market-predictability#what-a-weather-comparable-day-means-matchingpy">what "weather-comparable" means</a></p>
   </div>
 
   <h2>Explore</h2>
@@ -111,15 +121,23 @@
     const eur = n => '€' + Math.round(Math.abs(n));
     const sign = n => (n > 0 ? '+' : n < 0 ? '−' : '±');
 
-    // Finding 1: the forecast's money value
-    get('forecast_value.json').then(v => {
-      const c = v.annual_cost_eur, val = v.value;
-      set('f1-timing', eur(val.smart_timing_vs_anytime_eur_yr));
-      const share = (c.all_day - c.climatology) / (c.all_day - c.perfect);
+    // Finding 1: the full-year value-of-complexity ladder (milestone 10)
+    get('forecast_ladder.json').then(l => {
+      const o = l.overall, clim = o.rungs.climatology;
+      set('f1-days', o.n_days);
+      set('f1-timing', eur(clim.eur_yr_saved_vs_anytime));
+      const share = (o.all_day_cost - clim.avg_cost_ct) /
+                    (o.all_day_cost - o.perfect_cost);
       set('f1-share', Math.round(100 * share) + '%');
-      const m = val.model_vs_best_naive_eur_yr;
-      set('f1-model', (m >= 0 ? '+€' : '−€') + Math.abs(m).toFixed(2));
-    }).catch(() => set('f1-timing', '(run the pipeline)'));
+      // keep the hand-written claim honest if a rerun changes the winner
+      const best = l.ladder_order.reduce((a, b) =>
+        o.rungs[a].regret_ct <= o.rungs[b].regret_ct ? a : b);
+      if (best !== 'climatology' || l.mode !== 'full-year') {
+        set('f1-share', share > 0 ? Math.round(100 * share) + '%' : '…');
+        document.querySelector('#f1 .verdict').textContent =
+          '1  Smart timing is worth real money; see the ladder results for the model verdict.';
+      }
+    }).catch(() => set('f1-timing', '(run year_fetch.py + forecast_ladder.py)'));
 
     // Finding 2: the World Cup studies
     Promise.all([

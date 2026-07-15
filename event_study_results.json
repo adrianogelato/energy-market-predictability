@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-14T13:10",
+  "generated_at": "2026-07-14T18:34",
   "signal": "day-ahead price (ct/kWh)",
   "hours": "08:00-19:59",
   "n_permutations": 2000,

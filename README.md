@@ -16,13 +16,18 @@ pipeline, and statistics that are allowed to say "no effect".
 
 ## Findings at a glance
 
-**Smart timing is worth real money, but the model isn't.** Shifting a daily
-11 kWh EV charge into the three cheapest hours saves about €307/yr versus
-charging anytime (annualized at summer rates). But a trivial lookup table,
-"charge at the usual cheap times", captures ~97% of that value: the
-weather-driven forecaster ties it on hit-rate (0.757 both) and is worth
-−€0.28/yr against it. **Product implication: a smart-charging feature on this
-market needs automation and UX, not ML.** ([details](#the-cheapest-hours-forecaster-milestone-5),
+**Smart timing is worth real money, and the algorithm barely matters.** Over a
+full backtested year (337 days), shifting a daily 11 kWh EV charge into the
+three cheapest hours saves about €203/yr versus charging anytime. (An earlier
+summer-only window said €307/yr; peak solar spreads inflated it.) Across a
+six-rung ladder of forecasters, from a 28-day lookup table up to gradient
+boosting, the lookup table wins the whole year outright; every model
+underperforms it overall, weather models pay off only in winter, and there by
+roughly €1 per season for the household — despite being fed perfect weather.
+**Product implication: a smart-charging feature on this market needs
+automation and UX, not ML.**
+([ladder](#the-value-of-complexity-ladder-milestone-10),
+[forecaster](#the-cheapest-hours-forecaster-milestone-5),
 [value](#the-forecasts-money-value-milestone-8))
 
 **The World Cup does not detectably move the German market.** Prices during
@@ -67,8 +72,9 @@ So the milestones are not one sequence but three strands, interleaved because
 they share data. Strand A (M1-M3) builds contact with the market. Strand B
 (M4, M6, M7, M9) chases the event question, upgrading the measured variable
 from price to forecast error as the question sharpened, then hardening the
-inference with placebo tests and a positive control. Strand C (M5, M8) chases
-the forecast question: is the price shape predictable, and what is that worth?
+inference with placebo tests and a positive control. Strand C (M5, M8, M10)
+chases the forecast question: is the price shape predictable, what is that
+worth, and how much algorithm does it take?
 The ordering rule throughout: each milestone is the smallest runnable artifact
 that unblocks the next.
 
@@ -131,7 +137,7 @@ proves nothing, so it must find the certain weekend effect. It does
 null as a finding, within the limits of the study's power; every null is
 reported together with its minimum detectable effect.
 
-### Strand C: the forecast question (M5, M8)
+### Strand C: the forecast question (M5, M8, M10)
 
 Milestone 5 (`python forecast_cheap_hours.py`, reuses `wc_prices.csv` and
 `wc_weather.csv`) tests whether tomorrow's cheapest hours are predictable at
@@ -141,9 +147,15 @@ dataset; conceptually it is the start of the forecast strand.
 
 Milestone 8 (`python forecast_value.py`, reads `forecast_results.json`)
 converts the backtest into euros per year and separates the value of any smart
-timing from the value the model adds, which is where the headline finding
-falls out: timing is worth about €307/yr (summer-annualized), and a lookup
-table captures about 97% of it.
+timing from the value the model adds. On the summer window it hinted at the
+headline finding; milestone 10 then tested it properly.
+
+Milestone 10 (`python year_fetch.py && python forecast_ladder.py`) is the
+value-of-complexity study: a full backtested year, a six-rung ladder of
+forecasters from a 28-day lookup table to gradient boosting, every rung scored
+identically per season. It answers "how advanced does the algorithm need to
+be?" with a curve — which turns out to flatten at rung one. The lookup table
+wins the year outright.
 
 ## Quickstart
 
@@ -749,6 +761,57 @@ says so rather than pretending. Widening the fetch window into spring (Good Frid
 Easter Monday, Labour Day, Ascension) would give a proper holiday test, and is
 noted in the backlog.
 
+### The value-of-complexity ladder (milestone 10)
+
+The M5/M8 verdict ("the model adds nothing over a lookup table") came from 37
+summer days, the season where solar pins the cheap hours in place and a lookup
+table cannot lose. This study asks the question properly, and reframes it from
+a binary into a curve: how advanced does the forecasting algorithm need to be?
+
+```bash
+python year_fetch.py          # 365 days of prices + weather (new files, no fallback)
+python forecast_ladder.py     # the ladder; add scikit-learn for the gbm rung
+```
+
+Six rungs, every one scored with the same walk-forward backtest, the same
+metrics, per season: a 28-day rolling climatology (a lookup table refreshed
+monthly), persistence, the M5 linear model, a richer linear model (annual
+harmonics, day types, wind), a dependency-free k-nearest-days kernel
+regression, and gradient boosting.
+
+The result (337 test days, 2025-07 to 2026-07): the curve flattens at rung
+one. Climatology wins the year outright — hit-rate 0.67, regret 0.40 ct/kWh,
+€203/yr saved versus charging anytime — and no model beats it overall (knn
+comes closest at 0.42; the linear models and gradient boosting trail it).
+Weather models do win in winter, where the price shape genuinely varies:
+0.41 ct/kWh regret versus climatology's 0.51. That advantage is worth about
+€1 per winter for the household. In the shoulder seasons the linear models are
+actively worse than the lookup table (up to 1.02 ct/kWh regret in autumn),
+overfitting weather levels while missing the hour ranking that actually
+matters.
+
+Why does a lookup table beat gradient boosting? Because the product target is
+a selection, not a price. Weather moves price *levels* strongly, but the
+*ranking* of hours — which three are cheapest — is pinned by the daily solar
+and demand cycle almost every day. Models spend their capacity explaining
+level variance that the selection task never rewards.
+
+Two design decisions keep the comparison honest. The climatology baseline is
+rolling (28 days), not full-history, so a winter day is judged against winter;
+a full-history mean would have been a strawman. And every weather-using rung
+sees actual weather, a perfect forecast it would never have in production,
+while climatology needs no forecast at all — so the lookup table's win is
+conservative, and would widen under deployed conditions. The
+deployed-realism variant (archived weather forecasts) and the quarter-hourly
+version remain on the backlog.
+
+The product reading, which is the point of the study: the algorithm choice
+moves €9/yr at most; being on a dynamic tariff with *any* automated timing
+moves ~€200/yr. Engineering budget belongs in automation, onboarding, and
+trust, not in the forecaster — at household scale. (An aggregator trading
+hundreds of MW across thousands of vehicles prices the same €-per-kWh gaps
+very differently; that question is out of scope here.)
+
 ## Assumptions and limitations
 
 The numbers are a model, not a bill. The flat rate, the fixed adder, the
@@ -778,7 +841,10 @@ wc_load_effect.py          milestone 7: forecast-error study during match hours
 wc_permutation.py          milestone 7 capstone: placebo / permutation test
 forecast_value.py          milestone 8: euros-per-year value of the forecast
 event_study.py             milestone 9: generic event-study engine
-events_holidays.csv        German public holidays for the event study
+year_fetch.py              milestone 10: full-year price + weather fetcher
+forecast_ladder.py         milestone 10: the value-of-complexity ladder
+forecast_ladder.json       milestone 10 results, committed (index.html reads it)
+events_holidays.csv        German public holidays (event study + day-typing)
 data/                      raw schedule source files (provenance only, see data/README.md)
 ROADMAP.md                 working hypothesis and milestone plan
 requirements.txt           dependencies (version floors)

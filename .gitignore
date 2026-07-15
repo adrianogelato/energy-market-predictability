@@ -23,6 +23,10 @@ wc_load_meta.json
 wc_load_effect.png
 wc_permutation.png
 forecast_value.png
+year_prices.csv
+year_weather.csv
+year_meta.json
+forecast_ladder.png
 
 # Intentionally tracked result JSONs (the pages read them in the browser):
 #   wc_load_results.json, wc_permutation_results.json  -> worldcup.html

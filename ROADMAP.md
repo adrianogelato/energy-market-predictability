@@ -27,22 +27,30 @@ better than naive guessing"); the results forced a split, because its two
 halves came out differently. Conflating them hid the most interesting finding.
 
 H1a, the predictability hypothesis: tomorrow's cheapest hours are predictable.
-**Verdict: confirmed.** In the backtest, even the trivial climatology rule
-("charge at the usual cheap times") captures about 97% of the perfect-foresight
-value (€307 of a €316/yr ceiling for the model household). The cheap hours are
-highly stable.
+**Verdict: confirmed, now on a full year.** A 28-day rolling climatology
+("charge at the usual cheap times, refreshed monthly") captures about 93% of
+the perfect-foresight value over 337 backtested days (€203 of a €219/yr
+ceiling for the model household). The cheap-hour ranking is pinned by the
+daily solar and demand cycle in every season.
 
-H1b, the model-value hypothesis: a weather-driven model beats naive rules
-(persistence, climatology) at picking those hours. **Verdict: refuted, on this
-data.** The model's hit-rate (0.757) ties climatology (0.757) and trails
-persistence (0.766), and in money terms the model is worth −€0.28/yr versus the
-best naive rule. By the project's own criterion ("the forecaster earns its
-place only if it beats the baselines"), it did not.
+H1b, the model-value hypothesis: a weather-driven model beats naive rules at
+picking those hours. **Verdict: refuted, over a full year and a six-rung
+ladder (forecast_ladder.py).** No model beats the rolling lookup table
+overall — not the linear models, not k-nearest-days, not gradient boosting,
+all fed perfect actual weather. Models win only in winter (regret 0.41 vs
+0.51 ct/kWh), worth about €1 per winter for the household; in the shoulder
+seasons linear models are actively worse than the lookup table. The original
+summer-only verdict was a lower bound taken where models matter least; the
+full year confirms it rather than overturning it, and the summer question
+("does H1b fail only because solar pins the cheap hours?") is answered: it
+fails everywhere at household scale, winter included.
 
-The refuted half is the more valuable result: for German summer day-ahead
-prices, a lookup table beats a model. A smart-charging product built on this
-market needs automation and UX, not ML. Whether H1b fails in winter too, when
-solar no longer pins the midday dip, is an open question for a wider window.
+The refuted half remains the most valuable result: the algorithm choice moves
+at most €9/yr while automated timing at all moves ~€200/yr, so a
+smart-charging product built on this market needs automation and UX, not ML.
+The open remainder is deployed realism (archived weather forecasts instead of
+actuals, which can only widen the lookup table's lead) and the aggregator
+scale, where the same €-per-kWh gaps price differently.
 
 Note the original framing also claimed H1 "has to be true before anything else
 is meaningful". That was wrong: the event studies (H2) never depended on the
@@ -72,8 +80,8 @@ price test; the forecast-error test needs load data.
 For H1a/H1b: a forecast skill number. The hit-rate of the predicted cheapest
 hours and the mean error, both compared against explicit naive baselines, plus
 the money a household or aggregator captures by acting on the forecast versus
-perfect foresight and versus naive behaviour. (Delivered by M5 and M8; verdicts
-above.)
+perfect foresight and versus naive behaviour. (Delivered by M5 and M8 on the
+summer window and settled by M10 on a full year; verdicts above.)
 
 For H2: an effect size with uncertainty, and, when the estimate is null, the
 minimum detectable effect, so "no effect found" is a bounded statement rather
@@ -93,12 +101,13 @@ smaller than ~2.6 ct/kWh in price and not separable from seasonal drift in load.
 
 ## Milestones
 
-All nine milestones are built. Their descriptions, run commands, and the
+All ten milestones are built. Their descriptions, run commands, and the
 reasoning for their order live in the README under "What it does" (three
 strands: A, see the market, M1-M3; B, the event question, M4/M6/M7/M9; C, the
-forecast question, M5/M8). They are not repeated here. How each maps to the
-hypotheses: M5 tests H1a/H1b, M8 prices the verdict; M4 tests the anticipation
-half of H2, M7 the surprise half, M9 calibrates the instrument.
+forecast question, M5/M8/M10). They are not repeated here. How each maps to
+the hypotheses: M5 tests H1a/H1b, M8 prices the verdict, M10 settles both on a
+full year; M4 tests the anticipation half of H2, M7 the surprise half, M9
+calibrates the instrument.
 
 ## Limitations to carry throughout
 
@@ -131,6 +140,17 @@ load-based forecast-error test in M7 matters.
 
 ## Backlog and parked ideas
 
+Two paths forward. The items below sort into two research paths that share one
+spine. Path one, forecasting-algorithm complexity (items 4, 8): how much of the
+price shape is predictable, and how much model does that take? Path two,
+event-effect measurement (items 1, 2, 3, 5, 7): do scheduled events move the
+market beyond its predictable baseline? Item 6 (15-minute resolution) serves
+both. The shared spine: an event effect is nothing but a deviation from a
+counterfactual baseline, so the better the forecasting model from path one,
+the sharper the event tests in path two. The paths converge in a model-based
+event study, where the forecaster itself replaces comparable-days matching as
+the control.
+
 In priority order. The first block matters most; the older ideas follow.
 
 1. Post-tournament rerun. The tournament ends 19 July 2026; all World Cup
@@ -153,14 +173,17 @@ In priority order. The first block matters most; the older ideas follow.
    unanticipated demand shift would show; adding either (both on ENTSO-E)
    would complete H2 properly.
 
-4. A winter backtest window for the forecaster (strand C). The H1b verdict,
-   that the model adds nothing over a lookup table, is summer-only: solar pins
-   the midday dip so hard that the cheap hours barely move. In winter the
-   price shape is driven by heating demand and scarce daylight, cheap hours
-   wander more, and a weather model has something left to predict. Rerun
-   `forecast_cheap_hours.py` and `forecast_value.py` on a winter window; if
-   the model earns its keep there, the product answer is seasonal rather than
-   "never".
+4. DONE: the value-of-complexity study (`year_fetch.py`,
+   `forecast_ladder.py`, results in `forecast_ladder.json` and the README's
+   milestone 10 section). The curve flattens at rung one: a 28-day rolling
+   lookup table wins the full year outright against five more complex models
+   including gradient boosting, all fed perfect weather. Verdicts under
+   "Working hypotheses". Two follow-ups remain open here: the
+   deployed-realism variant (score against archived weather *forecasts*
+   instead of actuals; can only widen the lookup table's lead), and note
+   that the full-year files (`year_prices.csv`, `year_weather.csv`) now also
+   provide the widened control pools and real holiday test that item 2 asks
+   for — the event studies just need pointing at them.
 
 5. A second event: the Milano Cortina Winter Olympics, 6-22 February 2026.
    Parked because it is the reuse test for the whole methodology (the M9
@@ -171,8 +194,8 @@ In priority order. The first block matters most; the older ideas follow.
    timezone (CET), so finals landed in German daytime and prime-time viewing
    hours: if a TV effect exists anywhere, this is the well-powered place to
    look. Three design notes captured now so they are not rediscovered later.
-   First, the February window doubles as the winter backtest window of item 4,
-   so one data fetch serves both. Second, the event-hours definition is the
+   First, the February window is already covered by item 4's full-year fetch,
+   so no new price or weather data is needed. Second, the event-hours definition is the
    hard part: the Olympics run all day for 17 days, and flagging every hour
    would dilute exposure to nothing; curate the high-German-viewership
    sessions (biathlon, ski jumping, medal finals) into the events file rather
@@ -209,6 +232,17 @@ In priority order. The first block matters most; the older ideas follow.
    Germany's (neutral) in the same hours, with each country's own
    weather-matched controls. Same-hours cross-zone comparison also nets out
    Europe-wide common shocks, which the single-zone design cannot.
+
+8. Diagnostic depth for the ladder study (path one). The current outputs are
+   aggregates; reviewing how the conclusion was reached requires seeing the
+   fits themselves. Add per-rung diagnostic plots: predicted versus actual
+   24-hour price curves overlaid for sample days; specifically each rung's
+   best-fit and worst-fit day (by daily regret, and separately by price RMSE,
+   since a rung can rank hours correctly while missing levels); and a
+   residual-by-hour profile per season showing where each model
+   systematically misses. Same transparency standard the matching engine got
+   with its pairings table: make "the lookup table wins" inspectable day by
+   day, not just believable in aggregate.
 
 Older ideas, still parked:
 

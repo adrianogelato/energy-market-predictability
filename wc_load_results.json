@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-14T13:10",
+  "generated_at": "2026-07-14T18:34",
   "data_source": "live",
   "n_control_pool": 28,
   "k_controls_per_day": 5,
@@ -19,7 +19,7 @@
     "season_gap_max_days": null,
     "distance": "euclidean over z-scored features"
   },
-  "mean_load_mw": 50508.0,
+  "mean_load_mw": 50509.0,
   "effect": {
     "n_match_days": 31,
     "mean_delta_mw": 486.8,

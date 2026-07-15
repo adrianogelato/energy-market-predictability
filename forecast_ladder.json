@@ -1,0 +1,238 @@
+{
+  "generated_at": "2026-07-14T16:12",
+  "mode": "full-year",
+  "config": {
+    "n_cheap_hours": 3,
+    "warmup_days": 28,
+    "climatology_window_days": 28,
+    "knn_k": 20,
+    "gbm_included": true,
+    "gbm_retrain_every_days": 7,
+    "weather_input": "actuals (perfect-forecast ceiling; fair between rungs, flattering in absolute terms)"
+  },
+  "ladder_order": [
+    "climatology",
+    "persistence",
+    "linear",
+    "linear_rich",
+    "knn",
+    "gbm"
+  ],
+  "overall": {
+    "n_days": 337,
+    "perfect_cost": 3.998,
+    "all_day_cost": 9.449,
+    "rungs": {
+      "climatology": {
+        "hit_rate": 0.67,
+        "avg_cost_ct": 4.396,
+        "regret_ct": 0.398,
+        "eur_yr_saved_vs_anytime": 202.86
+      },
+      "persistence": {
+        "hit_rate": 0.62,
+        "avg_cost_ct": 4.613,
+        "regret_ct": 0.615,
+        "eur_yr_saved_vs_anytime": 194.18
+      },
+      "linear": {
+        "hit_rate": 0.6,
+        "avg_cost_ct": 4.604,
+        "regret_ct": 0.606,
+        "eur_yr_saved_vs_anytime": 194.53
+      },
+      "linear_rich": {
+        "hit_rate": 0.583,
+        "avg_cost_ct": 4.578,
+        "regret_ct": 0.58,
+        "eur_yr_saved_vs_anytime": 195.55
+      },
+      "knn": {
+        "hit_rate": 0.66,
+        "avg_cost_ct": 4.418,
+        "regret_ct": 0.42,
+        "eur_yr_saved_vs_anytime": 202.01
+      },
+      "gbm": {
+        "hit_rate": 0.614,
+        "avg_cost_ct": 4.511,
+        "regret_ct": 0.513,
+        "eur_yr_saved_vs_anytime": 198.26
+      }
+    }
+  },
+  "by_season": {
+    "DJF": {
+      "n_days": 90,
+      "perfect_cost": 7.394,
+      "all_day_cost": 10.016,
+      "rungs": {
+        "climatology": {
+          "hit_rate": 0.504,
+          "avg_cost_ct": 7.905,
+          "regret_ct": 0.511,
+          "eur_yr_saved_vs_anytime": 84.78
+        },
+        "persistence": {
+          "hit_rate": 0.393,
+          "avg_cost_ct": 8.226,
+          "regret_ct": 0.832,
+          "eur_yr_saved_vs_anytime": 71.86
+        },
+        "linear": {
+          "hit_rate": 0.437,
+          "avg_cost_ct": 7.805,
+          "regret_ct": 0.411,
+          "eur_yr_saved_vs_anytime": 88.78
+        },
+        "linear_rich": {
+          "hit_rate": 0.374,
+          "avg_cost_ct": 7.906,
+          "regret_ct": 0.512,
+          "eur_yr_saved_vs_anytime": 84.7
+        },
+        "knn": {
+          "hit_rate": 0.522,
+          "avg_cost_ct": 7.811,
+          "regret_ct": 0.417,
+          "eur_yr_saved_vs_anytime": 88.52
+        },
+        "gbm": {
+          "hit_rate": 0.459,
+          "avg_cost_ct": 7.878,
+          "regret_ct": 0.484,
+          "eur_yr_saved_vs_anytime": 85.84
+        }
+      }
+    },
+    "JJA": {
+      "n_days": 65,
+      "perfect_cost": 2.424,
+      "all_day_cost": 9.629,
+      "rungs": {
+        "climatology": {
+          "hit_rate": 0.79,
+          "avg_cost_ct": 2.655,
+          "regret_ct": 0.231,
+          "eur_yr_saved_vs_anytime": 280.0
+        },
+        "persistence": {
+          "hit_rate": 0.8,
+          "avg_cost_ct": 2.685,
+          "regret_ct": 0.261,
+          "eur_yr_saved_vs_anytime": 278.81
+        },
+        "linear": {
+          "hit_rate": 0.79,
+          "avg_cost_ct": 2.741,
+          "regret_ct": 0.317,
+          "eur_yr_saved_vs_anytime": 276.54
+        },
+        "linear_rich": {
+          "hit_rate": 0.769,
+          "avg_cost_ct": 2.743,
+          "regret_ct": 0.319,
+          "eur_yr_saved_vs_anytime": 276.49
+        },
+        "knn": {
+          "hit_rate": 0.821,
+          "avg_cost_ct": 2.61,
+          "regret_ct": 0.186,
+          "eur_yr_saved_vs_anytime": 281.8
+        },
+        "gbm": {
+          "hit_rate": 0.8,
+          "avg_cost_ct": 2.629,
+          "regret_ct": 0.205,
+          "eur_yr_saved_vs_anytime": 281.05
+        }
+      }
+    },
+    "MAM": {
+      "n_days": 91,
+      "perfect_cost": 0.839,
+      "all_day_cost": 9.216,
+      "rungs": {
+        "climatology": {
+          "hit_rate": 0.806,
+          "avg_cost_ct": 1.105,
+          "regret_ct": 0.266,
+          "eur_yr_saved_vs_anytime": 325.65
+        },
+        "persistence": {
+          "hit_rate": 0.769,
+          "avg_cost_ct": 1.383,
+          "regret_ct": 0.544,
+          "eur_yr_saved_vs_anytime": 314.49
+        },
+        "linear": {
+          "hit_rate": 0.714,
+          "avg_cost_ct": 1.432,
+          "regret_ct": 0.593,
+          "eur_yr_saved_vs_anytime": 312.51
+        },
+        "linear_rich": {
+          "hit_rate": 0.674,
+          "avg_cost_ct": 1.68,
+          "regret_ct": 0.841,
+          "eur_yr_saved_vs_anytime": 302.57
+        },
+        "knn": {
+          "hit_rate": 0.795,
+          "avg_cost_ct": 1.152,
+          "regret_ct": 0.313,
+          "eur_yr_saved_vs_anytime": 323.75
+        },
+        "gbm": {
+          "hit_rate": 0.722,
+          "avg_cost_ct": 1.439,
+          "regret_ct": 0.6,
+          "eur_yr_saved_vs_anytime": 312.24
+        }
+      }
+    },
+    "SON": {
+      "n_days": 91,
+      "perfect_cost": 4.921,
+      "all_day_cost": 8.991,
+      "rungs": {
+        "climatology": {
+          "hit_rate": 0.612,
+          "avg_cost_ct": 5.462,
+          "regret_ct": 0.541,
+          "eur_yr_saved_vs_anytime": 141.69
+        },
+        "persistence": {
+          "hit_rate": 0.568,
+          "avg_cost_ct": 5.645,
+          "regret_ct": 0.724,
+          "eur_yr_saved_vs_anytime": 134.33
+        },
+        "linear": {
+          "hit_rate": 0.513,
+          "avg_cost_ct": 5.94,
+          "regret_ct": 1.019,
+          "eur_yr_saved_vs_anytime": 122.5
+        },
+        "linear_rich": {
+          "hit_rate": 0.564,
+          "avg_cost_ct": 5.497,
+          "regret_ct": 0.576,
+          "eur_yr_saved_vs_anytime": 140.29
+        },
+        "knn": {
+          "hit_rate": 0.546,
+          "avg_cost_ct": 5.617,
+          "regret_ct": 0.696,
+          "eur_yr_saved_vs_anytime": 135.45
+        },
+        "gbm": {
+          "hit_rate": 0.527,
+          "avg_cost_ct": 5.597,
+          "regret_ct": 0.676,
+          "eur_yr_saved_vs_anytime": 136.26
+        }
+      }
+    }
+  }
+}
