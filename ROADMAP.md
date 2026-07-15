@@ -233,16 +233,13 @@ In priority order. The first block matters most; the older ideas follow.
    weather-matched controls. Same-hours cross-zone comparison also nets out
    Europe-wide common shocks, which the single-zone design cannot.
 
-8. Diagnostic depth for the ladder study (path one). The current outputs are
-   aggregates; reviewing how the conclusion was reached requires seeing the
-   fits themselves. Add per-rung diagnostic plots: predicted versus actual
-   24-hour price curves overlaid for sample days; specifically each rung's
-   best-fit and worst-fit day (by daily regret, and separately by price RMSE,
-   since a rung can rank hours correctly while missing levels); and a
-   residual-by-hour profile per season showing where each model
-   systematically misses. Same transparency standard the matching engine got
-   with its pairings table: make "the lookup table wins" inspectable day by
-   day, not just believable in aggregate.
+8. DONE: diagnostic depth for the ladder study. `forecast_ladder.py` now also
+   writes `forecast_ladder_diagnostics.json` plus best/worst-fit-day and
+   residual-by-hour plots, and `ladder.html` publishes the whole chain:
+   verdict, the seven-step reasoning, the ladder curve, the residual chart,
+   single inspected days, and the critical questions answered as design
+   decisions. Same transparency standard the matching engine got with its
+   pairings table.
 
 Older ideas, still parked:
 

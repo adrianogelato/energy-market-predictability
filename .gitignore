@@ -36,3 +36,6 @@ forecast_ladder.png
 #   results.json      demo page data, refreshed daily by the workflow
 #   wc_results.json   World Cup study output, read by worldcup.html
 #   wc_matches.csv    the (user-edited) match schedule
+
+forecast_ladder_days.png
+forecast_ladder_residuals.png

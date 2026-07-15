@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How advanced does a price forecaster need to be?</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --win:#4c9f70; --lose:#c1436d; }
+    * { box-sizing:border-box; }
+    body { font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--ink); max-width:860px; margin:0 auto; padding:2rem 1.25rem; line-height:1.55; }
+    a { color:var(--win); }
+    h1 { margin-bottom:.2rem; } .sub { color:var(--muted); margin-top:0; }
+    section { margin:2.25rem 0; } canvas { max-width:100%; }
+    .verdict { border:2px solid var(--win); border-radius:10px; padding:1rem 1.25rem; margin:1.25rem 0; }
+    .verdict .head { font-size:1.25rem; font-weight:700; margin:.1rem 0; }
+    ol li { margin:.5rem 0; }
+    .qa dt { font-weight:700; margin-top:1rem; }
+    .qa dd { margin:.25rem 0 0 0; }
+    .note { background:#f7f7f5; border-left:3px solid var(--win); padding:.75rem 1rem;
+      border-radius:6px; font-size:.92rem; }
+    .row { display:flex; gap:1rem; flex-wrap:wrap; } .row > div { flex:1 1 380px; }
+    footer { color:var(--muted); font-size:.8rem; margin-top:3rem;
+      border-top:1px solid var(--line); padding-top:1rem; }
+    select { font-size:1rem; padding:.15rem .4rem; }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; project overview</a> &nbsp;·&nbsp;
+     <a href="tariff.html">daily tariff demo</a> &nbsp;·&nbsp;
+     <a href="worldcup.html">World Cup study</a></p>
+  <h1>How advanced does a price forecaster need to be?</h1>
+  <p class="sub">Six models, from a lookup table to gradient boosting, one full
+     backtested year, identical scoring. The value-of-complexity study.</p>
+
+  <div class="verdict">
+    <p class="head" id="vHead">The answer: a lookup table.</p>
+    <p id="vText">Over <b id="vDays">…</b> backtested days, a 28-day rolling
+       lookup table ("average price per hour over the last four weeks, pick the
+       cheapest three") saves <b id="vEur">…</b>/year for a household shifting a
+       daily 11&nbsp;kWh EV charge — <b id="vShare">…</b> of what perfect
+       foresight would earn (<b id="vCeil">…</b>/year). No model on the ladder
+       beats it overall, including gradient boosting fed perfect weather.</p>
+  </div>
+
+  <section>
+    <h2>The reasoning, in seven steps</h2>
+    <ol>
+      <li><b>The action is picking hours, not predicting prices.</b> A smart
+        charger must choose 3 of 24 hours; it is judged by what those hours
+        cost at real prices.</li>
+      <li><b>There is a hard ceiling.</b> Picking the true cheapest hours every
+        day earns a fixed amount set by the price spread itself. No algorithm
+        can exceed it.</li>
+      <li><b>The test is fair.</b> Every strategy is backtested walk-forward:
+        to predict a day, it may only use data from before that day.</li>
+      <li><b>The dumbest informed strategy nearly maxes out.</b> The 28-day
+        lookup table captures ~93% of the ceiling.</li>
+      <li><b>Why: German cheap hours are structurally pinned.</b> Solar floods
+        midday, demand dies overnight. Weather changes <em>how cheap</em> those
+        hours are, rarely <em>which</em> hours they are. Models predict price
+        levels, spending their capacity on variance the hour-picking task never
+        rewards — and their level errors occasionally reshuffle the ranking,
+        making them actively worse (see the residual chart below).</li>
+      <li><b>The winter nuance.</b> Heating and scarce daylight make the winter
+        shape genuinely variable, so models do win there — by about €1 per
+        winter for this household. Direction confirmed, economics irrelevant.</li>
+      <li><b>The product conclusion.</b> Algorithm choice moves a few euros a
+        year; automated timing at all moves about two hundred. Engineering
+        budget belongs in automation, onboarding and trust, not the
+        forecaster — at household scale.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>The ladder</h2>
+    <p>Regret = what a strategy's picked hours cost beyond perfect foresight,
+       in ct/kWh. Lower is better. The curve never dips below its first rung.</p>
+    <canvas id="ladderChart" height="150"></canvas>
+  </section>
+
+  <section>
+    <h2>Where the models systematically miss</h2>
+    <p>Mean predicted-minus-actual price by hour of day. The lookup table
+       (black) hugs zero; the models chase weather and miss the evening peak in
+       summer and the midday dip in spring.
+       Season: <select id="seasonSel"></select></p>
+    <canvas id="residChart" height="150"></canvas>
+  </section>
+
+  <section>
+    <h2>Single days, inspected</h2>
+    <p>Each strategy's worst-fit day of the year (largest price RMSE), predicted
+       versus actual. A model can miss the level badly and still rank hours
+       correctly — which is exactly why level-predicting skill buys so little
+       here.</p>
+    <div class="row">
+      <div><canvas id="day0" height="220"></canvas></div>
+      <div><canvas id="day1" height="220"></canvas></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The critical questions are design decisions</h2>
+    <dl class="qa">
+      <dt>"Maybe the models were just badly built?"</dt>
+      <dd>The ceiling caps the argument: perfect foresight earns the maximum,
+        the lookup table takes ~93% of it, so any model — however brilliant —
+        competes for the remaining few euros a year. The upside is bounded
+        before the model quality debate starts. (And gradient boosting with
+        perfect weather inputs is a strong baseline; it lost.)</dd>
+      <dt>"Feeding models actual weather flatters them, no?"</dt>
+      <dd>Yes, deliberately — and they still lost. Real weather forecasts would
+        make every weather-using rung worse, while the lookup table needs no
+        forecast at all. The conclusion is conservative by construction.</dd>
+      <dt>"Is linear regression really machine learning?"</dt>
+      <dd>Textbook yes, industry arguably. Irrelevant here: the ladder includes
+        gradient boosting and k-nearest-neighbour kernel regression,
+        unambiguously ML.</dd>
+      <dt>"Why a 28-day lookup window?"</dt>
+      <dd>Rolling, so a winter day is judged against winter. A full-history
+        average would have been a strawman for the models to beat.</dd>
+      <dt>"Does this verdict hold at scale?"</dt>
+      <dd>No — and that boundary is part of the finding. An aggregator trading
+        GWh prices 0.4 ct/kWh of regret very differently. This is a
+        household-product verdict.</dd>
+      <dt>"Only one year?"</dt>
+      <dd>One weather year, hourly resolution. Known open items, documented in
+        the <a href="https://github.com/adrianogelato/energy-market-predictability/blob/main/ROADMAP.md">ROADMAP</a>:
+        scoring against archived weather forecasts, 15-minute products,
+        multi-year windows.</dd>
+    </dl>
+  </section>
+
+  <p class="note">Method details and every design decision:
+     <a href="https://github.com/adrianogelato/energy-market-predictability#the-value-of-complexity-ladder-milestone-10">README, milestone 10</a>.
+     Raw results: <a href="forecast_ladder.json">forecast_ladder.json</a>,
+     <a href="forecast_ladder_diagnostics.json">diagnostics</a>.</p>
+
+  <footer id="footer"></footer>
+
+  <script>
+    const COLORS = { climatology:'#1c1c1c', persistence:'#888', linear:'#4c72b0',
+                     linear_rich:'#4c9f70', knn:'#e0a458', gbm:'#c1436d' };
+    const eur = n => '€' + Math.round(n);
+    const get = u => fetch(u).then(r => { if (!r.ok) throw 0; return r.json(); });
+
+    Promise.all([get('forecast_ladder.json'),
+                 get('forecast_ladder_diagnostics.json').catch(() => null)])
+      .then(([l, d]) => { renderVerdict(l); renderLadder(l); if (d) renderDiag(l, d); })
+      .catch(() => document.body.insertAdjacentHTML('beforeend',
+        '<p class="note">Could not load forecast_ladder.json — run ' +
+        '<code>python year_fetch.py && python forecast_ladder.py</code>.</p>'));
+
+    function renderVerdict(l) {
+      const o = l.overall, c = o.rungs.climatology;
+      const ceil = (o.all_day_cost - o.perfect_cost) * 11 * 365 / 100;
+      document.getElementById('vDays').textContent = o.n_days;
+      document.getElementById('vEur').textContent = eur(c.eur_yr_saved_vs_anytime);
+      document.getElementById('vCeil').textContent = eur(ceil);
+      document.getElementById('vShare').textContent =
+        Math.round(100 * c.eur_yr_saved_vs_anytime / ceil) + '%';
+      const best = l.ladder_order.reduce((a, b) =>
+        o.rungs[a].regret_ct <= o.rungs[b].regret_ct ? a : b);
+      if (best !== 'climatology' || l.mode !== 'full-year')
+        document.getElementById('vHead').textContent =
+          'The answer: check the ladder below — the winner changed with the latest data.';
+      document.getElementById('footer').textContent =
+        'Generated ' + l.generated_at + ' · ' + o.n_days + ' walk-forward test days · ' +
+        'weather input: ' + l.config.weather_input +
+        (l.config.gbm_included ? '' : ' · gbm rung not included in this run');
+    }
+
+    function renderLadder(l) {
+      const rungs = l.ladder_order;
+      const ds = [{ label: 'overall', data: rungs.map(r => l.overall.rungs[r].regret_ct),
+                    borderColor: '#1c1c1c', borderWidth: 3, tension: .2 }];
+      for (const [s, a] of Object.entries(l.by_season))
+        ds.push({ label: s, data: rungs.map(r => a.rungs[r].regret_ct),
+                  borderColor: {DJF:'#4c72b0',MAM:'#4c9f70',JJA:'#e0a458',SON:'#c1436d'}[s],
+                  borderWidth: 1.3, tension: .2 });
+      new Chart(document.getElementById('ladderChart'), { type: 'line',
+        data: { labels: rungs, datasets: ds },
+        options: { scales: { y: { title: { display: true,
+          text: 'regret vs perfect foresight (ct/kWh)' } } } } });
+    }
+
+    function renderDiag(l, d) {
+      const seasons = Object.keys(d.residual_by_hour);
+      const sel = document.getElementById('seasonSel');
+      sel.innerHTML = seasons.map(s => '<option>' + s + '</option>').join('');
+      let chart = null;
+      const draw = s => {
+        if (chart) chart.destroy();
+        chart = new Chart(document.getElementById('residChart'), { type: 'line',
+          data: { labels: [...Array(24).keys()],
+            datasets: Object.entries(d.residual_by_hour[s]).map(([r, v]) => ({
+              label: r, data: v, borderColor: COLORS[r] || '#555',
+              borderWidth: r === 'climatology' ? 2.5 : 1.3, pointRadius: 0, tension: .25 })) },
+          options: { scales: {
+            x: { title: { display: true, text: 'hour of day' } },
+            y: { title: { display: true, text: 'mean predicted − actual (ct/kWh)' } } } } });
+      };
+      sel.onchange = () => draw(sel.value);
+      draw(seasons[0]);
+
+      const pick = ['climatology',
+                    d.gbm ? 'gbm' : (d.linear ? 'linear' : null)].filter(Boolean);
+      pick.forEach((r, i) => {
+        const w = d[r].worst_fit;
+        new Chart(document.getElementById('day' + i), { type: 'line',
+          data: { labels: [...Array(24).keys()], datasets: [
+            { label: 'actual', data: w.actual, borderColor: '#1c1c1c',
+              borderWidth: 2, pointRadius: 0 },
+            { label: r + ' predicted', data: w.predicted,
+              borderColor: COLORS[r] || '#c1436d', borderDash: [5, 3],
+              borderWidth: 1.6, pointRadius: 0 }] },
+          options: { plugins: { title: { display: true,
+              text: r + ' worst day: ' + w.date + ' (RMSE ' + w.rmse_ct + ' ct)' } },
+            scales: { y: { title: { display: true, text: 'ct/kWh' } } } } });
+      });
+    }
+  </script>
+</body>
+</html>

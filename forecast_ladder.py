@@ -159,17 +159,20 @@ def main():
               "pip install scikit-learn to include it)\n")
 
     gbm, gbm_age = None, 10**9
-    records = []
+    records, day_curves = [], []
     for i in range(WARMUP_DAYS, len(days)):
         test, train = days[i], days[:i]
         actual = prices_of(test)
         actual_cheap = cheapest(actual)
         picks = {}
 
+        curves = {}   # each rung's predicted 24h price curve, for diagnostics
         clim_days = train[-CLIM_WINDOW:]
-        picks["climatology"] = cheapest({
-            h: float(np.mean([prices_of(d)[h] for d in clim_days])) for h in range(24)})
-        picks["persistence"] = cheapest(prices_of(train[-1]))
+        curves["climatology"] = {
+            h: float(np.mean([prices_of(d)[h] for d in clim_days])) for h in range(24)}
+        curves["persistence"] = prices_of(train[-1])
+        picks["climatology"] = cheapest(curves["climatology"])
+        picks["persistence"] = cheapest(curves["persistence"])
 
         for name, rich in (("linear", False), ("linear_rich", True)):
             X = [hour_features(t, weather[t], holidays, rich)
@@ -179,6 +182,7 @@ def main():
             pred = {t.hour: float(np.dot(
                 hour_features(t, weather[t], holidays, rich), beta))
                 for t in hours_of[test]}
+            curves[name] = pred
             picks[name] = cheapest(pred)
 
         dists = np.array([np.linalg.norm(zvec[test] - zvec[d]) for d in train])
@@ -186,6 +190,7 @@ def main():
         wts = 1.0 / (dists[idx] + 0.1)
         pred = {h: float(np.average([prices_of(train[j])[h] for j in idx],
                                     weights=wts)) for h in range(24)}
+        curves["knn"] = pred
         picks["knn"] = cheapest(pred)
 
         if HAVE_SKLEARN:
@@ -200,6 +205,7 @@ def main():
                            for t in hours_of[test]])
             pred = dict(zip([t.hour for t in hours_of[test]],
                             [float(v) for v in gbm.predict(Xt)]))
+            curves["gbm"] = pred
             picks["gbm"] = cheapest(pred)
 
         rec = {"date": test.isoformat(), "season": season(test),
@@ -211,6 +217,10 @@ def main():
                 "cost": float(np.mean([actual[h] for h in picks[name]])),
             }
         records.append(rec)
+        day_curves.append({"date": test.isoformat(), "season": season(test),
+                           "actual": [actual[h] for h in range(24)],
+                           "rungs": {n: [curves[n][h] for h in range(24)]
+                                     for n in rungs}})
 
     def agg(recs):
         out = {"n_days": len(recs),
@@ -246,7 +256,76 @@ def main():
     with open(HERE / "forecast_ladder.json", "w") as f:
         json.dump(results, f, indent=2)
     plot(results)
+    diagnostics(day_curves, rungs, results["mode"])
     report(results)
+
+
+def diagnostics(day_curves, rungs, mode):
+    """Backlog item 8: make the conclusion inspectable, not just believable.
+
+    Per rung: the best- and worst-fit day (by price RMSE, which measures the
+    fit itself; a rung can rank hours right while missing levels), overlaid on
+    the actual curve. Plus mean residual (predicted minus actual) by hour per
+    season, showing where each model systematically misses.
+    """
+    def rmse(c, name):
+        return math.sqrt(sum((c["rungs"][name][h] - c["actual"][h]) ** 2
+                             for h in range(24)) / 24)
+
+    diag = {"note": "fit quality is RMSE in ct/kWh over the 24 hourly prices"}
+    fig, axes = plt.subplots(len(rungs), 2, figsize=(11, 2.6 * len(rungs)),
+                             sharex=True)
+    for i, name in enumerate(rungs):
+        scored = sorted(day_curves, key=lambda c: rmse(c, name))
+        for j, (label, c) in enumerate((("best_fit", scored[0]),
+                                        ("worst_fit", scored[-1]))):
+            diag.setdefault(name, {})[label] = {
+                "date": c["date"], "season": c["season"],
+                "rmse_ct": round(rmse(c, name), 2),
+                "actual": [round(v, 2) for v in c["actual"]],
+                "predicted": [round(v, 2) for v in c["rungs"][name]],
+            }
+            ax = axes[i][j]
+            ax.plot(range(24), c["actual"], color="#1c1c1c", lw=1.8, label="actual")
+            ax.plot(range(24), c["rungs"][name], color="#c1436d", lw=1.4,
+                    ls="--", label=name)
+            ax.set_title(f"{name} {label.replace('_', ' ')}: {c['date']} "
+                         f"(RMSE {rmse(c, name):.2f} ct)", fontsize=9)
+            ax.grid(True, alpha=.3)
+            if i == 0 and j == 0:
+                ax.legend(fontsize=8)
+    fig.suptitle("Predicted vs actual prices: each rung's best and worst day"
+                 + ("  [SMOKE TEST]" if mode != "full-year" else ""))
+    fig.tight_layout()
+    fig.savefig(HERE / "forecast_ladder_days.png", dpi=110)
+
+    seasons = sorted({c["season"] for c in day_curves})
+    fig, axes = plt.subplots(1, len(seasons), figsize=(4 * len(seasons), 4),
+                             sharey=True)
+    axes = [axes] if len(seasons) == 1 else list(axes)
+    colors = {"climatology": "#1c1c1c", "persistence": "#888", "linear": "#4c72b0",
+              "linear_rich": "#4c9f70", "knn": "#e0a458", "gbm": "#c1436d"}
+    diag["residual_by_hour"] = {}
+    for ax, s in zip(axes, seasons):
+        cs = [c for c in day_curves if c["season"] == s]
+        for name in rungs:
+            res = [sum(c["rungs"][name][h] - c["actual"][h] for c in cs) / len(cs)
+                   for h in range(24)]
+            diag["residual_by_hour"].setdefault(s, {})[name] = [round(v, 2) for v in res]
+            ax.plot(range(24), res, lw=1.3, color=colors.get(name, "#555"), label=name)
+        ax.axhline(0, color="#bbb", lw=.8)
+        ax.set_title(f"{s} (n={len(cs)})")
+        ax.grid(True, alpha=.3)
+    axes[0].set_ylabel("mean predicted − actual (ct/kWh)")
+    axes[-1].legend(fontsize=8)
+    fig.suptitle("Where each model systematically misses, by hour and season")
+    fig.tight_layout()
+    fig.savefig(HERE / "forecast_ladder_residuals.png", dpi=110)
+
+    with open(HERE / "forecast_ladder_diagnostics.json", "w") as f:
+        json.dump(diag, f, indent=2)
+    print("Wrote forecast_ladder_diagnostics.json, forecast_ladder_days.png, "
+          "forecast_ladder_residuals.png")
 
 
 def plot(res):

@@ -812,6 +812,12 @@ trust, not in the forecaster — at household scale. (An aggregator trading
 hundreds of MW across thousands of vehicles prices the same €-per-kWh gaps
 very differently; that question is out of scope here.)
 
+The whole chain is published on `ladder.html`: the verdict, the reasoning in
+seven steps, the ladder curve, a residual-by-hour chart showing where each
+model systematically misses, single inspected days (each rung's worst fit),
+and the critical questions answered as design decisions. The script also
+writes `forecast_ladder_diagnostics.json` and two diagnostic PNGs.
+
 ## Assumptions and limitations
 
 The numbers are a model, not a bill. The flat rate, the fixed adder, the
