@@ -250,6 +250,21 @@ In priority order. The first block matters most; the older ideas follow.
 10. Finding 1 extension: Run the numbers for different configurations regarding their 
     electricity consumers (not everybody owns an EV). Define the relevant consumers.
 
+11. Remove spelling out the units in graph and chart captions: ct/kWh, EUR/MWh can stay 
+    as they are. PARTIAL: done for `ladder.html` and the `forecast_ladder.py`
+    figure captions; still open in `tariff.html`, `worldcup.html`,
+    `wc_analysis.py`, `fetch_prices.py`, `forecast_cheap_hours.py`.
+
+12. Finding 1: Evaluate the effect of predicting the cheapest two and the cheapest four
+    hours with comparison to the cheapest three hours. Make graphs for the comparison.
+    DONE (needs one local rerun to populate): `forecast_ladder.py` scores
+    windows of 2, 3 and 4 hours against the same predictions in one run
+    (`by_n` aggregates plus per-day `daily` blocks keyed by window size in
+    `forecast_ladder.json`), and `ladder.html` compares them in the "Does the
+    window size matter?" chart. Verdict aggregates stay pinned to n=3.
+
+13. Finding 1 extension: Home Energy Management System as a product. Instead of an EV consider a local energy storage like a wall box. Identify relevant sizing of such local energy storage. 
+
 Older ideas, still parked:
 
 Module separation beyond matching: aWATTar price data, ENTSO-E load data, and

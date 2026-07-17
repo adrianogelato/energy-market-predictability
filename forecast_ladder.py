@@ -50,12 +50,18 @@ from matching import load_holidays
 from plot_utils import add_caption
 
 HERE = Path(__file__).parent
-N_CHEAP = 3
+N_CHEAP = 3            # canonical window; overall/by_season use this
+N_LIST = (2, 3, 4)     # window sizes scored in the same run (ROADMAP item 12)
+assert N_CHEAP in N_LIST
 WARMUP_DAYS = 28
 CLIM_WINDOW = 28
 KNN_K = 20
 GBM_RETRAIN_DAYS = 7
 EV_KWH, DAYS_PER_YEAR = 11.0, 365
+# Display names for figures; keys in the result files stay as they are.
+# "climatology" is the forecasting term for a historical-average baseline,
+# but reads as if weather were an input, which it is not.
+DISPLAY = {"climatology": "lookup table"}
 
 try:
     from sklearn.ensemble import HistGradientBoostingRegressor
@@ -142,8 +148,8 @@ def main():
     def prices_of(d):
         return {t.hour: price[t] for t in hours_of[d]}
 
-    def cheapest(pbh):
-        return set(sorted(pbh, key=lambda h: pbh[h])[:N_CHEAP])
+    def cheapest(pbh, n=N_CHEAP):
+        return set(sorted(pbh, key=lambda h: pbh[h])[:n])
 
     # z-stats for knn day vectors (over all days; distances only rank)
     vecs = {d: day_vector(d, hours_of, weather, holidays) for d in days}
@@ -160,20 +166,17 @@ def main():
               "pip install scikit-learn to include it)\n")
 
     gbm, gbm_age = None, 10**9
-    records, day_curves = [], []
+    records = {n: [] for n in N_LIST}
+    day_curves = []
     for i in range(WARMUP_DAYS, len(days)):
         test, train = days[i], days[:i]
         actual = prices_of(test)
-        actual_cheap = cheapest(actual)
-        picks = {}
 
-        curves = {}   # each rung's predicted 24h price curve, for diagnostics
+        curves = {}   # each rung's predicted 24h price curve
         clim_days = train[-CLIM_WINDOW:]
         curves["climatology"] = {
             h: float(np.mean([prices_of(d)[h] for d in clim_days])) for h in range(24)}
         curves["persistence"] = prices_of(train[-1])
-        picks["climatology"] = cheapest(curves["climatology"])
-        picks["persistence"] = cheapest(curves["persistence"])
 
         for name, rich in (("linear", False), ("linear_rich", True)):
             X = [hour_features(t, weather[t], holidays, rich)
@@ -184,7 +187,6 @@ def main():
                 hour_features(t, weather[t], holidays, rich), beta))
                 for t in hours_of[test]}
             curves[name] = pred
-            picks[name] = cheapest(pred)
 
         dists = np.array([np.linalg.norm(zvec[test] - zvec[d]) for d in train])
         idx = np.argsort(dists)[:KNN_K]
@@ -192,7 +194,6 @@ def main():
         pred = {h: float(np.average([prices_of(train[j])[h] for j in idx],
                                     weights=wts)) for h in range(24)}
         curves["knn"] = pred
-        picks["knn"] = cheapest(pred)
 
         if HAVE_SKLEARN:
             if gbm_age >= GBM_RETRAIN_DAYS:
@@ -207,17 +208,20 @@ def main():
             pred = dict(zip([t.hour for t in hours_of[test]],
                             [float(v) for v in gbm.predict(Xt)]))
             curves["gbm"] = pred
-            picks["gbm"] = cheapest(pred)
 
-        rec = {"date": test.isoformat(), "season": season(test),
-               "perfect_cost": float(np.mean([actual[h] for h in actual_cheap])),
-               "all_day_cost": float(np.mean(list(actual.values())))}
-        for name in rungs:
-            rec[name] = {
-                "hit": len(picks[name] & actual_cheap) / N_CHEAP,
-                "cost": float(np.mean([actual[h] for h in picks[name]])),
-            }
-        records.append(rec)
+        # Score every window size against the same predictions.
+        for n in N_LIST:
+            actual_cheap = cheapest(actual, n)
+            rec = {"date": test.isoformat(), "season": season(test),
+                   "perfect_cost": float(np.mean([actual[h] for h in actual_cheap])),
+                   "all_day_cost": float(np.mean(list(actual.values())))}
+            for name in rungs:
+                picks = cheapest(curves[name], n)
+                rec[name] = {
+                    "hit": len(picks & actual_cheap) / n,
+                    "cost": float(np.mean([actual[h] for h in picks])),
+                }
+            records[n].append(rec)
         day_curves.append({"date": test.isoformat(), "season": season(test),
                            "actual": [actual[h] for h in range(24)],
                            "rungs": {n: [curves[n][h] for h in range(24)]
@@ -239,7 +243,7 @@ def main():
             }
         return out
 
-    seasons_present = sorted({r["season"] for r in records})
+    seasons_present = sorted({r["season"] for r in records[N_CHEAP]})
     results = {
         "generated_at": dt.datetime.now().isoformat(timespec="minutes"),
         "mode": mode,
@@ -250,9 +254,20 @@ def main():
                    "weather_input": "actuals (perfect-forecast ceiling; fair "
                                     "between rungs, flattering in absolute terms)"},
         "ladder_order": rungs,
-        "overall": agg(records),
-        "by_season": {s: agg([r for r in records if r["season"] == s])
+        "overall": agg(records[N_CHEAP]),
+        "by_season": {s: agg([r for r in records[N_CHEAP] if r["season"] == s])
                       for s in seasons_present},
+        # ROADMAP item 12: the same predictions scored for every window size.
+        "by_n": {str(n): agg(records[n]) for n in N_LIST},
+        # Per-day walk-forward results, keyed by window size (n_cheap_hours).
+        # ladder.html computes the cumulative-savings and rolling-cost charts
+        # from this in the browser.
+        "daily": {str(n): [
+            {"date": r["date"], "season": r["season"],
+             "perfect_cost": round(r["perfect_cost"], 3),
+             "all_day_cost": round(r["all_day_cost"], 3),
+             "rungs": {name: round(r[name]["cost"], 3) for name in rungs}}
+            for r in records[n]] for n in N_LIST},
     }
     with open(HERE / "forecast_ladder.json", "w") as f:
         json.dump(results, f, indent=2)
@@ -289,8 +304,9 @@ def diagnostics(day_curves, rungs, mode):
             ax = axes[i][j]
             ax.plot(range(24), c["actual"], color="#1c1c1c", lw=1.8, label="actual")
             ax.plot(range(24), c["rungs"][name], color="#c1436d", lw=1.4,
-                    ls="--", label=name)
-            ax.set_title(f"{name} {label.replace('_', ' ')}: {c['date']} "
+                    ls="--", label=DISPLAY.get(name, name))
+            ax.set_title(f"{DISPLAY.get(name, name)} "
+                         f"{label.replace('_', ' ')}: {c['date']} "
                          f"(RMSE {rmse(c, name):.2f} ct)", fontsize=9)
             ax.grid(True, alpha=.3)
             if i == 0 and j == 0:
@@ -299,14 +315,15 @@ def diagnostics(day_curves, rungs, mode):
                  + ("  [SMOKE TEST]" if mode != "full-year" else ""))
     fig.tight_layout()
     add_caption(fig, "Each row is one \"rung\": a forecasting model on the "
-                "complexity ladder, from climatology (predicts each hour's "
+                "complexity ladder, from the lookup table (\"climatology\" in "
+                "the result files: predicts each hour's "
                 "historical average) and persistence (predicts tomorrow repeats "
                 "today) through linear regression (linear, and linear_rich with "
                 "extra weather features), knn (k-nearest-neighbour, a "
                 "non-parametric model) to gbm (gradient boosting, a tree "
                 "ensemble). Left column: the day that rung fit best; right: its "
-                "worst. RMSE = root-mean-square error in ct/kWh (euro-cents per "
-                "kilowatt-hour) between predicted and actual hourly prices.")
+                "worst. RMSE = root-mean-square error in ct/kWh between "
+                "predicted and actual hourly prices.")
     fig.subplots_adjust(bottom=min(0.22, 1.3 / (2.6 * len(rungs))))
     fig.savefig(HERE / "forecast_ladder_days.png", dpi=110)
 
@@ -323,7 +340,8 @@ def diagnostics(day_curves, rungs, mode):
             res = [sum(c["rungs"][name][h] - c["actual"][h] for c in cs) / len(cs)
                    for h in range(24)]
             diag["residual_by_hour"].setdefault(s, {})[name] = [round(v, 2) for v in res]
-            ax.plot(range(24), res, lw=1.3, color=colors.get(name, "#555"), label=name)
+            ax.plot(range(24), res, lw=1.3, color=colors.get(name, "#555"),
+                    label=DISPLAY.get(name, name))
         ax.axhline(0, color="#bbb", lw=.8)
         ax.set_title(f"{s} (n={len(cs)})")
         ax.grid(True, alpha=.3)
@@ -331,13 +349,14 @@ def diagnostics(day_curves, rungs, mode):
     axes[-1].legend(fontsize=8)
     fig.suptitle("Where each model systematically misses, by hour and season")
     fig.tight_layout()
-    add_caption(fig, "ct/kWh = euro-cents per kilowatt-hour. Residual = mean "
-                "predicted-minus-actual price by hour, averaged over all days in "
+    add_caption(fig, "Residual = mean "
+                "predicted-minus-actual price by hour (ct/kWh), averaged over all days in "
                 "that season; above zero means the model overpredicts that "
                 "hour, below means it underpredicts. Panels are the four "
                 "meteorological seasons: DJF = Dec-Jan-Feb, MAM = Mar-Apr-May, "
                 "JJA = Jun-Jul-Aug, SON = Sep-Oct-Nov. Lines are the ladder's "
-                "rungs (models): climatology, persistence, linear, linear_rich, "
+                "rungs (models): lookup table (\"climatology\" in the result "
+                "files), persistence, linear, linear_rich, "
                 "knn (k-nearest-neighbour) and gbm (gradient boosting).")
     fig.subplots_adjust(bottom=0.28)
     fig.savefig(HERE / "forecast_ladder_residuals.png", dpi=110)
@@ -351,31 +370,38 @@ def diagnostics(day_curves, rungs, mode):
 def plot(res):
     rungs = res["ladder_order"]
     fig, ax = plt.subplots(figsize=(9, 5.5))
-    x = range(len(rungs))
-    ax.plot(x, [res["overall"]["rungs"][r]["regret_ct"] for r in rungs],
-            marker="o", lw=2.5, color="#1c1c1c", label=f"overall ({res['overall']['n_days']}d)")
-    palette = {"DJF": "#4c72b0", "MAM": "#4c9f70", "JJA": "#e0a458", "SON": "#c1436d"}
-    for s, a in res["by_season"].items():
-        ax.plot(x, [a["rungs"][r]["regret_ct"] for r in rungs], marker="o",
-                lw=1.2, alpha=.8, color=palette.get(s, "#888"),
-                label=f"{s} ({a['n_days']}d)")
-    ax.set_xticks(list(x), rungs)
+    # Grouped bars matching ladder.html: groups are the models in ladder
+    # order, one bar per period (full year, then the four seasons).
+    season_col = {"DJF": "#4c72b0", "MAM": "#4c9f70",
+                  "JJA": "#e0a458", "SON": "#c1436d"}
+    periods = [("full year", "#555", res["overall"])] + [
+        (s, season_col[s], res["by_season"][s])
+        for s in ("DJF", "MAM", "JJA", "SON") if s in res["by_season"]]
+    width = 0.8 / len(periods)
+    for i, (name, col, a) in enumerate(periods):
+        xs = [g + (i - (len(periods) - 1) / 2) * width
+              for g in range(len(rungs))]
+        ax.bar(xs, [a["rungs"][r]["regret_ct"] for r in rungs],
+               width=width, color=col, label=f"{name} ({a['n_days']}d)")
+    ax.set_xticks(range(len(rungs)), [DISPLAY.get(r, r) for r in rungs])
     ax.set_ylabel("Regret vs perfect foresight (ct/kWh; lower = better)")
-    ax.set_title("Value of forecasting complexity: where does the curve flatten?"
+    ax.set_title("Value of forecasting complexity: regret by model and period"
                  + ("  [SMOKE TEST]" if res["mode"] != "full-year" else ""))
-    ax.grid(True, alpha=.3)
+    ax.grid(True, alpha=.3, axis="y")
     ax.legend()
     fig.tight_layout()
-    add_caption(fig, "ct/kWh = euro-cents per kilowatt-hour. \"Regret\" is how "
+    add_caption(fig, "\"Regret\" is how "
                 "much more a strategy's chosen hours cost than perfect "
-                "foresight (an oracle baseline that already knows real prices) "
-                "— lower is better. The x-axis is the value-of-complexity "
-                "ladder, from the simplest model (climatology: predicts each "
-                "hour's historical average) through persistence, linear, "
-                "linear_rich, knn (k-nearest-neighbour) to gbm (gradient "
-                "boosting, the most complex). Colored lines break the same "
-                "curve out by meteorological season: DJF = Dec-Jan-Feb, "
-                "MAM = Mar-Apr-May, JJA = Jun-Jul-Aug, SON = Sep-Oct-Nov.")
+                "foresight (an oracle baseline that already knows real "
+                "prices); lower is better. Groups: the models in ladder "
+                "order, from the simplest (lookup table, \"climatology\" in "
+                "the result files: predicts each hour's historical average) "
+                "through persistence, linear, linear_rich, knn "
+                "(k-nearest-neighbour) to gbm (gradient boosting, the most "
+                "complex). Within each group, one bar per period: the full "
+                "backtest year, then the four meteorological seasons (DJF = "
+                "Dec-Jan-Feb, MAM = Mar-Apr-May, JJA = Jun-Jul-Aug, SON = "
+                "Sep-Oct-Nov).")
     fig.subplots_adjust(bottom=0.26)
     fig.savefig(HERE / "forecast_ladder.png", dpi=120)
 

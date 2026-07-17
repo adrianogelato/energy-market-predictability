@@ -51,6 +51,24 @@ Pages: index.html (one-pager, computes numbers live from JSONs; hand-written
 verdicts have data-driven guards — preserve them), tariff.html (daily demo),
 worldcup.html (event study, verdict-first).
 
+## Chart design (all figures on the pages and in `analysis.py`)
+
+Every chart must be self-explanatory in isolation, readable without the
+surrounding prose.
+
+- **Title**: states what the chart shows.
+- **Caption**: states the takeaway, so the finding is clear without reading
+  the body text.
+- **Legend**: present whenever more than one series is plotted; label series
+  explicitly, no reliance on color alone.
+- **Axes**: both labeled, with units.
+- **Source and range**: note the data source and date range (e.g. "German
+  day-ahead prices, 2023-2025").
+- **Small-n caveat**: state sample size or noise caveats directly on the chart
+  when n is small (matches the existing weekday-effect guard).
+- **Color**: consistent palette across all pages and figures.
+- **Abbreviations & acronyms**: Abbreviations and acronyms shall be spelled out. Units like ct/kWh or EUR/MWh shall not be spelled out, they are considered known.
+
 ## Writing style (all prose: docs, pages, commit messages)
 
 No em dashes. No LinkedIn marketing tone. No inflated phrasing. Findings

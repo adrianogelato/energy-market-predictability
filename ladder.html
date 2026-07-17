@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>How advanced does a price forecaster need to be?</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2"></script>
   <style>
     :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --win:#4c9f70; --lose:#c1436d; }
     * { box-sizing:border-box; }
@@ -15,7 +16,7 @@
     section { margin:2.25rem 0; } canvas { max-width:100%; }
     .verdict { border:2px solid var(--win); border-radius:10px; padding:1rem 1.25rem; margin:1.25rem 0; }
     .verdict .head { font-size:1.25rem; font-weight:700; margin:.1rem 0; }
-    ol li { margin:.5rem 0; }
+    ol li, ul li { margin:.5rem 0; }
     .qa dt { font-weight:700; margin-top:1rem; }
     .qa dd { margin:.25rem 0 0 0; }
     .note { background:#f7f7f5; border-left:3px solid var(--win); padding:.75rem 1rem;
@@ -26,6 +27,7 @@
     select { font-size:1rem; padding:.15rem .4rem; }
     figure { margin: 0; }
     figcaption { color: var(--muted); font-size: .82rem; margin-top: .5rem; }
+    .hint { color: var(--muted); font-size: .78rem; margin: .3rem 0 0 0; }
   </style>
 </head>
 <body>
@@ -45,6 +47,44 @@
        foresight would earn (<b id="vCeil">…</b>/year). No model on the ladder
        beats it overall, including gradient boosting fed perfect weather.</p>
   </div>
+
+  <section id="heroSec">
+    <h2>The year, in euros</h2>
+    <p>The verdict's numbers, drawn out over the backtest year: cumulative
+       savings versus charging at the all-day average price (the zero line).
+       The endpoints are the verdict.</p>
+    <figure>
+      <canvas id="cumChart" height="170"></canvas>
+      <p class="hint">Drag a range to zoom (Ctrl+scroll also zooms,
+         Shift+drag pans) — <a href="#" id="cumReset">reset zoom</a>.
+         Click a legend entry to hide or show a series.</p>
+      <figcaption id="cumCap"></figcaption>
+    </figure>
+  </section>
+  <p class="note" id="staleNote" style="display:none">This
+     forecast_ladder.json predates parts of this page. Rerun
+     <code>python forecast_ladder.py</code> to populate the time-axis charts
+     and the window-size comparison.</p>
+
+  <section>
+    <h2>How the numbers are measured</h2>
+    <ol>
+      <li>Take a year of German day-ahead prices and weather. The first 28
+        days serve only as history for the models.</li>
+      <li>For every remaining day, each model sees data from before that day
+        only, and predicts the day's 24 hourly prices.</li>
+      <li>Each model picks the 3 hours it predicts to be cheapest (2 and 4
+        in the window-size comparison below). The EV charges its daily
+        11&nbsp;kWh in exactly those hours.</li>
+      <li>The bill is settled at the day's actual prices. Daily saving =
+        (all-day average price − average price of the picked hours) ×
+        11&nbsp;kWh. Daily regret = average price of the picked hours −
+        average price of the true cheapest hours.</li>
+      <li>Savings are summed over the year (chart above); regret is averaged
+        per model and season (the ladder below). Perfect foresight is the
+        same accounting applied to the true cheapest hours.</li>
+    </ol>
+  </section>
 
   <section>
     <h2>The reasoning, in seven steps</h2>
@@ -78,34 +118,81 @@
   <section>
     <h2>The ladder</h2>
     <p>Regret = what a strategy's picked hours cost beyond perfect foresight,
-       in ct/kWh. Lower is better. The curve never dips below its first rung.</p>
+       in ct/kWh. Lower is better.</p>
+    <p>The six models, in order of complexity:</p>
+    <ul>
+      <li><b>lookup table</b> (<code>climatology</code> in the code and
+          result files, the forecasting term for a historical-average
+          baseline): predicts each hour's average price over the previous
+          four weeks, no weather input.</li>
+      <li><b>persistence</b>: predicts that tomorrow's 24 prices repeat
+          today's.</li>
+      <li><b>linear</b>: linear regression on time-of-day harmonics,
+          temperature, solar radiation (or cloud cover) and a weekend
+          flag.</li>
+      <li><b>linear_rich</b>: the same regression with time-of-year
+          harmonics, separate Saturday and Sunday-or-holiday flags, squared
+          temperature and wind added.</li>
+      <li><b>knn</b> (k-nearest-neighbour): finds the 20 most weather-similar
+          past days and predicts the weighted average of their price
+          curves.</li>
+      <li><b>gbm</b> (gradient boosting): boosted decision trees on the rich
+          feature set, retrained weekly.</li>
+    </ul>
+    <p>All are backtested walk-forward on the same days and scored
+       identically.</p>
     <figure>
       <canvas id="ladderChart" height="150"></canvas>
-      <figcaption>Regret (extra cost vs. perfect foresight, in ct/kWh —
-        euro-cents per kilowatt-hour) for each rung of the complexity ladder:
-        climatology (predicts each hour's historical average) → persistence
-        (predicts tomorrow repeats today) → linear → linear_rich (linear
-        regression, with extra weather features) → knn (k-nearest-neighbour)
-        → gbm (gradient boosting). Lower is better. Colored lines break the
-        curve out by meteorological season: DJF = Dec-Jan-Feb, MAM =
-        Mar-Apr-May, JJA = Jun-Jul-Aug, SON = Sep-Oct-Nov.</figcaption>
+      <figcaption>Regret (extra cost vs. perfect foresight, in ct/kWh), lower
+        is better. Groups on the x axis: the models in ladder order, as
+        described in the list above. Within each group, one bar per period:
+        the full backtest year, then the four meteorological seasons (DJF =
+        Dec-Jan-Feb, MAM = Mar-Apr-May, JJA = Jun-Jul-Aug, SON =
+        Sep-Oct-Nov). <span id="ladderSrc"></span></figcaption>
+    </figure>
+  </section>
+
+  <section id="rollSec">
+    <h2>The winter nuance, on the calendar</h2>
+    <p>Step 6 of the reasoning, drawn out: what each day's picked hours
+       actually cost. For most of the year the lookup table's picked hours
+       cost about the same as perfect foresight's; in winter the daily price
+       shape varies more and the difference becomes visible.</p>
+    <figure>
+      <canvas id="rollChart" height="170"></canvas>
+      <p class="hint">Drag a range to zoom (Ctrl+scroll also zooms,
+         Shift+drag pans) — <a href="#" id="rollReset">reset zoom</a>.
+         Click a legend entry to hide or show a series.</p>
+      <figcaption id="rollCap"></figcaption>
+    </figure>
+  </section>
+
+  <section id="winSec">
+    <h2>Does the window size matter?</h2>
+    <p>The same backtest, asking each model for the cheapest 2, 3 or 4 hours
+       of the day. A charger that needs fewer hours can be pickier, so a
+       smaller window pays a lower price per kWh for every strategy; the
+       question is whether the ranking between strategies changes.</p>
+    <figure>
+      <canvas id="winChart" height="150"></canvas>
+      <figcaption id="winCap"></figcaption>
     </figure>
   </section>
 
   <section>
     <h2>Where the models systematically miss</h2>
     <p>Mean predicted-minus-actual price by hour of day. The lookup table
-       (black) hugs zero; the models chase weather and miss the evening peak in
-       summer and the midday dip in spring.
+       (black) stays near zero; the models' errors are largest at the evening
+       peak in summer and the midday dip in spring.
        Season: <select id="seasonSel"></select></p>
     <figure>
       <canvas id="residChart" height="150"></canvas>
-      <figcaption>Mean predicted-minus-actual price (ct/kWh, euro-cents per
-        kilowatt-hour) by hour of day, for the one meteorological season
+      <figcaption>Mean predicted-minus-actual price (ct/kWh) by hour of day,
+        for the one meteorological season
         selected above (DJF = Dec-Jan-Feb, MAM = Mar-Apr-May, JJA =
         Jun-Jul-Aug, SON = Sep-Oct-Nov). Above zero = that model overpredicts
         that hour; below = underpredicts. Lines are the ladder's rungs:
-        climatology, persistence, linear, linear_rich, knn
+        lookup table (climatology), persistence, linear, linear_rich, knn
         (k-nearest-neighbour), gbm (gradient boosting).</figcaption>
     </figure>
   </section>
@@ -170,12 +257,109 @@
   <script>
     const COLORS = { climatology:'#1c1c1c', persistence:'#888', linear:'#4c72b0',
                      linear_rich:'#4c9f70', knn:'#e0a458', gbm:'#c1436d' };
+    const SEASON_COL = { DJF:'#4c72b0', MAM:'#4c9f70', JJA:'#e0a458', SON:'#c1436d' };
+    const SEASON_FILL = { DJF:'rgba(76,114,176,.07)', MAM:'rgba(76,159,112,.07)',
+                          JJA:'rgba(224,164,88,.10)', SON:'rgba(193,67,109,.06)' };
+    // Display names; keys in the result files stay as they are.
+    const LABEL = { climatology: 'lookup table' };
+    const disp = r => LABEL[r] || r;
+    const SEASON_KEY = 'DJF = Dec-Jan-Feb, MAM = Mar-Apr-May, ' +
+                       'JJA = Jun-Jul-Aug, SON = Sep-Oct-Nov';
+    // Reference series get hues outside the model palette.
+    const REF_COL = { perfect: '#2a9d8f', untimed: '#8d6a9f' };
+    const EV_KWH = 11;
     const eur = n => '€' + Math.round(n);
     const get = u => fetch(u).then(r => { if (!r.ok) throw 0; return r.json(); });
 
+    // Per-day walk-forward records, keyed by n_cheap_hours (ROADMAP item 12).
+    const dailyOf = l => (l.daily || {})[String(l.config.n_cheap_hours)] || null;
+    const srcLine = (l, daily) => 'German day-ahead prices, ' +
+      (daily ? daily[0].date + ' to ' + daily[daily.length - 1].date + ', ' : '') +
+      l.overall.n_days + ' walk-forward test days.';
+
+    // Inline plugin: shade the meteorological seasons on time-axis charts.
+    const seasonBands = { id: 'seasonBands',
+      beforeDatasetsDraw(c, _a, opts) {
+        if (!opts.spans) return;
+        const { ctx, chartArea: { top, bottom, left, right } } = c,
+              x = c.scales.x;
+        // Extend each band from category centers to category edges, so
+        // adjacent bands meet without a one-day gap at season boundaries.
+        const half = x.getPixelForValue(1) - x.getPixelForValue(0) > 0
+          ? (x.getPixelForValue(1) - x.getPixelForValue(0)) / 2 : 0;
+        ctx.save();
+        for (const s of opts.spans) {
+          const a = Math.max(left, x.getPixelForValue(s.i0) - half),
+                b = Math.min(right, x.getPixelForValue(s.i1) + half);
+          ctx.fillStyle = SEASON_FILL[s.season] || 'rgba(0,0,0,.04)';
+          ctx.fillRect(a, top, b - a, bottom - top);
+          ctx.fillStyle = '#999'; ctx.textAlign = 'center';
+          ctx.font = '10px ' + getComputedStyle(document.body).fontFamily;
+          ctx.fillText(s.season, (a + b) / 2, top + 11);
+        }
+        ctx.restore();
+      } };
+
+    // Inline plugin: dashed vertical line at the year change, with the years
+    // labeled on either side at the bottom of the plot area.
+    const yearLine = { id: 'yearLine',
+      afterDatasetsDraw(c, _a, opts) {
+        if (!opts.labels) return;
+        const i = opts.labels.findIndex((d, j) =>
+          j && d.slice(0, 4) !== opts.labels[j - 1].slice(0, 4));
+        if (i < 1) return;
+        const { ctx, chartArea: { top, bottom } } = c, x = c.scales.x;
+        const px = (x.getPixelForValue(i - 1) + x.getPixelForValue(i)) / 2;
+        ctx.save();
+        ctx.strokeStyle = '#666'; ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
+        ctx.beginPath(); ctx.moveTo(px, top); ctx.lineTo(px, bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#666';
+        ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+        ctx.textAlign = 'right';
+        ctx.fillText(opts.labels[i - 1].slice(0, 4), px - 6, bottom - 6);
+        ctx.textAlign = 'left';
+        ctx.fillText(opts.labels[i].slice(0, 4), px + 6, bottom - 6);
+        ctx.restore();
+      } };
+
+    // Zoom/pan on the time-axis charts (chartjs-plugin-zoom).
+    const zoomOpts = { zoom: { drag: { enabled: true },
+                               wheel: { enabled: true, modifierKey: 'ctrl' },
+                               mode: 'x' },
+                       pan: { enabled: true, mode: 'x', modifierKey: 'shift' } };
+    const wireReset = (linkId, chart) => {
+      const a = document.getElementById(linkId);
+      if (a) a.onclick = e => { e.preventDefault(); chart.resetZoom(); };
+    };
+
+    const seasonSpans = daily => {
+      const out = [];
+      daily.forEach((d, i) => {
+        const s = out[out.length - 1];
+        if (s && s.season === d.season) s.i1 = i;
+        else out.push({ season: d.season, i0: i, i1: i });
+      });
+      return out;
+    };
+
+    const monthAxis = labels => ({
+      grid: { display: false },
+      title: { display: true, text: 'date' },
+      ticks: { autoSkip: false, maxRotation: 0,
+        callback(_v, i) {
+          const m = labels[i].slice(0, 7);
+          if (i && labels[i - 1].slice(0, 7) === m) return null;
+          return new Date(labels[i] + 'T00:00')
+            .toLocaleString('en', { month: 'short' });
+        } } });
+
     Promise.all([get('forecast_ladder.json'),
                  get('forecast_ladder_diagnostics.json').catch(() => null)])
-      .then(([l, d]) => { renderVerdict(l); renderLadder(l); if (d) renderDiag(l, d); })
+      .then(([l, d]) => { renderVerdict(l); renderHero(l); renderLadder(l);
+                          renderRolling(l); renderWindows(l);
+                          if (d) renderDiag(l, d); })
       .catch(() => document.body.insertAdjacentHTML('beforeend',
         '<p class="note">Could not load forecast_ladder.json — run ' +
         '<code>python year_fetch.py && python forecast_ladder.py</code>.</p>'));
@@ -199,20 +383,156 @@
         (l.config.gbm_included ? '' : ' · gbm rung not included in this run');
     }
 
+    function renderHero(l) {
+      const daily = dailyOf(l);
+      if (!daily) {
+        document.getElementById('heroSec').style.display = 'none';
+        document.getElementById('rollSec').style.display = 'none';
+        document.getElementById('staleNote').style.display = 'block';
+        return;
+      }
+      const labels = daily.map(d => d.date);
+      const cumsum = f => { let s = 0;
+        return daily.map(d =>
+          +(s += (d.all_day_cost - f(d)) * EV_KWH / 100).toFixed(2)); };
+      const perfect = cumsum(d => d.perfect_cost);
+      const lookup = cumsum(d => d.rungs.climatology);
+      const ds = [
+        { label: 'perfect foresight (ceiling)', data: perfect,
+          borderColor: REF_COL.perfect, borderDash: [6, 3], borderWidth: 2,
+          pointRadius: 0 },
+        { label: '28-day lookup table', data: lookup,
+          borderColor: '#1c1c1c', borderWidth: 2.5, pointRadius: 0 }];
+      let gbmEnd = null;
+      if ('gbm' in daily[0].rungs) {
+        const g = cumsum(d => d.rungs.gbm);
+        gbmEnd = g[g.length - 1];
+        ds.push({ label: 'gradient boosting', data: g,
+                  borderColor: COLORS.gbm, borderWidth: 1.4, pointRadius: 0 });
+      }
+      const chart = new Chart(document.getElementById('cumChart'), {
+        type: 'line',
+        data: { labels, datasets: ds },
+        plugins: [seasonBands, yearLine],
+        options: { plugins: { seasonBands: { spans: seasonSpans(daily) },
+            yearLine: { labels }, zoom: zoomOpts,
+            title: { display: true,
+              text: 'Cumulative savings vs. untimed charging (' +
+                    EV_KWH + ' kWh/day EV charge)' } },
+          scales: { x: monthAxis(labels),
+            y: { title: { display: true,
+                 text: 'cumulative savings (€)' } } } } });
+      wireReset('cumReset', chart);
+      const pEnd = perfect[perfect.length - 1],
+            cEnd = lookup[lookup.length - 1];
+      document.getElementById('cumCap').textContent =
+        'Cumulative euros saved by charging in each day\'s predicted cheapest ' +
+        l.config.n_cheap_hours + ' hours instead of at the all-day average ' +
+        'price (the zero line). The baseline is untimed charging on the same ' +
+        'dynamic tariff, not a flat tariff. Endpoints: perfect foresight ' + eur(pEnd) +
+        ', lookup table ' + eur(cEnd) + ' (' +
+        Math.round(100 * cEnd / pEnd) + '% of the ceiling)' +
+        (gbmEnd !== null ? ', gradient boosting ' + eur(gbmEnd) : '') +
+        '. The verdict normalizes these endpoints to 365 days. Shaded bands: ' +
+        'meteorological seasons (' + SEASON_KEY + '). ' + srcLine(l, daily);
+    }
+
+    function renderRolling(l) {
+      const daily = dailyOf(l);
+      if (!daily) return;
+      const labels = daily.map(d => d.date);
+      const roll = a => a.map((_, i) => i < 6 ? null :
+        +(a.slice(i - 6, i + 1).reduce((s, v) => s + v, 0) / 7).toFixed(2));
+      const series = f => roll(daily.map(f));
+      const ds = [
+        { label: 'untimed (all-day average)',
+          data: series(d => d.all_day_cost),
+          borderColor: REF_COL.untimed, borderDash: [2, 3], borderWidth: 1.4,
+          pointRadius: 0 },
+        { label: 'perfect foresight (lowest possible cost)',
+          data: series(d => d.perfect_cost),
+          borderColor: REF_COL.perfect, borderDash: [6, 3], borderWidth: 2,
+          pointRadius: 0 }];
+      for (const r of l.ladder_order) {
+        if (!(r in daily[0].rungs)) continue;
+        ds.push({ label: disp(r), data: series(d => d.rungs[r]),
+                  borderColor: COLORS[r] || '#555',
+                  borderWidth: r === 'climatology' ? 2.2 : 1.1,
+                  pointRadius: 0 });
+      }
+      const chart = new Chart(document.getElementById('rollChart'), {
+        type: 'line',
+        data: { labels, datasets: ds },
+        plugins: [seasonBands, yearLine],
+        options: { plugins: { seasonBands: { spans: seasonSpans(daily) },
+            yearLine: { labels }, zoom: zoomOpts,
+            title: { display: true,
+              text: 'What the picked hours cost, through the year ' +
+                    '(7-day rolling mean)' } },
+          scales: { x: monthAxis(labels),
+            y: { title: { display: true,
+                 text: 'cost of picked hours (ct/kWh)' } } } } });
+      wireReset('rollReset', chart);
+      document.getElementById('rollCap').textContent =
+        'Seven-day rolling arithmetic mean of the average price paid in the ' +
+        l.config.n_cheap_hours + ' picked hours, for every model, against ' +
+        'perfect foresight (the lowest cost any selection can reach) and the ' +
+        'all-day average. For most of the year the lookup table (black) is ' +
+        'close to perfect foresight; the difference widens in winter, when ' +
+        'the daily price shape varies more. Shaded bands: meteorological ' +
+        'seasons (' + SEASON_KEY + '). ' + srcLine(l, daily);
+    }
+
+    function renderWindows(l) {
+      if (!l.by_n) {
+        document.getElementById('winSec').style.display = 'none';
+        document.getElementById('staleNote').style.display = 'block';
+        return;
+      }
+      const ns = Object.keys(l.by_n).sort();
+      const rungs = l.ladder_order;
+      const ds = [
+        { type: 'line', label: 'untimed (all-day average)',
+          data: ns.map(n => l.by_n[n].all_day_cost),
+          borderColor: REF_COL.untimed, borderDash: [2, 3], borderWidth: 1.4,
+          pointRadius: 0 },
+        { type: 'bar', label: 'perfect foresight',
+          data: ns.map(n => l.by_n[n].perfect_cost),
+          backgroundColor: REF_COL.perfect },
+        ...rungs.map(r => ({ type: 'bar', label: disp(r),
+          data: ns.map(n => l.by_n[n].rungs[r].avg_cost_ct),
+          backgroundColor: COLORS[r] || '#555' }))];
+      new Chart(document.getElementById('winChart'), {
+        data: { labels: ns.map(n => n + ' hours'), datasets: ds },
+        options: { plugins: { title: { display: true,
+            text: 'Average price of the picked hours, by window size' } },
+          scales: { y: { title: { display: true,
+            text: 'average price of picked hours (ct/kWh)' } } } } });
+      document.getElementById('winCap').textContent =
+        'Average price paid per kWh in the picked hours when each model must ' +
+        'pick the cheapest 2, 3 or 4 hours of the day. Bars: perfect ' +
+        'foresight, then the models in ladder order (see the list above). ' +
+        'Dashed line: untimed charging at the all-day average price, which ' +
+        'does not depend on the window size. Lower is better. ' +
+        srcLine(l, dailyOf(l)) +
+        ' Click a legend entry to hide or show a series.';
+    }
+
     function renderLadder(l) {
       const rungs = l.ladder_order;
-      const ds = [{ label: 'overall', data: rungs.map(r => l.overall.rungs[r].regret_ct),
-                    borderColor: '#1c1c1c', borderWidth: 3, tension: .2 }];
-      for (const [s, a] of Object.entries(l.by_season))
-        ds.push({ label: s, data: rungs.map(r => a.rungs[r].regret_ct),
-                  borderColor: {DJF:'#4c72b0',MAM:'#4c9f70',JJA:'#e0a458',SON:'#c1436d'}[s],
-                  borderWidth: 1.3, tension: .2 });
-      new Chart(document.getElementById('ladderChart'), { type: 'line',
-        data: { labels: rungs, datasets: ds },
+      const periods = ['full year',
+        ...['DJF', 'MAM', 'JJA', 'SON'].filter(s => l.by_season[s])];
+      const aggOf = p => p === 'full year' ? l.overall : l.by_season[p];
+      const ds = periods.map(p => ({ label: p,
+        data: rungs.map(r => aggOf(p).rungs[r].regret_ct),
+        backgroundColor: p === 'full year' ? '#555' : SEASON_COL[p] }));
+      new Chart(document.getElementById('ladderChart'), { type: 'bar',
+        data: { labels: rungs.map(disp), datasets: ds },
         options: { plugins: { title: { display: true,
-            text: 'Regret vs. perfect foresight, by model and season' } },
-          scales: { y: { title: { display: true,
+            text: 'Regret vs. perfect foresight, by period and model' } },
+          scales: { y: { beginAtZero: true, title: { display: true,
           text: 'regret vs perfect foresight (ct/kWh)' } } } } });
+      document.getElementById('ladderSrc').textContent = srcLine(l, dailyOf(l));
     }
 
     function renderDiag(l, d) {
@@ -225,7 +545,7 @@
         chart = new Chart(document.getElementById('residChart'), { type: 'line',
           data: { labels: [...Array(24).keys()],
             datasets: Object.entries(d.residual_by_hour[s]).map(([r, v]) => ({
-              label: r, data: v, borderColor: COLORS[r] || '#555',
+              label: disp(r), data: v, borderColor: COLORS[r] || '#555',
               borderWidth: r === 'climatology' ? 2.5 : 1.3, pointRadius: 0, tension: .25 })) },
           options: { plugins: { title: { display: true,
               text: 'Mean predicted minus actual price by hour, season ' + s } },
@@ -244,11 +564,11 @@
           data: { labels: [...Array(24).keys()], datasets: [
             { label: 'actual', data: w.actual, borderColor: '#1c1c1c',
               borderWidth: 2, pointRadius: 0 },
-            { label: r + ' predicted', data: w.predicted,
+            { label: disp(r) + ' predicted', data: w.predicted,
               borderColor: COLORS[r] || '#c1436d', borderDash: [5, 3],
               borderWidth: 1.6, pointRadius: 0 }] },
           options: { plugins: { title: { display: true,
-              text: r + ' worst day: ' + w.date + ' (RMSE ' + w.rmse_ct + ' ct)' } },
+              text: disp(r) + ' worst day: ' + w.date + ' (RMSE ' + w.rmse_ct + ' ct)' } },
             scales: { y: { title: { display: true, text: 'ct/kWh' } } } } });
       });
     }
