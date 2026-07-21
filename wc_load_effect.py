@@ -60,8 +60,14 @@ def load_error_and_actual():
 
 
 def load_match_hours_split():
-    """Return {'all','prime','overnight'} -> {date: set(hours)}, bucketed by kickoff hour."""
-    out = {"all": defaultdict(set), "prime": defaultdict(set), "overnight": defaultdict(set)}
+    """Return {'all','prime','overnight','germany'} -> {date: set(hours)}.
+
+    Prime/overnight are bucketed by kickoff hour. Germany is bucketed by the
+    label column: the single best-followed team in this market, so despite the
+    small n it is the best-powered single event in the data.
+    """
+    out = {"all": defaultdict(set), "prime": defaultdict(set),
+           "overnight": defaultdict(set), "germany": defaultdict(set)}
     with open(HERE / "wc_matches.csv") as f:
         for r in csv.DictReader(f):
             raw = (r.get("kickoff_cet") or "").strip()
@@ -73,11 +79,14 @@ def load_match_hours_split():
                 continue
             kh = start.hour
             bucket = "prime" if kh in PRIME_HOURS else ("overnight" if kh in OVERNIGHT_HOURS else None)
+            is_germany = "germany" in (r.get("label") or "").lower()
             for k in range(2):
                 t = start + dt.timedelta(hours=k)
                 out["all"][t.date()].add(t.hour)
                 if bucket:
                     out[bucket][t.date()].add(t.hour)
+                if is_germany:
+                    out["germany"][t.date()].add(t.hour)
     return out
 
 
@@ -211,7 +220,7 @@ def main():
     mean_load = mean(actual.values())
 
     subsets, per_day_all, did = {}, [], {}
-    for name in ("all", "prime", "overnight"):
+    for name in ("all", "prime", "overnight", "germany"):
         per_day, effect = compute_effect(splits[name], err, err_days, matcher,
                                          control_days, mean_load)
         subsets[name] = effect
@@ -296,7 +305,7 @@ def plot(res):
     ax.grid(True, alpha=0.3)
     ax.legend()
     fig.tight_layout()
-    add_caption(fig, "MW = megawatts. \"Load forecast error\" = actual grid "
+    add_caption(fig, "\"Load forecast error\" = actual grid "
                 "demand minus the day-ahead demand forecast, i.e. how surprised "
                 "the grid was; a positive spike means real demand ran above "
                 "what was predicted. CEST = Central European Summer Time. "
@@ -315,7 +324,7 @@ def report(s):
               "pipeline test, not a real result. Run entsoe_fetch.py with a valid token.\n")
     print(f"Control pool: {s['n_control_pool']} days | mean load: {s['mean_load_mw']:.0f} MW\n")
     print(f"{'subset':<12}{'n days':>7}{'effect MW':>11}{'% load':>9}{'t':>7}")
-    for name in ("all", "prime", "overnight"):
+    for name in ("all", "prime", "overnight", "germany"):
         e = s["subsets"][name]
         if e["mean_delta_mw"] is None:
             print(f"{name:<12}{e['n_match_days']:>7}{'--':>11}")
@@ -324,7 +333,7 @@ def report(s):
               f"{e['mean_delta_pct_of_load']:>+9.2f}{e['t_stat']:>7}")
     print()
     did = s.get("robustness_within_day") or {}
-    for name in ("all", "prime", "overnight"):
+    for name in ("all", "prime", "overnight", "germany"):
         r = did.get(name)
         if r:
             print(f"DiD robustness ({name}): {r['mean_delta_mw']:+.0f} MW (t={r['t_stat']})")

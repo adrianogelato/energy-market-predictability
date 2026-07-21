@@ -1,11 +1,12 @@
-# Working hypotheses and backlog
+# Roadmap and working ledger
 
 Two documents, two jobs, no duplication. The README is the presentation layer:
 the story, the findings, what each milestone does and how to run it, and the
 design decisions. This file is the working ledger: the hypotheses and their
-verdicts, what an answer has to look like, the limitations that constrain every
-result, and the prioritized backlog. If a milestone description is what you
-want, it lives in the README's three strands, not here.
+verdicts, the limitations that constrain every result, the roadmap (outcome
+level bets, grouped by horizon), and the task backlog that feeds it. If a
+milestone description is what you want, it lives in the README's three strands,
+not here.
 
 ## The theme
 
@@ -72,10 +73,13 @@ forecast versus the actual load, which is the market's own prediction and its
 miss. A spike in that error concentrated around match hours is strong evidence.
 
 So H2 is really two tests: a price test (was it anticipated) and a forecast-error
-test (did demand actually deviate). The current World Cup study does only the
-price test; the forecast-error test needs load data.
+test (did demand actually deviate). The World Cup study runs both: M4 is the
+price test, M7 (on ENTSO-E load data) the forecast-error test.
 
 ## What an answer looks like
+
+Success criteria for the delivered hypotheses. Future work carries its own
+"answer looks like" line per roadmap item below.
 
 For H1a/H1b: a forecast skill number. The hit-rate of the predicted cheapest
 hours and the mean error, both compared against explicit naive baselines, plus
@@ -90,14 +94,18 @@ match hours relative to weather-comparable days, robust to the weather controls
 and to a within-day difference-in-differences contrast, with permutation
 p-values (per subset and family-wise across subsets).
 
-Where H2 landed (interim, tournament ends 19 July): no robust effect. The price
-test reads +0.89 ct/kWh (t=0.97, MDE ≈ 2.6 ct/kWh) and collapses to +0.14 under
-the within-day contrast. The load forecast-error test's one marginal subset
-(overnight, +833 MW, t=2.04) fails the placebo test (subset p=0.228,
-family-wise p=0.401) and flips sign under the within-day contrast (−758 MW),
-which says the error series drifts across the window in a way neither estimator
-fully removes. The honest summary: any World Cup effect on the German market is
-smaller than ~2.6 ct/kWh in price and not separable from seasonal drift in load.
+Where H2 landed (window through 18 July; the 19 July final joins with the
+post-tournament refetch): no robust effect, and the near-final window weakened
+the earlier blips further. The price test reads +0.62 ct/kWh (t=0.84,
+MDE ≈ 2.1 ct/kWh) and halves to +0.31 under the within-day contrast. The load
+forecast-error test's once-marginal overnight subset shrank to +501 MW
+(t=1.39) and is consistent with chance (subset p=0.513, family-wise p=0.901
+over four subsets, Germany-only included), while flipping sign under the
+within-day contrast (−739 MW), which says the error series drifts across the
+window in a way neither estimator fully removes. The Germany-only subset is
+flat in both tests (+0.39 ct/kWh price, +162 MW load, n=4, MDEs 6.9 ct/kWh and
+4,600 MW). The honest summary: any World Cup effect on the German market is
+smaller than ~2.1 ct/kWh in price and not separable from seasonal drift in load.
 
 ## Milestones
 
@@ -111,6 +119,9 @@ calibrates the instrument.
 
 ## Limitations to carry throughout
 
+This is the standing risk register: every roadmap item and every published
+number is read against these constraints.
+
 The control pool is seasonal, and this is the binding constraint. Because
 matches run almost daily from 11 June to 19 July, nearly all non-match control
 days fall in mid-May to early June, which is cooler than July. Weather-matching
@@ -122,7 +133,7 @@ within-day difference-in-differences contrast removes additive day-level drift,
 but the drift here changes the intraday *shape* (midday solar forecast bias),
 which is why the main estimate and the DiD disagree in sign for load. Widening
 the window into adjacent summer weeks or matching on solar radiation directly
-is the real fix.
+is the real fix (roadmap item R2).
 
 Per-day effect estimates share control days (a pool of ~28 controls serves ~30
 match days, 5 each), so they are positively correlated and plain t-statistics
@@ -138,150 +149,289 @@ Price is downstream of demand. Price also moves with wind, solar, and fuel, so i
 is a noisy proxy for the demand effect we care about. This is exactly why the
 load-based forecast-error test in M7 matters.
 
-## Backlog and parked ideas
+## Roadmap
 
-Two paths forward. The items below sort into two research paths that share one
-spine. Path one, forecasting-algorithm complexity (items 4, 8): how much of the
-price shape is predictable, and how much model does that take? Path two,
-event-effect measurement (items 1, 2, 3, 5, 7): do scheduled events move the
-market beyond its predictable baseline? Item 6 (15-minute resolution) serves
-both. The shared spine: an event effect is nothing but a deviation from a
-counterfactual baseline, so the better the forecasting model from path one,
-the sharper the event tests in path two. The paths converge in a model-based
-event study, where the forecaster itself replaces comparable-days matching as
-the control.
+How to read it. Items are outcome-level bets, not tasks, grouped into Now
+(committed and being worked), Next (committed direction, starts when Now
+clears), and Later (believed valuable, not yet committed). Horizons instead of
+dates on purpose: a solo research project's capacity is uncertain, and dated
+promises would be false precision. Each item states the outcome, why it sits
+where it does, what an answer looks like, its dependencies, and who benefits
+(household, tariff/flexibility company, or the methodology itself). Concrete
+work lives in the task backlog below; every task points at a roadmap item.
 
-In priority order. The first block matters most; the older ideas follow.
+Two research paths share one spine. Path one, forecasting-algorithm
+complexity: how much of the price shape is predictable, and how much model
+does that take? Path two, event-effect measurement: do scheduled events move
+the market beyond its predictable baseline? The spine: an event effect is
+nothing but a deviation from a counterfactual baseline, so the better the
+forecasting model from path one, the sharper the event tests in path two. The
+paths converge in R8, where the forecaster itself replaces comparable-day
+matching as the control.
 
-1. Post-tournament rerun. The tournament ends 19 July 2026; all World Cup
-   results are interim until the fetch and the full analysis chain are re-run
-   on the complete window. Split out Germany's matches as their own subset:
-   a Germany knockout match is the single best-powered event in the data.
+### Non-goals
 
-2. Widen the fetch window into spring. This is the structural fix for the
-   seasonal control gap described in Limitations, and it simultaneously turns
-   the n=1 holiday test into a real one (Good Friday, Easter Monday, Labour
-   Day, Ascension, Whit Monday all land in March-May). Needs a local run of
-   `wc_fetch_data.py` with an earlier START_DATE; the refetch also fills the
-   new wind and radiation columns the matching engine already knows how to
-   use. When widening, enable the season guard in `matching.py`
-   (SEASON_GAP_MAX_DAYS, around 21 days) so controls stay seasonal neighbours.
+- No database, no dashboard framework. Files are the interface; the rationale
+  is a README design decision and it holds at this scale.
+- No production ML forecaster. H1b's refutation is the finding: algorithm
+  choice moves at most €9/yr while automated timing at all moves ~€200/yr.
+  Building a better model would chase the small number.
+- No live or real-time operation. This stays an offline study; deployed
+  realism enters only as archived forecasts (R6).
 
-3. Test the event hypothesis in the market where surprise can exist. The
-   day-ahead price is fixed at 12:00 the day before delivery, so M4 could only
-   ever measure anticipation. Intraday or imbalance prices are where an
-   unanticipated demand shift would show; adding either (both on ENTSO-E)
-   would complete H2 properly.
+### Now
 
-4. DONE: the value-of-complexity study (`year_fetch.py`,
-   `forecast_ladder.py`, results in `forecast_ladder.json` and the README's
-   milestone 10 section). The curve flattens at rung one: a 28-day rolling
-   lookup table wins the full year outright against five more complex models
-   including gradient boosting, all fed perfect weather. Verdicts under
-   "Working hypotheses". Two follow-ups remain open here: the
-   deployed-realism variant (score against archived weather *forecasts*
-   instead of actuals; can only widen the lookup table's lead), and note
-   that the full-year files (`year_prices.csv`, `year_weather.csv`) now also
-   provide the widened control pools and real holiday test that item 2 asks
-   for — the event studies just need pointing at them.
+**R1. Final World Cup verdict** (path two)
+- Outcome: H2 moves from interim to final on the complete tournament window,
+  with Germany's matches as their own subset.
+- Status: mostly done. The Germany subset is implemented across the chain
+  (wc_analysis.py, wc_load_effect.py, wc_permutation.py with the family-wise
+  correction over four subsets) and surfaced on worldcup.html; the fetch
+  window already ends 19 July. Germany went out in the round of 32, so the
+  subset is four group-stage/R32 matches, not a knockout run: n=4, and its
+  MDE does most of the talking.
+- Answer looks like: final effect sizes with permutation p-values and MDEs on
+  the complete window, all cited numbers reconciled per the hard rule; the
+  interim notices retire themselves once wc_results.json reaches 2026-07-19.
+- Depends on: the weather archive lagging about two days, so the rerun only
+  becomes possible on or after 22 July.
+- Who benefits: methodology, and every H2 claim on the pages.
 
-5. A second event: the Milano Cortina Winter Olympics, 6-22 February 2026.
-   Parked because it is the reuse test for the whole methodology (the M9
-   engine plus an events CSV is exactly the intended vehicle), and because it
-   varies the dimensions the World Cup could not. It is a winter market, where
-   heating demand and scarce daylight drive the price shape instead of solar.
-   And unlike the North American World Cup, the host sits in Germany's own
-   timezone (CET), so finals landed in German daytime and prime-time viewing
-   hours: if a TV effect exists anywhere, this is the well-powered place to
-   look. Three design notes captured now so they are not rediscovered later.
-   First, the February window is already covered by item 4's full-year fetch,
-   so no new price or weather data is needed. Second, the event-hours definition is the
-   hard part: the Olympics run all day for 17 days, and flagging every hour
-   would dilute exposure to nothing; curate the high-German-viewership
-   sessions (biathlon, ski jumping, medal finals) into the events file rather
-   than taking the full schedule. Third, the control pool can sit on BOTH
-   sides of the event (late January and March), avoiding the one-sided
-   seasonal drift that undermined the World Cup study. One code fix required:
-   `entsoe_fetch.py` hardcodes the summer +2 h CEST conversion and needs
-   proper Europe/Berlin handling before it can serve a February window.
+**R2. Repair the seasonal control gap** (path two)
+- Outcome: event estimates no longer confounded by the period drift documented
+  in Limitations, and the n=1 holiday test becomes a real one (Good Friday,
+  Easter Monday, Labour Day, Ascension, Whit Monday all land in March-May).
+- Why now: this is the binding limitation on every event result, and the data
+  already exists: the full-year files from M10 (`year_prices.csv`,
+  `year_weather.csv`) contain the widened control pools and the wind and
+  radiation columns the matching engine already knows how to use.
+- Answer looks like: the match-day vs control forecast-error gap at non-match
+  hours shrinks toward zero; a holiday effect estimate with MDE.
+- Depends on: pointing the event studies at the full-year files; enabling the
+  season guard in `matching.py` (SEASON_GAP_MAX_DAYS, around 21 days) so
+  controls stay seasonal neighbours.
+- Who benefits: methodology; retroactively strengthens R1.
 
-6. Move to 15-minute resolution. The European day-ahead auction (SDAC)
-   switched to 15-minute products on 1 October 2025, so the entire study
-   window is already quarter-hourly at the source. Two payoffs. For the event
-   studies: the classic TV-pickup (kettles at half-time and full-time) is a
-   minute-scale phenomenon that hourly averaging dilutes toward zero;
-   quarter-hours are the first resolution where it could actually appear.
-   Cheapest of all, `entsoe_fetch.py` already receives quarter-hourly German
-   load and deliberately averages it to hourly, so the sharper M7 test needs
-   no new data source, only the averaging removed. For the tariff model:
-   check whether aWATTar's API now returns quarter-hour prices; if so, the
-   cost model's EV window and the forecaster's target become 15-minute
-   blocks, which is also how a real smart-charging product would trade.
+### Next
 
-7. Cross-country dose-response: do other nations' markets tell a different
-   story? Germany dropped out early, but several European teams kept playing,
-   which creates treatment variation the single-zone study lacks: the same
-   match hours, watched intensely in one country and not in another. The
-   design writes itself with existing tools: ENTSO-E carries load and
-   day-ahead load forecast for every European zone under the same token,
-   open-meteo covers any city, and the matching engine plus M9 event engine
-   are zone-agnostic. Use the load forecast error, not price, as the signal:
-   day-ahead prices are coupled across European zones, so a price effect
-   smears across borders, while the forecast error is zone-local. The sharp
-   test: a semifinal country's forecast error during its match hours versus
-   Germany's (neutral) in the same hours, with each country's own
-   weather-matched controls. Same-hours cross-zone comparison also nets out
-   Europe-wide common shocks, which the single-zone design cannot.
+**R3. Test H2 in a market where surprise can exist** (path two)
+- Outcome: the surprise half of H2 gets its proper market-side test. The
+  day-ahead price is fixed at 12:00 the day before delivery, so M4 could only
+  ever measure anticipation; intraday or imbalance prices are where an
+  unanticipated demand shift would show.
+- Why next: it closes a known logical hole in H2 rather than opening a new
+  question.
+- Answer looks like: event-hour intraday or imbalance price deviation with
+  MDE, run through the same robustness battery as M9.
+- Depends on: an ENTSO-E intraday or imbalance price fetch (same token).
+- Who benefits: methodology; a flexibility company trading imbalance.
 
-8. DONE: diagnostic depth for the ladder study. `forecast_ladder.py` now also
-   writes `forecast_ladder_diagnostics.json` plus best/worst-fit-day and
-   residual-by-hour plots, and `ladder.html` publishes the whole chain:
-   verdict, the seven-step reasoning, the ladder curve, the residual chart,
-   single inspected days, and the critical questions answered as design
-   decisions. Same transparency standard the matching engine got with its
-   pairings table.
+**R4. Winter Olympics study: the reuse test** (path two)
+- Outcome: does the methodology generalize? Milano Cortina (6-22 February
+  2026) varies what the World Cup could not: a winter market where heating
+  demand and scarce daylight drive the price shape instead of solar, and a
+  host in Germany's own timezone (CET), so finals landed in German daytime
+  and prime-time viewing hours. If a TV effect exists anywhere, this is the
+  well-powered place to look.
+- Why next: it is the designed reuse vehicle for the M9 engine plus an events
+  CSV, and the February window is already covered by the full-year fetch, so
+  no new price or weather data is needed.
+- Answer looks like: effect sizes with MDEs on curated high-German-viewership
+  sessions (biathlon, ski jumping, medal finals; the Olympics run all day for
+  17 days, and flagging every hour would dilute exposure to nothing), with
+  controls on BOTH sides of the event (late January and March), avoiding the
+  one-sided seasonal drift that undermined the World Cup study.
+- Depends on: proper Europe/Berlin handling in `entsoe_fetch.py` (it hardcodes
+  the summer +2 h CEST conversion); a curated events file.
+- Who benefits: methodology (external validity of the whole event framework).
 
-9. Finding 1 shows that a lookup table covers 93% of a perfect foresight approach. 
-   What are the economic consequences? What does this mean for individual users 
-   (smart tariffs are worth it, what else?) and what does it mean to smart tariffs 
-   companies (computational resources/requirements)? Analyze the effect for the 
-   stakeholders.
+**R5. Price the findings for the stakeholders** (path one, product lens)
+- Outcome: finding 1 (the lookup table captures ~93% of perfect-foresight
+  value) turned into decisions. Household side: which consumer configurations
+  beyond the EV case profit from a smart tariff and by how much; relevant
+  sizing for local storage (Home Energy Management System as a product).
+  Company side: what the result means for computational requirements (a
+  lookup table needs almost none) and where product value concentrates
+  (automation and UX, not model complexity).
+- Why next: it converts the strongest existing result into the project's
+  product argument; no new data is needed.
+- Answer looks like: €/yr per consumer configuration; a defined set of
+  relevant consumers; a storage-sizing statement; company-side implications
+  stated plainly.
+- Depends on: nothing new; extends M8's cost model.
+- Who benefits: household and company both.
 
-10. Finding 1 extension: Run the numbers for different configurations regarding their 
-    electricity consumers (not everybody owns an EV). Define the relevant consumers.
+### Later
 
-11. Remove spelling out the units in graph and chart captions: ct/kWh, EUR/MWh can stay 
-    as they are. PARTIAL: done for `ladder.html` and the `forecast_ladder.py`
-    figure captions; still open in `tariff.html`, `worldcup.html`,
-    `wc_analysis.py`, `fetch_prices.py`, `forecast_cheap_hours.py`.
+**R6. Deployed realism for the forecast ladder** (path one)
+- Outcome: the ladder scored against archived weather forecasts instead of
+  actuals, bounding the lookup table's lead under real deployment conditions.
+  It can only widen: the models lose their information edge, the lookup table
+  never had one.
+- Why later: it sharpens a settled verdict rather than answering a new
+  question.
+- Answer looks like: the ladder curve rerun on forecast inputs, same metrics.
+- Depends on: open-meteo archived forecasts (already available).
+- Who benefits: a company deciding whether to buy model complexity.
 
-12. Finding 1: Evaluate the effect of predicting the cheapest two and the cheapest four
-    hours with comparison to the cheapest three hours. Make graphs for the comparison.
-    DONE (needs one local rerun to populate): `forecast_ladder.py` scores
-    windows of 2, 3 and 4 hours against the same predictions in one run
-    (`by_n` aggregates plus per-day `daily` blocks keyed by window size in
-    `forecast_ladder.json`), and `ladder.html` compares them in the "Does the
-    window size matter?" chart. Verdict aggregates stay pinned to n=3.
+**R7. 15-minute resolution** (serves both paths)
+- Outcome: the first resolution where the classic TV-pickup (kettles at
+  half-time and full-time) could appear at all; hourly averaging dilutes it
+  toward zero. Also the resolution a real smart-charging product would trade,
+  since the European day-ahead auction (SDAC) switched to 15-minute products
+  on 1 October 2025, so the entire study window is already quarter-hourly at
+  the source.
+- Why later: mechanical touch across fetchers, cost model, and pages. The
+  load half is cheap (`entsoe_fetch.py` already receives quarter-hourly load
+  and deliberately averages it to hourly, so the sharper M7 test only needs
+  the averaging removed) and can be pulled forward if the event studies stay
+  null at hourly resolution.
+- Answer looks like: M7 rerun on quarter-hours; the cost model's EV window
+  and the forecaster's target as 15-minute blocks if aWATTar serves them.
+- Depends on: removing the averaging; checking whether aWATTar's API returns
+  quarter-hour prices.
+- Who benefits: methodology and product.
 
-13. Finding 1 extension: Home Energy Management System as a product. Instead of an EV consider a local energy storage like a wall box. Identify relevant sizing of such local energy storage. 
+**R8. Cross-country dose-response, where the two paths converge** (path two endpoint)
+- Outcome: treatment variation the single-zone design lacks. Germany dropped
+  out early but several European teams kept playing: the same match hours,
+  watched intensely in one country and not in another. Signal is the load
+  forecast error, not price: day-ahead prices are coupled across European
+  zones, so a price effect smears across borders, while the forecast error is
+  zone-local. The sharp test: a semifinal country's forecast error during its
+  match hours versus Germany's (neutral) in the same hours, each with its own
+  weather-matched controls; the same-hours cross-zone contrast also nets out
+  Europe-wide common shocks, which the single-zone design cannot. Endpoint of
+  the spine: a model-based event study where the forecaster replaces
+  comparable-day matching as the control.
+- Why later: largest scope. Every ingredient exists (ENTSO-E carries load and
+  day-ahead load forecast for every European zone under the same token,
+  open-meteo covers any city, the matching and event engines are
+  zone-agnostic), but it multiplies data volume and analysis surface.
+- Answer looks like: per-country event-hour forecast-error contrasts with
+  MDEs and the full permutation battery.
+- Depends on: R1 finalized; a multi-zone fetch.
+- Who benefits: methodology (the strongest identification design available
+  to this project).
 
-Older ideas, still parked:
+**R9. Day-ahead versus intraday: how good is the market's own forecast?**
+(path one, market lens)
+- Outcome: the study treats day-ahead prices as ground truth, which they are
+  for the bill (dynamic tariffs settle at the day-ahead auction price), but
+  they embody the market's day-ahead forecasts of load and renewables. This
+  item measures how well that forecast holds up: compare day-ahead against
+  intraday and imbalance prices for the same delivery hours, quantify the
+  spread by hour and season, and test whether the cheapest-3 ranking
+  survives from day-ahead to intraday, i.e. whether a cheap-hour picker
+  would choose different hours under intraday settlement.
+- Why later: it cannot move the household verdict, because the household is
+  billed at day-ahead prices regardless. It becomes decision-relevant only
+  for intraday-settled tariffs or flexibility traded closer to delivery.
+- Answer looks like: day-ahead minus intraday spread distributions with the
+  usual honest-null bounds; a rank-stability number for the cheapest hours;
+  one verdict sentence on whether day-ahead is a good proxy for real-time
+  scarcity at household-relevant hours.
+- Depends on: an intraday price source (ENTSO-E publishes intraday and
+  imbalance prices under the existing token; coverage to be checked before
+  committing).
+- Who benefits: tariff and flexibility companies; methodology (it tests the
+  premise, stated on ladder.html, that predicting the day-ahead price is the
+  right target).
 
-Module separation beyond matching: aWATTar price data, ENTSO-E load data, and
-event data could each be an inspectable component (the comparable-day matching
-already is: `matching.py`).
+## Task backlog
 
-Raw-data visibility: a way to browse the underlying hourly data (prices, load,
-weather, forecast error) directly, not only the aggregated results.
+Concrete, executable work, priority top to bottom. Every task points at a
+roadmap item or names its purpose.
 
-Done since this list was first written: hour-alignment fix in the cost model,
-timezone-explicit fetches (CI-safe), sample-SD t-statistics, minimum detectable
-effects reported with every null, within-day difference-in-differences
-robustness checks, family-wise permutation test across subsets, permutation
-p-values surfaced on the results page, and the comparable-day matching engine
-extracted into `matching.py` with richer market-specific features (wind,
-radiation, temperature max), day-type classes with holiday exclusion, and the
-exact pairings exposed in the JSONs and on the page.
+1. (R1) One local `python run_all.py` on or after 22 July (the weather
+   archive lags about two days, so the 19 July final only becomes fetchable
+   then), then reconcile all cited numbers in README, this file, and the
+   page verdicts.
+2. (R1) Fill in the actual finalists in the last four rows of wc_matches.csv
+   (they carry placeholder labels like "Match 101 Winner"; kickoff hours are
+   real, so the analysis is unaffected).
+3. (R2) Point the event studies at `year_prices.csv` / `year_weather.csv` for
+   the widened control pool; enable SEASON_GAP_MAX_DAYS (~21 days) in
+   `matching.py`.
+4. (R2) Run the real holiday test on the five spring holidays.
+5. (R4) Fix `entsoe_fetch.py` timezone handling: ZoneInfo("Europe/Berlin")
+   instead of the hardcoded summer +2 h CEST conversion, so it can serve a
+   February window.
+6. (R4) Curate the Olympics events CSV: high-German-viewership sessions only.
+7. (R5) Define the relevant consumer configurations beyond the EV case and
+   run the cost model per configuration.
+8. (R5) Local storage sizing analysis (wall-box scale).
+9. (Ladder) One local rerun of `forecast_ladder.py` to populate the
+   window-size comparison (n=2/3/4, `by_n` aggregates plus per-day `daily`
+   blocks in `forecast_ladder.json`) and the accuracy-vs-decision-value
+   blocks (`accuracy`, `paired_vs_lookup`; needs scikit-learn for the gbm
+   rung) already built into the script and ladder.html. Verdict aggregates
+   stay pinned to n=3.
+
+## Parked
+
+Parked means: not on the roadmap, with a stated condition that would unpark it.
+
+Module separation beyond `matching.py` (aWATTar price data, ENTSO-E load data,
+and event data as inspectable components). Unpark when a second consumer of
+the fetchers appears, which R4's February window or R8's multi-zone fetch
+would create.
+
+Raw-data browser (a way to inspect the underlying hourly prices, load,
+weather, and forecast error directly, not only the aggregated results).
+Unpark if debugging an event study demands it or the project needs an
+exploration surface.
+
+## Changelog
+
+A roadmap is a living document; the revisions are part of the record.
+
+- 2026-07-21: R9 added (day-ahead vs intraday). Prompted by the accuracy
+  discussion: day-ahead prices are settlement truth for the bill but embody
+  the market's own forecasts; whether they proxy real-time conditions is a
+  separate, answerable question. Filed under Later because it cannot change
+  the household verdict.
+- 2026-07-21: accuracy vs decision value made explicit (old tasks 9 and 10,
+  verdict hygiene + ladder metrics). `forecast_ladder.py` now emits per-rung
+  price-accuracy metrics (MAE, RMSE, guarded MAPE, and MAE/RMSE over the
+  picked hours only) and a paired sign-flip permutation test of each rung's
+  daily cost against the lookup table (per-rung p, MDE at 80% power,
+  family-wise max-|t|). ladder.html gained the "Accuracy is the wrong
+  yardstick" section: both metric families in one table plus the test
+  verdict, with a data-driven guard that flips the text if a rerun ever
+  shows a model beating the lookup table. Finding on the committed daily
+  records: no model beats the lookup table on decision value; knn is
+  statistically indistinguishable (p about 0.66) and gbm trails by about
+  5 euro/yr (p about 0.06), while several rungs beat the lookup table on
+  MAE/RMSE. Accuracy and decision value rank the models differently, which
+  is finding 1 stated precisely. One local rerun (task 9) populates the new
+  JSON blocks.
+- 2026-07-20: restructured this file from a flat prioritized backlog into a
+  roadmap (Now/Next/Later, outcome-level items with rationale, success
+  criteria, dependencies, stakeholders) plus a task backlog. No open work
+  dropped; completed items moved here.
+- 2026-07, World Cup near-final pass: Germany-only subset implemented across
+  the full chain (price test, load test, permutation with family-wise
+  correction over four subsets) and surfaced on worldcup.html; H2 interim
+  verdict updated on the window through 18 July (weaker than the earlier
+  blips); worldcup.html hourly price chart gained the min-max band and
+  per-hour match counts; the interim info boxes now hide themselves once
+  wc_results.json reaches 2026-07-19; units are no longer spelled out in any
+  chart caption (non-unit acronyms like CEST and RMSE stay spelled out per
+  the chart design rules).
+- 2026-07, full-year ladder study (M10) delivered: H1a confirmed, H1b
+  refuted. H1 split into H1a and H1b because its two halves came out
+  differently; the original single claim hid the main finding. Ladder
+  diagnostics and ladder.html published, including the window-size
+  comparison (task 11 populates it with one local rerun).
+- Earlier: hour-alignment fix in the cost model; timezone-explicit fetches
+  (CI-safe); sample-SD t-statistics; minimum detectable effects reported with
+  every null; within-day difference-in-differences robustness checks;
+  family-wise permutation test across subsets; permutation p-values surfaced
+  on the results page; comparable-day matching engine extracted into
+  `matching.py` with richer market-specific features (wind, radiation,
+  temperature max), day-type classes with holiday exclusion, and the exact
+  pairings exposed in the JSONs and on the page.
 
 ## Data sources
 

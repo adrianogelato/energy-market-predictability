@@ -5,18 +5,18 @@ Why
 ---
 The forecast-error study found a marginal overnight effect (t just over 2)
 while prime time, where a viewing effect would have to be, was flat. Testing
-three subsets means one can cross t=2 by chance. This test quantifies that in
-two ways:
+several subsets (all / prime / overnight / Germany) means one can cross t=2 by
+chance. This test quantifies that in two ways:
 
 1. Per subset: if we label random days as "match days" and rerun the whole
    comparable-days analysis many times, how often is t as extreme as the real
    one? That fraction is a distribution-free p-value for that subset alone.
-2. Family-wise: because three subsets were examined and the most extreme one
+2. Family-wise: because several subsets were examined and the most extreme one
    is the one anyone would report, the honest reference is the null
-   distribution of max|t| ACROSS the three subsets. Each permutation draw
+   distribution of max|t| ACROSS all subsets. Each permutation draw
    relabels the days once and carries every day's subset membership along, so
-   all three subset t's come from the same draw, and their maximum forms the
-   family-wise null. This is the number that answers "we looked three times,
+   all subset t's come from the same draw, and their maximum forms the
+   family-wise null. This is the number that answers "we looked several times,
    how surprising is the best-looking result?"
 
 Method
@@ -57,7 +57,7 @@ HERE = Path(__file__).parent
 # override with e.g. N_PERM=200 for a quick smoke run; default is the real test
 N_PERM = int(os.environ.get("N_PERM", 2000))
 SEED = 20260713
-SUBSETS = ("all", "prime", "overnight")
+SUBSETS = ("all", "prime", "overnight", "germany")
 
 
 def main():
@@ -121,8 +121,8 @@ def main():
         "real_max_abs_t": round(real_max, 2),
         "p_value": round(float((np.sum(null_max >= real_max) + 1) / (N_PERM + 1)), 3),
         "null_max_t_95pct": round(float(np.percentile(null_max, 95)), 2),
-        "note": ("null of max|t| across the three subsets from joint draws; "
-                 "this is the correct reference when the most extreme of "
+        "note": (f"null of max|t| across the {len(SUBSETS)} subsets from joint "
+                 "draws; this is the correct reference when the most extreme of "
                  "several examined subsets is the one being reported"),
     }
 
@@ -161,7 +161,7 @@ def plot(null_overnight, null_max, ov, family):
     ax.hist(null_max, bins=40, color="#c9b", edgecolor="white")
     ax.axvline(family["real_max_abs_t"], color="#c1436d", lw=2,
                label=f"real max|t| = {family['real_max_abs_t']}")
-    ax.set_title(f"Family-wise null: max|t| over 3 subsets  (p = {family['p_value']})")
+    ax.set_title(f"Family-wise null: max|t| over {len(SUBSETS)} subsets  (p = {family['p_value']})")
     ax.set_xlabel("max|t| from random 'match' days")
     ax.legend()
     fig.tight_layout()
@@ -174,8 +174,8 @@ def plot(null_overnight, null_max, ov, family):
                 "at least as extreme as the real result — small p means the "
                 "real effect is unlikely to be chance. Left: the overnight-kickoff "
                 "subset only. Right: \"family-wise\" takes the largest |t| across "
-                "3 subsets per random draw, correcting for having examined "
-                "several subsets and reported the most extreme one.")
+                f"{len(SUBSETS)} subsets per random draw, correcting for having "
+                "examined several subsets and reported the most extreme one.")
     fig.subplots_adjust(bottom=0.30)
     fig.savefig(HERE / "wc_permutation.png", dpi=120)
 
@@ -189,8 +189,8 @@ def report(s):
         e = s["subsets"][name]
         print(f"{name:<12}{str(e['real_t']):>8}{e['p_value_two_sided']:>13}{e['p_value_one_sided']:>13}")
     fam = s["family_wise"]
-    print(f"\nFamily-wise (max|t| over the 3 subsets): real={fam['real_max_abs_t']}, "
-          f"p={fam['p_value']}")
+    print(f"\nFamily-wise (max|t| over the {len(SUBSETS)} subsets): "
+          f"real={fam['real_max_abs_t']}, p={fam['p_value']}")
     ov = s["subsets"]["overnight"]
     worst_p = max(ov["p_value_two_sided"], fam["p_value"])
     verdict = ("NOT surprising: consistent with chance" if worst_p > 0.05

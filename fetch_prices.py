@@ -75,8 +75,7 @@ def plot(rows, path):
     ax.grid(True, alpha=0.3)
     fig.autofmt_xdate()
     fig.tight_layout()
-    add_caption(fig, "ct/kWh = euro-cents per kilowatt-hour, the retail-scale "
-                "unit (wholesale is quoted in EUR/MWh; divide by 10 to convert). "
+    add_caption(fig, "Wholesale is quoted in EUR/MWh; divide by 10 for ct/kWh. "
                 "\"Day-ahead\" means this hour's price was set the previous day "
                 "in the EPEX SPOT auction, via the aWATTar API. The dashed red "
                 "line marks 0 ct/kWh: hours below it are negative-price, when "

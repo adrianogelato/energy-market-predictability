@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T16:33",
+  "generated_at": "2026-07-20T13:01",
   "data_source": "live",
   "n_permutations": 2000,
   "matching": {
@@ -20,34 +20,42 @@
   },
   "subsets": {
     "all": {
-      "n_match_days": 31,
-      "real_t": 1.33,
-      "real_delta_mw": 486.8,
-      "p_value_two_sided": 0.342,
-      "p_value_one_sided": 0.157,
-      "null_t_95pct": 2.82
+      "n_match_days": 34,
+      "real_t": 0.68,
+      "real_delta_mw": 214.8,
+      "p_value_two_sided": 0.644,
+      "p_value_one_sided": 0.239,
+      "null_t_95pct": 2.85
     },
     "prime": {
-      "n_match_days": 31,
-      "real_t": 0.85,
-      "real_delta_mw": 376.1,
-      "p_value_two_sided": 0.549,
-      "p_value_one_sided": 0.241,
-      "null_t_95pct": 2.79
+      "n_match_days": 34,
+      "real_t": 0.39,
+      "real_delta_mw": 151.4,
+      "p_value_two_sided": 0.803,
+      "p_value_one_sided": 0.3,
+      "null_t_95pct": 2.84
     },
     "overnight": {
       "n_match_days": 25,
-      "real_t": 1.99,
-      "real_delta_mw": 792.3,
-      "p_value_two_sided": 0.159,
-      "p_value_one_sided": 0.095,
-      "null_t_95pct": 2.73
+      "real_t": 0.81,
+      "real_delta_mw": 295.6,
+      "p_value_two_sided": 0.513,
+      "p_value_one_sided": 0.224,
+      "null_t_95pct": 2.77
+    },
+    "germany": {
+      "n_match_days": 4,
+      "real_t": 0.2,
+      "real_delta_mw": 199.6,
+      "p_value_two_sided": 0.859,
+      "p_value_one_sided": 0.395,
+      "null_t_95pct": 3.65
     }
   },
   "family_wise": {
-    "real_max_abs_t": 1.99,
-    "p_value": 0.279,
-    "null_max_t_95pct": 3.17,
-    "note": "null of max|t| across the three subsets from joint draws; this is the correct reference when the most extreme of several examined subsets is the one being reported"
+    "real_max_abs_t": 0.81,
+    "p_value": 0.901,
+    "null_max_t_95pct": 4.11,
+    "note": "null of max|t| across the 4 subsets from joint draws; this is the correct reference when the most extreme of several examined subsets is the one being reported"
   }
 }

@@ -31,16 +31,18 @@ automation and UX, not ML.**
 [value](#the-forecasts-money-value-milestone-8))
 
 **The World Cup does not detectably move the German market.** Prices during
-match hours: +0.89 ct/kWh vs weather-comparable days (t=0.97), collapsing to
-+0.14 under a within-day contrast that nets out seasonal drift. Load forecast
-error: the one marginal subset (overnight, +833 MW, t=2.04) fails the placebo
-test (family-wise permutation p=0.40) and flips sign under the within-day
+match hours: +0.62 ct/kWh vs weather-comparable days (t=0.84), and +0.31 under
+a within-day contrast that nets out seasonal drift. Load forecast error: the
+once-marginal overnight subset shrank to +501 MW (t=1.39) as the window filled
+in and is consistent with chance (family-wise permutation p=0.90 over four
+subsets including Germany-only), while flipping sign under the within-day
 contrast. The study's power bounds the claim: no price effect larger than
-~2.6 ct/kWh, no load effect separable from seasonal drift. Interim until the
-final on 19 July. ([details](#the-world-cup-price-study-milestone-4))
+~2.1 ct/kWh, no load effect separable from seasonal drift. Only the 19 July
+final is still missing from the window.
+([details](#the-world-cup-price-study-milestone-4))
 
 **The method detects real events.** The same engine finds the weekend effect at
-−6.10 ct/kWh in daytime prices (t=−12.1, permutation p < 0.0005), so the World
+−5.81 ct/kWh in daytime prices (t=−13.96, permutation p < 0.0005), so the World
 Cup null is a bounded finding from a working instrument, not a broken tool —
 with the caveat that detecting a 6 ct effect does not prove sensitivity to
 small ones, which is why every null above carries its minimum detectable
@@ -66,7 +68,7 @@ auction at noon the day before delivery (milestone 4). "Did the forecast miss
 it?" is a question about surprise, and surprise can only show up in the
 market's own forecast error, actual load minus the day-ahead load forecast
 (milestones 6 and 7). The current answers: any priced-in effect is smaller than
-~2.5 ct/kWh, and there is no forecast miss separable from seasonal drift.
+~2.1 ct/kWh, and there is no forecast miss separable from seasonal drift.
 
 So the milestones are not one sequence but three strands, interleaved because
 they share data. Strand A (M1-M3) builds contact with the market. Strand B
@@ -126,7 +128,7 @@ minus the day-ahead load forecast is exactly that.
 Milestone 7 (`python wc_load_effect.py`) asks the sharp version of the
 question: did demand deviate from what was forecast during match hours, split
 into prime-time and overnight kickoffs? Its capstone
-(`python wc_permutation.py`) is the placebo test: three subsets were examined,
+(`python wc_permutation.py`) is the placebo test: several subsets were examined,
 so any marginal result must survive a per-subset and a family-wise permutation
 test before it means anything.
 
@@ -439,9 +441,9 @@ Two honest footnotes on the statistics. The per-day deltas share control days
 correlated and the plain t is optimistic; the permutation test is the
 trustworthy inference. And because the control days are mostly pre-tournament,
 the analysis also reports a within-day difference-in-differences contrast that
-nets out day-level seasonal drift. On the current data it collapses the
-+0.89 ct/kWh headline to +0.14, which is what identifies that headline as
-drift rather than a match effect.
+nets out day-level seasonal drift. On the current data it halves the
++0.62 ct/kWh headline to +0.31, which says part of that headline is drift
+rather than a match effect.
 
 The match schedule is an editable CSV, not a hard-coded list or an API call.
 There is no clean, keyless World Cup schedule API, and the knockout fixtures
@@ -563,11 +565,12 @@ harmonics and a cloud-at-midday interaction, fit with numpy, captures the daily
 shape and the solar effect without a heavy machine-learning stack. A stronger
 model is a later milestone; the point here is a correct, honest baseline.
 
-What the backtest actually found (real data, 37 test days): the model does NOT
-beat the naive baselines. Hit-rate 0.757 ties climatology exactly and trails
-persistence (0.766); in money terms the model is worth −€0.28/yr against
-climatology. By this section's own criterion, the forecaster did not earn its
-place — and that is the finding, not a failure to have one. The cheap hours of
+What the backtest actually found (real data, 44 test days): the model does NOT
+meaningfully beat the naive baselines. On the refreshed window its hit-rate
+edges ahead (0.788 vs climatology's 0.773 and persistence's 0.765), but in
+money terms that is worth €0.60/yr against climatology, which is noise, not
+product value. By this section's own criterion, the forecaster did not earn its
+place, and that is the finding, not a failure to have one. The cheap hours of
 a German summer day are so stable (overnight plus solar-rich midday) that a
 lookup table is the right product. Two caveats keep this honest in both
 directions: the backtest feeds the model actual weather (a perfect forecast),
@@ -655,13 +658,16 @@ reports its minimum detectable effect (80% power), so "no effect" always means
 is reported alongside the main estimate as a robustness check against the
 day-level drift described in `ROADMAP.md`.
 
-It is split into prime-time and overnight kickoffs. Because the tournament is in
-North America, many matches kick off after midnight CEST when almost nobody in
-Germany is watching, and averaging those in dilutes any real effect. The study
-runs three ways: all matches, prime-time kickoffs (18:00-23:59 CEST), and
-overnight ones (00:00-06:59 CEST). Any TV-driven effect should concentrate in
-prime time, so that subset is the sharpest test; a difference between the two
-subsets is itself informative.
+It is split into prime-time and overnight kickoffs, plus a Germany-only subset.
+Because the tournament is in North America, many matches kick off after
+midnight CEST when almost nobody in Germany is watching, and averaging those in
+dilutes any real effect. The study runs four ways: all matches, prime-time
+kickoffs (18:00-23:59 CEST), overnight ones (00:00-06:59 CEST), and matches
+with Germany playing. Any TV-driven effect should concentrate in prime time, so
+that subset is the sharpest test; a difference between the subsets is itself
+informative. The Germany subset exists because the home team is by far the
+best-followed single event in this market, at the price of a very small n, so
+its minimum detectable effect does most of the talking.
 
 The synthetic check mirrors the fetcher's planted bump. On synthetic load the
 match hours carry an extra fixed demand that the forecast does not see, so this
@@ -672,7 +678,7 @@ tournament is thin and concentrated in overnight hours.
 
 ### The permutation test (milestone 7 capstone)
 
-`wc_permutation.py` answers a question the t-statistic alone cannot: three
+`wc_permutation.py` answers a question the t-statistic alone cannot: several
 subsets were tested, so how surprising is the one marginal result really?
 
 ```bash
@@ -684,14 +690,16 @@ rebuilds the weather-matched controls, and recomputes the effect thousands of
 times. The share of those random runs whose effect is at least as extreme as the
 real one is a distribution-free p-value. It answers the multiple-testing
 question properly: each draw relabels the days once and carries every day's
-subset membership along, so all three subset t's come from the same draw, and
+subset membership along, so all subset t's come from the same draw, and
 the maximum |t| across them builds the family-wise null — the correct reference
 when the most extreme of several examined subsets is the one being reported.
 
-On the current data the overnight blip lands at a subset p of 0.228 and a
-family-wise p of 0.401, so it is consistent with chance. A within-day
-difference-in-differences robustness check (in `wc_load_effect.py`) agrees for
-the opposite reason: it flips the overnight estimate to −758 MW, and two
+On the current data the overnight blip lands at a subset p of 0.513 and a
+family-wise p of 0.901 (over four subsets, the Germany-only one included), so
+it is consistent with chance; on the near-final window its t fell to 1.39
+anyway. A within-day difference-in-differences robustness check (in
+`wc_load_effect.py`) agrees for
+the opposite reason: it flips the overnight estimate to −739 MW, and two
 estimators that disagree in sign mean the drift in the forecast-error series,
 not the matches, is driving both. This is the check that keeps the null honest
 instead of hand-waved.
@@ -716,7 +724,7 @@ It uses wholesale price differences, which is legitimate. The fixed adders on a
 real bill are equal in every hour, so they cancel when comparing strategies. The
 euro figures are therefore the true savings from timing, independent of the
 tariff's fixed part. But they are annualized at summer rates: the backtest
-window is 37 early-summer days, when solar spreads are at their widest, so the
+window is 44 early-summer days, when solar spreads are at their widest, so the
 per-year numbers are a summer-rate extrapolation, not a calendar-year estimate.
 Winter would need its own window.
 
@@ -748,7 +756,7 @@ anything". The weekend effect is large and certain, so finding it (here about
 a permutation p is never exactly zero) proves the machinery works. One
 limitation stated plainly: detecting a 6 ct effect does not demonstrate
 sensitivity to small ones, which is why the World Cup null is reported with its
-minimum detectable effect (~2.5 ct/kWh) rather than as an unqualified "no
+minimum detectable effect (~2.1 ct/kWh) rather than as an unqualified "no
 effect".
 
 The signal is price, so it runs without a token. Weekends and holidays lower
@@ -795,6 +803,18 @@ a selection, not a price. Weather moves price *levels* strongly, but the
 *ranking* of hours — which three are cheapest — is pinned by the daily solar
 and demand cycle almost every day. Models spend their capacity explaining
 level variance that the selection task never rewards.
+
+Accuracy and decision value are therefore different yardsticks, and the study
+reports both. `forecast_ladder.py` emits per-rung price-accuracy metrics (MAE,
+RMSE, and MAPE guarded against near-zero prices, plus MAE/RMSE over the picked
+hours only) next to the regret ladder, and a paired sign-flip permutation test
+of each rung's daily cost against the lookup table, with a minimum detectable
+effect for every null and a family-wise max-|t| across the five comparisons.
+Several rungs predict price levels more accurately than the lookup table and
+still pick hours no better; none beats it on the decision task. The common
+objection "a well-built model is more accurate than a lookup table" is usually
+true, and beside the point; ladder.html shows both metric families in one
+table ("Accuracy is the wrong yardstick").
 
 Two design decisions keep the comparison honest. The climatology baseline is
 rolling (28 days), not full-history, so a winter day is judged against winter;

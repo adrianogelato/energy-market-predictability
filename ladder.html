@@ -13,7 +13,41 @@
       color:var(--ink); max-width:860px; margin:0 auto; padding:2rem 1.25rem; line-height:1.55; }
     a { color:var(--win); }
     h1 { margin-bottom:.2rem; } .sub { color:var(--muted); margin-top:0; }
-    section { margin:2.25rem 0; } canvas { max-width:100%; }
+    section { margin:2.25rem 0; scroll-margin-top:1rem; } canvas { max-width:100%; }
+    /* Table of contents: fixed to the left of the centred text column, so it
+       stays in view while scrolling. Below 1180px there is no room beside the
+       text, so it becomes a collapsible block in the flow instead. */
+    #toc { position:fixed; top:2rem; right:calc(50% + 430px + 1.5rem);
+      width:12.5rem; max-height:calc(100vh - 4rem); overflow-y:auto;
+      font-size:.82rem; line-height:1.4; }
+    #toc summary { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em;
+      color:var(--muted); margin-bottom:.5rem; list-style:none; cursor:default; }
+    #toc summary::-webkit-details-marker { display:none; }
+    #toc ol { list-style:none; margin:0; padding:0; }
+    #toc li { margin:0; }
+    #toc a { display:block; padding:.3rem .5rem; border-left:2px solid var(--line);
+      color:var(--muted); text-decoration:none; }
+    #toc a:hover { color:var(--ink); border-left-color:var(--muted); }
+    #toc a.active { color:var(--ink); font-weight:600; border-left-color:var(--win); }
+    @media (max-width:1180px) {
+      #toc { position:static; width:auto; max-height:none; overflow:visible;
+        border:1px solid var(--line); border-radius:6px; padding:.6rem .9rem;
+        margin:1.25rem 0; font-size:.9rem; }
+      #toc summary { margin:0; cursor:pointer; list-style:disclosure-closed; }
+      #toc summary::-webkit-details-marker { display:inline; }
+      #toc details[open] summary { margin-bottom:.5rem; list-style:disclosure-open; }
+      #toc a { padding:.35rem .5rem; }
+    }
+    /* Back to top: appears once the page is scrolled, bottom right so it
+       clears the table of contents on the left. */
+    #toTop { position:fixed; bottom:1.5rem; right:1.5rem; z-index:10;
+      font:inherit; font-size:.82rem; padding:.5rem .8rem; cursor:pointer;
+      color:var(--muted); background:#fff; border:1px solid var(--line);
+      border-radius:6px; box-shadow:0 1px 4px rgba(0,0,0,.12);
+      opacity:0; visibility:hidden; transition:opacity .18s ease; }
+    #toTop.show { opacity:1; visibility:visible; }
+    #toTop:hover { color:var(--ink); border-color:var(--muted); }
+    @media (prefers-reduced-motion:reduce) { #toTop { transition:none; } }
     .verdict { border:2px solid var(--win); border-radius:10px; padding:1rem 1.25rem; margin:1.25rem 0; }
     .verdict .head { font-size:1.25rem; font-weight:700; margin:.1rem 0; }
     ol li, ul li { margin:.5rem 0; }
@@ -28,6 +62,11 @@
     figure { margin: 0; }
     figcaption { color: var(--muted); font-size: .82rem; margin-top: .5rem; }
     .hint { color: var(--muted); font-size: .78rem; margin: .3rem 0 0 0; }
+    table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+    th, td { text-align: right; padding: .35rem .5rem; border-bottom: 1px solid var(--line); }
+    th:first-child, td:first-child { text-align: left; }
+    thead th { border-bottom: 2px solid var(--ink); }
+    td.best { font-weight: 700; color: var(--win); }
   </style>
 </head>
 <body>
@@ -48,6 +87,13 @@
        beats it overall, including gradient boosting fed perfect weather.</p>
   </div>
 
+  <nav id="toc" aria-label="On this page">
+    <details id="tocDet" open>
+      <summary>On this page</summary>
+      <ol></ol>
+    </details>
+  </nav>
+
   <section id="heroSec">
     <h2>The year, in euros</h2>
     <p>The verdict's numbers, drawn out over the backtest year: cumulative
@@ -66,7 +112,7 @@
      <code>python forecast_ladder.py</code> to populate the time-axis charts
      and the window-size comparison.</p>
 
-  <section>
+  <section id="methodSec">
     <h2>How the numbers are measured</h2>
     <ol>
       <li>Take a year of German day-ahead prices and weather. The first 28
@@ -86,7 +132,7 @@
     </ol>
   </section>
 
-  <section>
+  <section id="stepsSec">
     <h2>The reasoning, in seven steps</h2>
     <ol>
       <li><b>The action is picking hours, not predicting prices.</b> A smart
@@ -115,7 +161,7 @@
     </ol>
   </section>
 
-  <section>
+  <section id="ladderSec">
     <h2>The ladder</h2>
     <p>Regret = what a strategy's picked hours cost beyond perfect foresight,
        in ct/kWh. Lower is better.</p>
@@ -152,6 +198,22 @@
     </figure>
   </section>
 
+  <section id="accSec">
+    <h2>Accuracy is the wrong yardstick</h2>
+    <p>A common objection: "my gradient boosting model beats a lookup table."
+       On forecast accuracy it may well. On this task it does not matter,
+       because the two rankings disagree: the models that predict price
+       <em>levels</em> best do not pick hours best. Picking hours needs only
+       the intraday <em>ranking</em>, and the German ranking is structurally
+       pinned (step 5 of the reasoning above). Both metrics, side by side:</p>
+    <figure>
+      <table id="accTable"></table>
+      <figcaption id="accCap"></figcaption>
+    </figure>
+    <p id="pairedText" style="margin-top:1rem"></p>
+    <p class="note" id="pairedNote"></p>
+  </section>
+
   <section id="rollSec">
     <h2>The winter nuance, on the calendar</h2>
     <p>Step 6 of the reasoning, drawn out: what each day's picked hours
@@ -179,7 +241,7 @@
     </figure>
   </section>
 
-  <section>
+  <section id="residSec">
     <h2>Where the models systematically miss</h2>
     <p>Mean predicted-minus-actual price by hour of day. The lookup table
        (black) stays near zero; the models' errors are largest at the evening
@@ -197,7 +259,7 @@
     </figure>
   </section>
 
-  <section>
+  <section id="daysSec">
     <h2>Single days, inspected</h2>
     <p>Each strategy's worst-fit day of the year (largest price RMSE), predicted
        versus actual. A model can miss the level badly and still rank hours
@@ -215,7 +277,7 @@
     </div>
   </section>
 
-  <section>
+  <section id="qaSec">
     <h2>The critical questions are design decisions</h2>
     <dl class="qa">
       <dt>"Maybe the models were just badly built?"</dt>
@@ -224,6 +286,13 @@
         competes for the remaining few euros a year. The upside is bounded
         before the model quality debate starts. (And gradient boosting with
         perfect weather inputs is a strong baseline; it lost.)</dd>
+      <dt>"But a well-built model is more accurate than a lookup table."</dt>
+      <dd>Usually true, and not the claim. The claim is sufficiency: the
+        lookup table captures ~93% of the achievable saving on the
+        hour-picking task. Several models on the ladder do predict price
+        levels more accurately (see "Accuracy is the wrong yardstick" above)
+        and still pick hours no better. Accuracy and decision value are
+        different metrics, and here they rank the models differently.</dd>
       <dt>"Feeding models actual weather flatters them, no?"</dt>
       <dd>Yes, deliberately — and they still lost. Real weather forecasts would
         make every weather-using rung worse, while the lookup table needs no
@@ -252,6 +321,8 @@
      Raw results: <a href="forecast_ladder.json">forecast_ladder.json</a>,
      <a href="forecast_ladder_diagnostics.json">diagnostics</a>.</p>
 
+  <button id="toTop" type="button" title="Back to top">&uarr; top</button>
+
   <footer id="footer"></footer>
 
   <script>
@@ -267,6 +338,8 @@
                        'JJA = Jun-Jul-Aug, SON = Sep-Oct-Nov';
     // Reference series get hues outside the model palette.
     const REF_COL = { perfect: '#2a9d8f', untimed: '#8d6a9f' };
+    // Window sizes are ordinal: one hue, dark = wider window.
+    const WINDOW_RAMP = ['#a8c0dd', '#6f95c4', '#3a5a86', '#1e3557'];
     const EV_KWH = 11;
     const eur = n => '€' + Math.round(n);
     const get = u => fetch(u).then(r => { if (!r.ok) throw 0; return r.json(); });
@@ -355,11 +428,59 @@
             .toLocaleString('en', { month: 'short' });
         } } });
 
+    // Table of contents, built from the section headings so it cannot drift
+    // from the page. Entries for hidden sections hide with them; the entry for
+    // the section being read is marked active.
+    function buildToc() {
+      const ol = document.querySelector('#toc ol');
+      const items = [...document.querySelectorAll('section[id] > h2')].map(h => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#' + h.parentElement.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        ol.appendChild(li);
+        return { sec: h.parentElement, li, a };
+      });
+      const toTop = document.getElementById('toTop');
+      const sync = () => {
+        let active = null;
+        for (const it of items) {
+          const hidden = it.sec.offsetParent === null;
+          it.li.style.display = hidden ? 'none' : '';
+          if (!hidden && it.sec.getBoundingClientRect().top <= 120) active = it;
+        }
+        for (const it of items) it.a.classList.toggle('active', it === active);
+        toTop.classList.toggle('show', scrollY > 600);
+      };
+      addEventListener('scroll', sync, { passive: true });
+      addEventListener('resize', sync);
+      sync();
+
+      // Wide viewports: always expanded, beside the text. Narrow: collapsed by
+      // default, and collapses again after a jump so it stays out of the way.
+      const det = document.getElementById('tocDet');
+      const wide = matchMedia('(min-width:1181px)');
+      const fit = () => { det.open = wide.matches; };
+      wide.addEventListener('change', fit);
+      fit();
+      ol.addEventListener('click', e => {
+        if (e.target.tagName === 'A' && !wide.matches) det.open = false;
+      });
+      toTop.addEventListener('click', () => scrollTo({ top: 0,
+        behavior: matchMedia('(prefers-reduced-motion:reduce)').matches
+          ? 'auto' : 'smooth' }));
+      return sync;
+    }
+    const syncToc = buildToc();
+
     Promise.all([get('forecast_ladder.json'),
                  get('forecast_ladder_diagnostics.json').catch(() => null)])
       .then(([l, d]) => { renderVerdict(l); renderHero(l); renderLadder(l);
+                          renderAccuracy(l);
                           renderRolling(l); renderWindows(l);
-                          if (d) renderDiag(l, d); })
+                          if (d) renderDiag(l, d);
+                          syncToc(); })
       .catch(() => document.body.insertAdjacentHTML('beforeend',
         '<p class="note">Could not load forecast_ladder.json — run ' +
         '<code>python year_fetch.py && python forecast_ladder.py</code>.</p>'));
@@ -437,6 +558,99 @@
         'meteorological seasons (' + SEASON_KEY + '). ' + srcLine(l, daily);
     }
 
+    function renderAccuracy(l) {
+      if (!l.accuracy || !l.paired_vs_lookup) {
+        document.getElementById('accSec').style.display = 'none';
+        document.getElementById('staleNote').style.display = 'block';
+        return;
+      }
+      const o = l.overall, acc = l.accuracy.rungs, pv = l.paired_vs_lookup;
+      const ceiling = o.all_day_cost - o.perfect_cost;
+      const rows = l.ladder_order.map(r => ({
+        name: disp(r),
+        mae: acc[r].mae_ct, rmse: acc[r].rmse_ct, mape: acc[r].mape_pct,
+        hit: o.rungs[r].hit_rate, regret: o.rungs[r].regret_ct,
+        share: 100 * (1 - o.rungs[r].regret_ct / ceiling),
+        eur: o.rungs[r].eur_yr_saved_vs_anytime }));
+      // Bold the best value per column: accuracy wins and decision wins land
+      // on different rows, which is the section's point.
+      const best = {
+        mae: Math.min(...rows.map(x => x.mae)),
+        rmse: Math.min(...rows.map(x => x.rmse)),
+        mape: Math.min(...rows.map(x => x.mape)),
+        hit: Math.max(...rows.map(x => x.hit)),
+        regret: Math.min(...rows.map(x => x.regret)),
+        share: Math.max(...rows.map(x => x.share)),
+        eur: Math.max(...rows.map(x => x.eur)) };
+      const td = (v, k, fmt) => '<td' +
+        (v === best[k] ? ' class="best"' : '') + '>' + fmt + '</td>';
+      document.getElementById('accTable').innerHTML =
+        '<thead><tr><th>model</th><th>MAE<br>ct/kWh</th><th>RMSE<br>ct/kWh</th>' +
+        '<th>MAPE<br>%</th><th>hit rate</th><th>regret<br>ct/kWh</th>' +
+        '<th>share of<br>ceiling</th><th>saved<br>€/yr</th></tr></thead><tbody>' +
+        rows.map(x => '<tr><td>' + x.name + '</td>' +
+          td(x.mae, 'mae', x.mae.toFixed(2)) +
+          td(x.rmse, 'rmse', x.rmse.toFixed(2)) +
+          td(x.mape, 'mape', x.mape.toFixed(1)) +
+          td(x.hit, 'hit', Math.round(100 * x.hit) + '%') +
+          td(x.regret, 'regret', x.regret.toFixed(2)) +
+          td(x.share, 'share', Math.round(x.share) + '%') +
+          td(x.eur, 'eur', eur(x.eur)) + '</tr>').join('') + '</tbody>';
+      document.getElementById('accCap').textContent =
+        'Left half: forecast accuracy over all predicted hours. MAE = mean ' +
+        'absolute error, RMSE = root-mean-square error (both ct/kWh), MAPE = ' +
+        'mean absolute percentage error, excluding hours with actual price ' +
+        'below ' + l.accuracy.mape_guard_ct + ' ct/kWh in magnitude (' +
+        Math.round(100 * l.accuracy.mape_excluded_share) + '% of hours; ' +
+        'day-ahead prices cross zero, where MAPE is undefined). Right half: ' +
+        'decision value on the pick-' + l.config.n_cheap_hours + '-cheapest-' +
+        'hours task. Hit rate = share of truly cheapest hours picked; regret ' +
+        '= extra cost vs perfect foresight; share of ceiling = fraction of ' +
+        'the perfect-foresight saving captured; saved €/yr = saving vs ' +
+        'untimed charging for the 11 kWh/day EV household. Green bold = best ' +
+        'per column. ' + srcLine(l, dailyOf(l));
+
+      // Paired sign-flip permutation test, rung minus lookup table.
+      const sig = e => e[1].p_two_sided < 0.05;
+      const beats = Object.entries(pv.rungs)
+        .filter(e => sig(e) && e[1].mean_diff_ct < 0);
+      const worse = Object.entries(pv.rungs)
+        .filter(e => sig(e) && e[1].mean_diff_ct > 0);
+      const ties = Object.entries(pv.rungs).filter(e => !sig(e));
+      let txt;
+      if (beats.length) {
+        // Data-driven guard: never claim "nothing beats the lookup table"
+        // if a rerun says otherwise.
+        txt = 'Caution: in this run ' +
+          beats.map(([r, a]) => disp(r) + ' undercuts the lookup table by ' +
+            eur(-a.eur_yr_diff) + '/yr (p = ' + a.p_two_sided + ')').join('; ') +
+          '. The verdict above needs revisiting.';
+      } else {
+        txt = 'Is the lookup table’s lead real, or one year of noise? A ' +
+          'paired test on daily costs (sign-flip permutation, ' +
+          pv.n_permutations + ' draws) says: no model beats it. ' +
+          (worse.length ? worse.map(([r, a]) =>
+            disp(r) + ' is significantly worse (+' + eur(a.eur_yr_diff) +
+            '/yr, p = ' + a.p_two_sided + ')').join('; ') + '. ' : '') +
+          (ties.length ? ties.map(([r, a]) =>
+            disp(r) + ' is statistically indistinguishable from it (' +
+            (a.eur_yr_diff >= 0 ? '+' : '-') +
+            eur(Math.abs(a.eur_yr_diff)) + '/yr, p = ' +
+            a.p_two_sided + '; differences under ' + a.mde_ct_80pct_power +
+            ' ct/kWh of daily cost would be invisible to one year of data)')
+            .join('; ') + '.' : '');
+      }
+      document.getElementById('pairedText').textContent = txt;
+      document.getElementById('pairedNote').textContent =
+        'Method: for each model, the daily cost difference to the lookup ' +
+        'table is paired on the same ' + pv.n_days + ' test days; signs are ' +
+        'randomly flipped ' + pv.n_permutations + ' times to build the null. ' +
+        'The strongest comparison survives a family-wise max-|t| check ' +
+        'across all ' + Object.keys(pv.rungs).length + ' models (p = ' +
+        pv.family_wise.p_value + '). Full numbers: forecast_ladder.json, ' +
+        'block "paired_vs_lookup".';
+    }
+
     function renderRolling(l) {
       const daily = dailyOf(l);
       if (!daily) return;
@@ -491,27 +705,32 @@
       }
       const ns = Object.keys(l.by_n).sort();
       const rungs = l.ladder_order;
+      // Groups on the x-axis are the models (plus perfect foresight);
+      // the bars within each group are the window sizes.
+      const cols = ['perfect', ...rungs];
+      const costOf = (n, c) => c === 'perfect'
+        ? l.by_n[n].perfect_cost : l.by_n[n].rungs[c].avg_cost_ct;
       const ds = [
         { type: 'line', label: 'untimed (all-day average)',
-          data: ns.map(n => l.by_n[n].all_day_cost),
+          data: cols.map(() => l.by_n[ns[0]].all_day_cost),
           borderColor: REF_COL.untimed, borderDash: [2, 3], borderWidth: 1.4,
           pointRadius: 0 },
-        { type: 'bar', label: 'perfect foresight',
-          data: ns.map(n => l.by_n[n].perfect_cost),
-          backgroundColor: REF_COL.perfect },
-        ...rungs.map(r => ({ type: 'bar', label: disp(r),
-          data: ns.map(n => l.by_n[n].rungs[r].avg_cost_ct),
-          backgroundColor: COLORS[r] || '#555' }))];
+        ...ns.map((n, i) => ({ type: 'bar', label: n + ' hours',
+          data: cols.map(c => costOf(n, c)),
+          backgroundColor: WINDOW_RAMP[i] || '#555' }))];
       new Chart(document.getElementById('winChart'), {
-        data: { labels: ns.map(n => n + ' hours'), datasets: ds },
+        data: { labels: cols.map(c => c === 'perfect'
+                  ? 'perfect foresight' : disp(c)), datasets: ds },
         options: { plugins: { title: { display: true,
-            text: 'Average price of the picked hours, by window size' } },
+            text: 'Average price of the picked hours, by model and ' +
+                  'window size' } },
           scales: { y: { title: { display: true,
             text: 'average price of picked hours (ct/kWh)' } } } } });
       document.getElementById('winCap').textContent =
         'Average price paid per kWh in the picked hours when each model must ' +
-        'pick the cheapest 2, 3 or 4 hours of the day. Bars: perfect ' +
+        'pick the cheapest 2, 3 or 4 hours of the day. Groups: perfect ' +
         'foresight, then the models in ladder order (see the list above). ' +
+        'Bars within each group: the window size, light to dark. ' +
         'Dashed line: untimed charging at the all-day average price, which ' +
         'does not depend on the window size. Lower is better. ' +
         srcLine(l, dailyOf(l)) +

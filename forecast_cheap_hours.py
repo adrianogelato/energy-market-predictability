@@ -209,7 +209,7 @@ def plot(s):
     ax.bar_label(bars, fmt="%.1f")
     ax.grid(True, axis="y", alpha=0.3)
     fig.tight_layout()
-    add_caption(fig, f"ct/kWh = euro-cents per kilowatt-hour. Each bar is the "
+    add_caption(fig, f"Each bar is the "
                 f"average wholesale price paid for {s['n_cheap_hours']} EV-charging "
                 "hours a day, backtested walk-forward (a strategy only sees data "
                 "from before the day it predicts). \"Perfect foresight\" is an "

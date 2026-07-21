@@ -168,12 +168,15 @@
       set('f3-p', w.permutation_p_str || w.permutation_p);
     }).catch(() => set('f3-weekend', '(run the pipeline)'));
 
-    // Footer freshness
+    // Footer freshness. Also: the tournament ended 19 July 2026, so once the
+    // event-study window reaches that date the interim notice hides itself.
     get('wc_results.json').then(wc => {
       document.getElementById('footer').textContent =
         'Numbers computed at page load from the committed result JSONs. ' +
         'Event-study window ' + wc.window.start + ' to ' + wc.window.end +
         ', generated ' + (wc.generated_at || 'unknown') + '.';
+      if (wc.window && wc.window.end >= '2026-07-19')
+        document.getElementById('status').style.display = 'none';
     }).catch(() => {});
   </script>
 </body>

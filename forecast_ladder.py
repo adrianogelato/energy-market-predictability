@@ -38,6 +38,7 @@ import csv
 import datetime as dt
 import json
 import math
+import os
 from collections import defaultdict
 from pathlib import Path
 
@@ -58,6 +59,13 @@ CLIM_WINDOW = 28
 KNN_K = 20
 GBM_RETRAIN_DAYS = 7
 EV_KWH, DAYS_PER_YEAR = 11.0, 365
+# Paired sign-flip permutation test (backlog items 9/10): same conventions as
+# wc_permutation.py — env-overridable draw count, fixed seed, +1-corrected p.
+N_PERM = int(os.environ.get("N_PERM", 2000))
+SEED = 20260713
+# German day-ahead prices cross zero, so plain MAPE explodes; hours with
+# |actual| below this bound are excluded from MAPE and the share is reported.
+MAPE_GUARD_CT = 1.0
 # Display names for figures; keys in the result files stay as they are.
 # "climatology" is the forecasting term for a historical-average baseline,
 # but reads as if weather were an input, which it is not.
@@ -131,6 +139,99 @@ def day_vector(day, hours_of, weather, holidays):
         1.0 if day.weekday() == 5 else 0.0)
     return [sum(temp) / len(temp), max(temp), sum(solar) / len(solar),
             (sum(wind) / len(wind)) if wind else 0.0, dtype]
+
+
+def accuracy(day_curves, rungs):
+    """Price-accuracy metrics per rung (backlog item 10).
+
+    These measure how well each rung predicts price LEVELS: MAE, RMSE and
+    guarded MAPE over every predicted hour, plus MAE/RMSE restricted to the
+    n hours each rung actually picked (the only hours whose prediction error
+    can cost money). Accuracy is deliberately reported next to regret on
+    ladder.html: a rung can win this table and still lose the decision task,
+    because picking hours needs the intraday RANKING, not the level.
+    """
+    actual = np.array([c["actual"] for c in day_curves])          # days x 24
+    ok = np.abs(actual) >= MAPE_GUARD_CT
+    out = {"note": "MAE/RMSE/MAPE over all predicted hours; picked_* over "
+                   "each rung's chosen cheapest hours only. MAPE excludes "
+                   f"hours with |actual| < {MAPE_GUARD_CT} ct/kWh (prices "
+                   "cross zero).",
+           "mape_guard_ct": MAPE_GUARD_CT,
+           "mape_excluded_share": round(float(1 - ok.mean()), 3),
+           "rungs": {}}
+    for name in rungs:
+        pred = np.array([c["rungs"][name] for c in day_curves])
+        err = pred - actual
+        picked = np.zeros_like(ok)
+        for i, c in enumerate(day_curves):
+            order = np.argsort(c["rungs"][name])[:N_CHEAP]
+            picked[i, order] = True
+        out["rungs"][name] = {
+            "mae_ct": round(float(np.mean(np.abs(err))), 3),
+            "rmse_ct": round(float(np.sqrt(np.mean(err ** 2))), 3),
+            "mape_pct": round(float(np.mean(
+                np.abs(err[ok]) / np.abs(actual[ok])) * 100), 1),
+            "picked_hours_mae_ct": round(float(np.mean(np.abs(err[picked]))), 3),
+            "picked_hours_rmse_ct": round(
+                float(np.sqrt(np.mean(err[picked] ** 2))), 3),
+        }
+    return out
+
+
+def paired_vs_lookup(recs, rungs):
+    """Is the lookup table's lead real, or one year of noise? (backlog item 9)
+
+    Paired daily cost difference (rung minus lookup table) on the same test
+    days, sign-flip permutation test. Conventions match the repo: the t is
+    descriptive, the permutation p is the trustworthy inference, a family-wise
+    max-|t| covers the five comparisons, and every rung reports its minimum
+    detectable effect (80% power, two-sided alpha 0.05), so a null is a
+    bounded statement, not an absence.
+    """
+    others = [r for r in rungs if r != "climatology"]
+    n = len(recs)
+    clim = np.array([r["climatology"]["cost"] for r in recs])
+    diffs = np.array([[r[name]["cost"] for r in recs] for name in others]) - clim
+    rng = np.random.default_rng(SEED)
+    signs = rng.choice([-1.0, 1.0], size=(N_PERM, n))
+
+    def tstat(d):
+        return float(d.mean() / (d.std(ddof=1) / math.sqrt(len(d))))
+
+    real_t = np.array([tstat(d) for d in diffs])
+    perm_t = np.empty((N_PERM, len(others)))
+    for i in range(N_PERM):
+        flipped = signs[i] * diffs                                # rungs x days
+        perm_t[i] = flipped.mean(axis=1) / (
+            flipped.std(axis=1, ddof=1) / math.sqrt(n))
+    out = {"note": "mean_diff_ct = daily cost of the rung minus the lookup "
+                   "table, paired on the same test days; positive = the rung "
+                   "costs more. Sign-flip permutation test; t is descriptive, "
+                   "p_two_sided is the inference. mde_ct is the minimum "
+                   "detectable effect at 80% power, two-sided alpha 0.05.",
+           "n_days": n, "n_permutations": N_PERM, "seed": SEED, "rungs": {}}
+    for j, name in enumerate(others):
+        d, sd = diffs[j], float(diffs[j].std(ddof=1))
+        out["rungs"][name] = {
+            "mean_diff_ct": round(float(d.mean()), 3),
+            "eur_yr_diff": round(
+                float(d.mean()) * EV_KWH * DAYS_PER_YEAR / 100, 2),
+            "t_stat": round(real_t[j], 2),
+            "p_two_sided": round(float(
+                (np.sum(np.abs(perm_t[:, j]) >= abs(real_t[j])) + 1)
+                / (N_PERM + 1)), 3),
+            "mde_ct_80pct_power": round(2.8 * sd / math.sqrt(n), 3),
+        }
+    real_max = float(np.max(np.abs(real_t)))
+    out["family_wise"] = {
+        "max_abs_t": round(real_max, 2),
+        "strongest_rung": others[int(np.argmax(np.abs(real_t)))],
+        "p_value": round(float(
+            (np.sum(np.max(np.abs(perm_t), axis=1) >= real_max) + 1)
+            / (N_PERM + 1)), 3),
+    }
+    return out
 
 
 def main():
@@ -254,6 +355,10 @@ def main():
                    "weather_input": "actuals (perfect-forecast ceiling; fair "
                                     "between rungs, flattering in absolute terms)"},
         "ladder_order": rungs,
+        # Backlog items 9/10: accuracy vs decision value, and whether the
+        # lookup table's lead is distinguishable from one year of noise.
+        "accuracy": accuracy(day_curves, rungs),
+        "paired_vs_lookup": paired_vs_lookup(records[N_CHEAP], rungs),
         "overall": agg(records[N_CHEAP]),
         "by_season": {s: agg([r for r in records[N_CHEAP] if r["season"] == s])
                       for s in seasons_present},
@@ -423,6 +528,21 @@ def report(res):
         print(f"{r:<14}" + "".join(
             f"{res['by_season'][s]['rungs'][r]['regret_ct']:>8.2f}"
             for s in res["by_season"]))
+    print("\nPrice accuracy (levels, not decisions):")
+    print(f"{'rung':<14}{'MAE ct':>8}{'RMSE ct':>9}{'MAPE %':>8}")
+    for r in res["ladder_order"]:
+        a = res["accuracy"]["rungs"][r]
+        print(f"{r:<14}{a['mae_ct']:>8.2f}{a['rmse_ct']:>9.2f}"
+              f"{a['mape_pct']:>8.1f}")
+    p = res["paired_vs_lookup"]
+    print(f"\nPaired vs lookup table ({p['n_permutations']} sign-flip draws):")
+    print(f"{'rung':<14}{'diff ct':>9}{'eur/yr':>8}{'p':>8}{'MDE ct':>8}")
+    for r, a in p["rungs"].items():
+        print(f"{r:<14}{a['mean_diff_ct']:>+9.3f}{a['eur_yr_diff']:>+8.2f}"
+              f"{a['p_two_sided']:>8.3f}{a['mde_ct_80pct_power']:>8.3f}")
+    fw = p["family_wise"]
+    print(f"family-wise max|t| {fw['max_abs_t']} ({fw['strongest_rung']}), "
+          f"p = {fw['p_value']}")
     print("\nWrote forecast_ladder.json and forecast_ladder.png")
 
 

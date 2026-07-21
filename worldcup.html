@@ -48,9 +48,10 @@
     <p style="margin:.5rem 0" id="verdictText">Once weather and season are
        controlled for, prices during match hours look like prices on ordinary
        days, and actual demand did not measurably deviate from what the grid
-       had forecast. One subset (overnight kickoffs) looks suggestive at first
-       glance, but a placebo test shows a blip that size appears by chance in
-       random data too. The numbers below are the evidence.</p>
+       had forecast. One subset (overnight kickoffs) looked suggestive on the
+       early interim data, but it faded as the window filled in, and a placebo
+       test shows a blip that size appears by chance in random data too. The
+       numbers below are the evidence.</p>
     <p style="margin:.5rem 0" class="sub" id="verdictBounds"></p>
   </section>
 
@@ -66,7 +67,7 @@
        whole analysis on randomly chosen "match days" thousands of times; p is
        the share of random runs that look at least as extreme as the real one.
        p=0.40 means: 40% of pure-chance runs look this impressive, so the real
-       one proves nothing. "Family-wise" corrects for having examined three
+       one proves nothing. "Family-wise" corrects for having examined several
        subsets and reporting the best-looking one.</p>
     <p><strong>Minimum detectable effect (MDE)</strong>: what the study could
        have seen. A null result only rules out effects larger than this, so
@@ -100,9 +101,9 @@
        (weekday / Saturday / Sunday-or-holiday, so a public holiday never
        stands in for a normal weekday). The exact pairing used is shown
        below, <a href="#pairings">which days were compared</a>.</p>
-    <p class="note warn">Interim numbers: the tournament runs until 19 July 2026,
-       so results here cover matches up to the latest data fetch and will be
-       re-run once the tournament is over.</p>
+    <p class="note warn" id="interimNote">Interim numbers: the tournament runs
+       until 19 July 2026, so results here cover matches up to the latest data
+       fetch and will be re-run once the tournament is over.</p>
   </section>
 
   <section>
@@ -112,13 +113,14 @@
        watchable-in-Europe matches fall in the late evening and overnight.</p>
     <figure>
       <canvas id="profileChart" height="150"></canvas>
-      <figcaption>Average wholesale price (ct/kWh, euro-cents per
-        kilowatt-hour) by hour of day, CEST (Central European Summer Time).
-        "Match days" = days with a live match; "weather-comparable days" =
-        non-match days matched on temperature, solar, wind and day type
-        (see matching.py), used as the counterfactual. Bigger/darker points
-        mark hours that were live-match hours on a larger share of match
-        days.</figcaption>
+      <figcaption>Average wholesale price (ct/kWh) by hour of day, CEST
+        (Central European Summer Time). "Match days" = days with a live match;
+        "weather-comparable days" = non-match days matched on temperature,
+        solar, wind and day type (see matching.py), used as the counterfactual.
+        The shaded band spans the minimum to maximum price across match days
+        for that hour. Bigger/darker points mark hours that were live-match
+        hours on a larger share of match days; hover a point for the number
+        of matches played in that hour.</figcaption>
     </figure>
   </section>
 
@@ -151,8 +153,8 @@
     <figure>
       <canvas id="loadChart" height="150"></canvas>
       <figcaption>Load forecast error by hour of day, CEST (Central European
-        Summer Time) — actual grid demand minus the day-ahead demand
-        forecast, in MW (megawatts). A positive spike means real demand ran
+        Summer Time): actual grid demand minus the day-ahead demand
+        forecast, in MW. A positive spike means real demand ran
         above what was forecast, i.e. the grid was surprised. "Match days"
         vs. "weather-comparable days" (matched non-match days, see
         matching.py) as above.</figcaption>
@@ -198,8 +200,10 @@
         card(fmt(S.all, 'all'), 'All matches (' + S.all.n_match_days + ' days)'),
         S.prime ? card(fmt(S.prime, 'prime'), 'Prime-time 18–24h CEST (' + S.prime.n_match_days + ')') : '',
         S.overnight ? card(fmt(S.overnight, 'overnight'), 'Overnight 0–7h CEST (' + S.overnight.n_match_days + ')') : '',
+        (S.germany && S.germany.n_match_days) ? card(fmt(S.germany, 'germany'),
+          'Germany matches only (' + S.germany.n_match_days + ' days — small sample)') : '',
         (perm && perm.family_wise) ? card('p=' + perm.family_wise.p_value,
-          'Family-wise placebo p (max|t| over the 3 subsets — the honest reference ' +
+          'Family-wise placebo p (max|t| over all subsets — the honest reference ' +
           'when reporting the most extreme of several examined subsets)') : '',
       ].join('');
 
@@ -248,7 +252,16 @@
           'fill in real fixtures in <code>wc_matches.csv</code>, for real results.</p>';
       }
 
+      // The tournament ended 19 July 2026: once the results window reaches
+      // that date, the interim caveats no longer apply and hide themselves.
+      const interim = !(d.window && d.window.end >= '2026-07-19');
+      if (!interim) {
+        const n = document.getElementById('interimNote');
+        if (n) n.style.display = 'none';
+      }
+
       const e = d.effect;
+      const g = d.germany && d.germany.effect;
       document.getElementById('cards').innerHTML = [
         card((e.mean_delta_ct_per_kwh > 0 ? '+' : '') + e.mean_delta_ct_per_kwh + ' ct/kWh',
              'Mean match-hour effect'),
@@ -262,22 +275,42 @@
              d.robustness_within_day.mean_delta_ct + ' ct/kWh',
              'Within-day diff-in-diff (nets out seasonal drift) · t=' +
              d.robustness_within_day.t_stat) : '',
+        (g && g.n_match_days) ? card(
+             (g.mean_delta_ct_per_kwh > 0 ? '+' : '') + g.mean_delta_ct_per_kwh +
+             ' ct/kWh',
+             'Germany matches only (' + g.n_match_days + ' days · t=' + g.t_stat +
+             ') — the best-followed team, but a small sample') : '',
       ].join('');
 
       const hp = d.hourly_profile;
       const share = hp.match_hour_share || hp.match_hour_flags;
       const matchPts = hp.hours.map(h => share[h] ? 2 + 5 * share[h] : 2);
       const matchClr = hp.hours.map(h => share[h] ? '#c1436d' : 'rgba(193,67,109,.5)');
+      const datasets = [];
+      if (hp.match_days_min && hp.match_days_max) {
+        datasets.push(
+          { label:'_band_min', data:hp.match_days_min, borderWidth:0,
+            pointRadius:0, tension:.25 },
+          { label:'Match-day min-max range', data:hp.match_days_max,
+            borderWidth:0, pointRadius:0, tension:.25, fill:'-1',
+            backgroundColor:'rgba(193,67,109,.12)' });
+      }
+      datasets.push(
+        { label:'Match days', data:hp.match_days_avg, borderColor:'#c1436d',
+          pointRadius:matchPts, pointBackgroundColor:matchClr, tension:.25 },
+        { label:'Weather-comparable days', data:hp.comparable_days_avg,
+          borderColor:'#4c9f70', pointRadius:2, tension:.25 });
       new Chart(document.getElementById('profileChart'), {
         type: 'line',
-        data: { labels: hp.hours, datasets: [
-          { label:'Match days', data:hp.match_days_avg, borderColor:'#c1436d',
-            pointRadius:matchPts, pointBackgroundColor:matchClr, tension:.25 },
-          { label:'Weather-comparable days', data:hp.comparable_days_avg,
-            borderColor:'#4c9f70', pointRadius:2, tension:.25 },
-        ]},
+        data: { labels: hp.hours, datasets: datasets },
         options: { plugins:{title:{display:true,
-            text:'Average price by hour: match days vs. weather-comparable days'}},
+            text:'Average price by hour: match days vs. weather-comparable days'},
+          legend:{labels:{filter: item => !item.text.startsWith('_')}},
+          tooltip:{callbacks:{footer: items => {
+            if (!hp.match_count) return '';
+            const h = items[0].dataIndex, c = hp.match_count[h];
+            return c ? c + (c === 1 ? ' match' : ' matches') + ' live in this hour' : '';
+          }}}},
           scales:{ x:{ title:{display:true,text:'Hour of day (CEST)'} },
           y:{ title:{display:true,text:'ct/kWh'} } } }
       });
@@ -314,8 +347,8 @@
         document.getElementById('verdictBounds').textContent =
           'Precision of that claim: a price effect of about ' +
           e.mde_ct_80pct_power + ' ct/kWh or larger would have been detected; ' +
-          'anything smaller is below the resolution of this study. Interim ' +
-          'until the tournament ends on 19 July 2026.';
+          'anything smaller is below the resolution of this study.' +
+          (interim ? ' Interim until the tournament ends on 19 July 2026.' : '');
       }
       if (Math.abs(e.t_stat || 0) >= 2) {
         flipVerdict('The price test shows a statistically clear difference of ' +

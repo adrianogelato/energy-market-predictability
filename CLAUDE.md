@@ -4,7 +4,8 @@ Portfolio project (PM/PO job search, energy domain): how predictable is the
 German day-ahead power market, what is a forecast worth, and can scheduled
 events (World Cup 2026) move it? Read `README.md` (presentation: story,
 findings, design decisions) and `ROADMAP.md` (working ledger: hypotheses with
-verdicts, limitations, prioritized backlog) before changing anything.
+verdicts, limitations, the Now/Next/Later roadmap, task backlog, changelog)
+before changing anything.
 Content lives in exactly one of the two; keep it that way.
 
 ## Commands

@@ -4,21 +4,21 @@
     "ev_kwh_per_day": 11.0,
     "days_per_year": 365,
     "n_cheap_hours": 3,
-    "backtest_days": 38
+    "backtest_days": 44
   },
-  "caveat": "annualized at SUMMER rates: the backtest window is 38 early-summer days with maximal solar spreads; winter spreads differ, so read the per-year figures as a summer-rate extrapolation, not a calendar-year estimate",
+  "caveat": "annualized at SUMMER rates: the backtest window is 44 early-summer days with maximal solar spreads; winter spreads differ, so read the per-year figures as a summer-rate extrapolation, not a calendar-year estimate",
   "annual_cost_eur": {
-    "perfect": 100.29,
-    "model": 108.36,
-    "climatology": 109.05,
-    "persistence": 115.27,
-    "all_day": 416.96
+    "perfect": 119.08,
+    "model": 126.19,
+    "climatology": 126.79,
+    "persistence": 132.62,
+    "all_day": 429.69
   },
   "value": {
-    "smart_timing_vs_anytime_eur_yr": 308.6,
-    "model_vs_best_naive_eur_yr": 0.69,
+    "smart_timing_vs_anytime_eur_yr": 303.5,
+    "model_vs_best_naive_eur_yr": 0.6,
     "best_naive_used": "climatology",
-    "gap_model_to_perfect_eur_yr": 8.07,
-    "perfect_vs_anytime_ceiling_eur_yr": 316.67
+    "gap_model_to_perfect_eur_yr": 7.11,
+    "perfect_vs_anytime_ceiling_eur_yr": 310.61
   }
 }
