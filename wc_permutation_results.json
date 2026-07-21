@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-20T13:01",
+  "generated_at": "2026-07-21T15:01",
   "data_source": "live",
   "n_permutations": 2000,
   "matching": {
@@ -20,42 +20,42 @@
   },
   "subsets": {
     "all": {
-      "n_match_days": 34,
-      "real_t": 0.68,
-      "real_delta_mw": 214.8,
-      "p_value_two_sided": 0.644,
-      "p_value_one_sided": 0.239,
-      "null_t_95pct": 2.85
+      "n_match_days": 35,
+      "real_t": 0.33,
+      "real_delta_mw": 107.9,
+      "p_value_two_sided": 0.824,
+      "p_value_one_sided": 0.365,
+      "null_t_95pct": 2.92
     },
     "prime": {
-      "n_match_days": 34,
-      "real_t": 0.39,
-      "real_delta_mw": 151.4,
-      "p_value_two_sided": 0.803,
-      "p_value_one_sided": 0.3,
-      "null_t_95pct": 2.84
+      "n_match_days": 35,
+      "real_t": 0.12,
+      "real_delta_mw": 46.2,
+      "p_value_two_sided": 0.944,
+      "p_value_one_sided": 0.41,
+      "null_t_95pct": 2.91
     },
     "overnight": {
       "n_match_days": 25,
-      "real_t": 0.81,
-      "real_delta_mw": 295.6,
-      "p_value_two_sided": 0.513,
-      "p_value_one_sided": 0.224,
-      "null_t_95pct": 2.77
+      "real_t": 0.88,
+      "real_delta_mw": 320.2,
+      "p_value_two_sided": 0.522,
+      "p_value_one_sided": 0.249,
+      "null_t_95pct": 2.68
     },
     "germany": {
       "n_match_days": 4,
-      "real_t": 0.2,
-      "real_delta_mw": 199.6,
-      "p_value_two_sided": 0.859,
-      "p_value_one_sided": 0.395,
-      "null_t_95pct": 3.65
+      "real_t": 0.7,
+      "real_delta_mw": 535.1,
+      "p_value_two_sided": 0.548,
+      "p_value_one_sided": 0.239,
+      "null_t_95pct": 3.78
     }
   },
   "family_wise": {
-    "real_max_abs_t": 0.81,
-    "p_value": 0.901,
-    "null_max_t_95pct": 4.11,
+    "real_max_abs_t": 0.88,
+    "p_value": 0.881,
+    "null_max_t_95pct": 4.03,
     "note": "null of max|t| across the 4 subsets from joint draws; this is the correct reference when the most extreme of several examined subsets is the one being reported"
   }
 }

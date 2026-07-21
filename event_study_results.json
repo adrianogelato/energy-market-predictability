@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-20T13:01",
+  "generated_at": "2026-07-21T15:01",
   "signal": "day-ahead price (ct/kWh)",
   "hours": "08:00-19:59",
   "n_permutations": 2000,
@@ -23,11 +23,11 @@
   "studies": [
     {
       "name": "weekend_vs_weekday",
-      "n": 19,
-      "mean_delta_ct": -5.81,
-      "std": 1.81,
-      "t_stat": -13.96,
-      "mde_ct_80pct_power": 1.16,
+      "n": 20,
+      "mean_delta_ct": -5.83,
+      "std": 1.77,
+      "t_stat": -14.75,
+      "mde_ct_80pct_power": 1.11,
       "permutation_p": 0.0005,
       "permutation_p_str": "< 0.0005"
     },
