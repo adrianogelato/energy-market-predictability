@@ -1,0 +1,42 @@
+/* Shared page navigation: the section menu and the back-to-top button.
+   Used by any page that includes page-nav.js and an empty <nav id="toc">.
+   Expects the page to define --ink, --muted, --line and --accent. */
+
+section { scroll-margin-top: 1rem; }
+
+/* Table of contents: fixed to the left of the centred text column, so it
+   stays in view while scrolling. Below 1180px there is no room beside the
+   text, so it becomes a collapsible block in the flow instead. */
+#toc { position:fixed; top:2rem; right:calc(50% + 430px + 1.5rem);
+  width:12.5rem; max-height:calc(100vh - 4rem); overflow-y:auto;
+  font-size:.82rem; line-height:1.4; }
+#toc summary { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--muted); margin-bottom:.5rem; list-style:none; cursor:default; }
+#toc summary::-webkit-details-marker { display:none; }
+#toc ol { list-style:none; margin:0; padding:0; }
+#toc li { margin:0; }
+#toc a { display:block; padding:.3rem .5rem; border-left:2px solid var(--line);
+  color:var(--muted); text-decoration:none; }
+#toc a:hover { color:var(--ink); border-left-color:var(--muted); }
+#toc a.active { color:var(--ink); font-weight:600; border-left-color:var(--accent); }
+
+@media (max-width:1180px) {
+  #toc { position:static; width:auto; max-height:none; overflow:visible;
+    border:1px solid var(--line); border-radius:6px; padding:.6rem .9rem;
+    margin:1.25rem 0; font-size:.9rem; }
+  #toc summary { margin:0; cursor:pointer; list-style:disclosure-closed; }
+  #toc summary::-webkit-details-marker { display:inline; }
+  #toc details[open] summary { margin-bottom:.5rem; list-style:disclosure-open; }
+  #toc a { padding:.35rem .5rem; }
+}
+
+/* Back to top: appears once the page is scrolled, bottom right so it
+   clears the table of contents on the left. */
+#toTop { position:fixed; bottom:1.5rem; right:1.5rem; z-index:10;
+  font:inherit; font-size:.82rem; padding:.5rem .8rem; cursor:pointer;
+  color:var(--muted); background:#fff; border:1px solid var(--line);
+  border-radius:6px; box-shadow:0 1px 4px rgba(0,0,0,.12);
+  opacity:0; visibility:hidden; transition:opacity .18s ease; }
+#toTop.show { opacity:1; visibility:visible; }
+#toTop:hover { color:var(--ink); border-color:var(--muted); }
+@media (prefers-reduced-motion:reduce) { #toTop { transition:none; } }

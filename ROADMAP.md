@@ -338,6 +338,19 @@ matching as the control.
   premise, stated on ladder.html, that predicting the day-ahead price is the
   right target).
 
+**R10. Implications from cheapest hour prediction** (path one, product lens)
+- Outcome: Use cases for individuals, fleet operators, tariff and flexibility companies.
+  Can the finding of using a lookup table to predict the cheapest hours be transformed
+  into a usable product? Could I built my own energy management system (EMS) at home if
+  I had an EV-comparable stationary energy storage (e.g. with a programmable BMS for a
+  battery)? What is the loss when the cheapest hours are mis-predicted?
+- Why later: it is the progression from the finding while still being an independent
+  development module/step.
+- Answer looks like: Virtual EMS as a browser page with configurable setup (number of
+  EVs, capacity of available storage, electricity tariff, etc.).
+- Depends on: ENTSO-E data, weather data
+- Who benefits: individuals, fleet operators, tariff and flexibility companies.
+
 ## Task backlog
 
 Concrete, executable work, priority top to bottom. Every task points at a
