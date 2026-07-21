@@ -268,12 +268,43 @@ acceptable trade for a piece meant to be shown.
 
 ### A static site on GitHub Pages, no backend
 
-The site is three small pages that read committed JSON files in the browser:
+The site is four small pages that read committed JSON files in the browser:
 `index.html` (the findings one-pager), `tariff.html` (the daily demo, charts
-via Chart.js from a CDN), and `worldcup.html` (the event study). There is no
-build step, no framework, and no server to run or pay for. GitHub Pages serves
-the repository directly. This keeps the whole thing free to host, trivial to
-reason about, and forkable by anyone.
+via Chart.js from a CDN), `worldcup.html` (the event study), and `ladder.html`
+(the value-of-complexity study). There is no build step, no framework, and no
+server to run or pay for. GitHub Pages serves the repository directly. This
+keeps the whole thing free to host, trivial to reason about, and forkable by
+anyone.
+
+### Shared page furniture: page-nav.css and page-nav.js
+
+The section menu and the back-to-top button live in one CSS file and one JS
+file that pages link, instead of being copied into each page's inline `<style>`
+and `<script>`. Everything else stays inline and page-local, which is the rule
+this follows: content belongs to its page, navigation that must behave
+identically everywhere does not.
+
+A page opts in with three lines: the stylesheet link, `<script src="page-nav.js"
+defer>`, and an empty `<nav id="toc">` placeholder marking where the menu sits
+in the flow on narrow screens. On wide screens the menu is fixed beside the
+text column, so the placeholder's position only matters below 1180px, where the
+menu becomes a collapsible block instead. A page without the placeholder gets
+neither feature, which is how `index.html` and `tariff.html` opt out today.
+
+The menu is built from every `section[id] > h2`, so it cannot drift from the
+page: add a section with an id and an entry appears, reword a heading and the
+label follows. Sections without an id are skipped, since there is no anchor to
+link to. Explicit ids were chosen over slugs derived from heading text, which
+would silently break saved links whenever a heading is reworded. Pages that
+reveal a section only after its data loads call `window.syncPageNav()` once
+rendered, so the entry appears with the section.
+
+The colour contract is one variable: each page defines `--accent`, and the
+shared stylesheet uses it for the active entry, so every page keeps its own
+palette.
+
+This was extracted at the third page, not the first. Two copies were cheaper to
+read than an indirection; the third copy, plus pages still to come, flipped it.
 
 ### Files as the interface, no database
 
@@ -870,6 +901,9 @@ event_study.py             milestone 9: generic event-study engine
 year_fetch.py              milestone 10: full-year price + weather fetcher
 forecast_ladder.py         milestone 10: the value-of-complexity ladder
 forecast_ladder.json       milestone 10 results, committed (index.html reads it)
+ladder.html                milestone 10: the value-of-complexity page
+page-nav.css               shared: section menu + back-to-top styling
+page-nav.js                shared: builds the section menu from the headings
 events_holidays.csv        German public holidays (event study + day-typing)
 data/                      raw schedule source files (provenance only, see data/README.md)
 ROADMAP.md                 working hypothesis and milestone plan

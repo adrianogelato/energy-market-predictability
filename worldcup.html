@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>World Cup and electricity prices — a small study</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <link rel="stylesheet" href="page-nav.css" />
+  <script src="page-nav.js" defer></script>
   <style>
-    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --match:#c1436d; --ctrl:#4c9f70; }
+    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --match:#c1436d; --ctrl:#4c9f70;
+      /* --accent: the page's own accent, consumed by page-nav.css */
+      --accent:#4c9f70; }
     * { box-sizing: border-box; }
     body { font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       color:var(--ink); max-width:860px; margin:0 auto; padding:2rem 1.25rem; line-height:1.55; }
@@ -17,42 +21,8 @@
     .card { flex:1 1 170px; border:1px solid var(--line); border-radius:10px; padding:1rem; }
     .card .n { font-size:1.5rem; font-weight:700; }
     .card .l { color:var(--muted); font-size:.85rem; }
-    section { margin:2.25rem 0; scroll-margin-top:1rem; }
+    section { margin:2.25rem 0; }
     canvas { max-width:100%; }
-    /* Table of contents: fixed to the left of the centred text column, so it
-       stays in view while scrolling. Below 1180px there is no room beside the
-       text, so it becomes a collapsible block in the flow instead. */
-    #toc { position:fixed; top:2rem; right:calc(50% + 430px + 1.5rem);
-      width:12.5rem; max-height:calc(100vh - 4rem); overflow-y:auto;
-      font-size:.82rem; line-height:1.4; }
-    #toc summary { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em;
-      color:var(--muted); margin-bottom:.5rem; list-style:none; cursor:default; }
-    #toc summary::-webkit-details-marker { display:none; }
-    #toc ol { list-style:none; margin:0; padding:0; }
-    #toc li { margin:0; }
-    #toc a { display:block; padding:.3rem .5rem; border-left:2px solid var(--line);
-      color:var(--muted); text-decoration:none; }
-    #toc a:hover { color:var(--ink); border-left-color:var(--muted); }
-    #toc a.active { color:var(--ink); font-weight:600; border-left-color:var(--ctrl); }
-    @media (max-width:1180px) {
-      #toc { position:static; width:auto; max-height:none; overflow:visible;
-        border:1px solid var(--line); border-radius:6px; padding:.6rem .9rem;
-        margin:1.25rem 0; font-size:.9rem; }
-      #toc summary { margin:0; cursor:pointer; list-style:disclosure-closed; }
-      #toc summary::-webkit-details-marker { display:inline; }
-      #toc details[open] summary { margin-bottom:.5rem; list-style:disclosure-open; }
-      #toc a { padding:.35rem .5rem; }
-    }
-    /* Back to top: appears once the page is scrolled, bottom right so it
-       clears the table of contents on the left. */
-    #toTop { position:fixed; bottom:1.5rem; right:1.5rem; z-index:10;
-      font:inherit; font-size:.82rem; padding:.5rem .8rem; cursor:pointer;
-      color:var(--muted); background:#fff; border:1px solid var(--line);
-      border-radius:6px; box-shadow:0 1px 4px rgba(0,0,0,.12);
-      opacity:0; visibility:hidden; transition:opacity .18s ease; }
-    #toTop.show { opacity:1; visibility:visible; }
-    #toTop:hover { color:var(--ink); border-color:var(--muted); }
-    @media (prefers-reduced-motion:reduce) { #toTop { transition:none; } }
     .note { background:#f7f7f5; border-left:3px solid var(--ctrl); padding:.75rem 1rem;
       border-radius:6px; color:#333; font-size:.92rem; }
     .warn { background:#fff5e6; border-left:3px solid #e0a458; }
@@ -114,12 +84,7 @@
 
   <div class="cards" id="cards"></div>
 
-  <nav id="toc" aria-label="On this page">
-    <details id="tocDet" open>
-      <summary>On this page</summary>
-      <ol></ol>
-    </details>
-  </nav>
+  <nav id="toc" aria-label="On this page"></nav>
 
   <section id="methodSec">
     <h2>The question and the method</h2>
@@ -208,60 +173,11 @@
      have their own demand patterns; the weekday-type control reduces but does
      not remove that. A result near zero is a real finding, not a failure.</p>
 
-  <button id="toTop" type="button" title="Back to top">&uarr; top</button>
-
   <footer id="footer"></footer>
 
   <script>
-    // Table of contents, built from the section headings so it cannot drift
-    // from the page. Entries for hidden sections hide with them; the entry for
-    // the section being read is marked active. Doubles as the scroll handler
-    // for the back-to-top button.
-    function buildToc() {
-      const ol = document.querySelector('#toc ol');
-      const items = [...document.querySelectorAll('section[id] > h2')].map(h => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.href = '#' + h.parentElement.id;
-        a.textContent = h.textContent;
-        li.appendChild(a);
-        ol.appendChild(li);
-        return { sec: h.parentElement, li, a };
-      });
-      const toTop = document.getElementById('toTop');
-      const sync = () => {
-        let active = null;
-        for (const it of items) {
-          const hidden = it.sec.offsetParent === null;
-          it.li.style.display = hidden ? 'none' : '';
-          if (!hidden && it.sec.getBoundingClientRect().top <= 120) active = it;
-        }
-        for (const it of items) it.a.classList.toggle('active', it === active);
-        toTop.classList.toggle('show', scrollY > 600);
-      };
-      addEventListener('scroll', sync, { passive: true });
-      addEventListener('resize', sync);
-      sync();
-
-      // Wide viewports: always expanded, beside the text. Narrow: collapsed by
-      // default, and collapses again after a jump so it stays out of the way.
-      const det = document.getElementById('tocDet');
-      const wide = matchMedia('(min-width:1181px)');
-      const fit = () => { det.open = wide.matches; };
-      wide.addEventListener('change', fit);
-      fit();
-      ol.addEventListener('click', e => {
-        if (e.target.tagName === 'A' && !wide.matches) det.open = false;
-      });
-      toTop.addEventListener('click', () => scrollTo({ top: 0,
-        behavior: matchMedia('(prefers-reduced-motion:reduce)').matches
-          ? 'auto' : 'smooth' }));
-      return sync;
-    }
-    const syncToc = buildToc();
-
     fetch('wc_results.json').then(r => r.json())
-      .then(d => { render(d); syncToc(); }).catch(() => {
+      .then(d => { render(d); window.syncPageNav?.(); }).catch(() => {
       document.getElementById('banner').innerHTML =
         '<p class="note warn">Could not load <code>wc_results.json</code>. Run ' +
         '<code>python wc_fetch_data.py &amp;&amp; python wc_analysis.py</code>, then serve over http.</p>';
@@ -272,7 +188,7 @@
     Promise.all([
       fetch('wc_load_results.json').then(r => r.json()),
       fetch('wc_permutation_results.json').then(r => r.json()).catch(() => null),
-    ]).then(([load, perm]) => { renderLoad(load, perm); syncToc(); })
+    ]).then(([load, perm]) => { renderLoad(load, perm); window.syncPageNav?.(); })
       .catch(() => {});
 
     function renderLoad(d, perm) {

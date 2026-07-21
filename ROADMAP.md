@@ -399,6 +399,13 @@ exploration surface.
 
 A roadmap is a living document; the revisions are part of the record.
 
+- 2026-07-21: page navigation (section menu + back-to-top) added to
+  ladder.html and worldcup.html, then extracted to shared `page-nav.css` and
+  `page-nav.js` once the second copy appeared and more pages were planned.
+  Pages opt in with an empty `<nav id="toc">`; the menu is generated from
+  `section[id] > h2`, so it cannot drift from the headings. index.html and
+  tariff.html do not opt in yet: tariff.html has two sections, too few to
+  navigate. Design decision recorded in README, "Shared page furniture".
 - 2026-07-21: R9 added (day-ahead vs intraday). Prompted by the accuracy
   discussion: day-ahead prices are settlement truth for the bill but embody
   the market's own forecasts; whether they proxy real-time conditions is a

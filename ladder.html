@@ -9,7 +9,9 @@
   <link rel="stylesheet" href="page-nav.css" />
   <script src="page-nav.js" defer></script>
   <style>
-    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --win:#4c9f70; --lose:#c1436d; }
+    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --win:#4c9f70; --lose:#c1436d;
+      /* --accent: the page's own accent, consumed by page-nav.css */
+      --accent:#4c9f70; }
     * { box-sizing:border-box; }
     body { font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       color:var(--ink); max-width:860px; margin:0 auto; padding:2rem 1.25rem; line-height:1.55; }
@@ -269,7 +271,7 @@
         average would have been a strawman for the models to beat.</dd>
       <dt>"Does this verdict hold at scale?"</dt>
       <dd>No — and that boundary is part of the finding. An aggregator trading
-        GWh prices 0.4 ct/kWh of regret very differently. This is a
+        GWh values 0.4 ct/kWh of regret very differently. This is a
         household-product verdict.</dd>
       <dt>"Only one year?"</dt>
       <dd>One weather year, hourly resolution. Known open items, documented in
