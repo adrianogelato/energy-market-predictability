@@ -14,7 +14,8 @@ Order and dependencies
 5. wc_analysis.py            offline   <- wc_prices/weather   -> wc_results.json
 6. forecast_cheap_hours.py   offline   <- wc_prices/weather   -> forecast_results.json
 7. forecast_value.py         offline   <- forecast_results    -> forecast_value.json
-8. event_study.py            offline   <- wc_prices/weather   -> event_study_results.json
+8. event_study.py            offline   <- year_prices/weather (fallback wc_*)
+                                                              -> event_study_results.json
 9. wc_load_effect.py         offline   <- wc_load.csv         -> wc_load_results.json
 10. wc_permutation.py        offline   <- wc_load.csv         -> wc_permutation_results.json
 

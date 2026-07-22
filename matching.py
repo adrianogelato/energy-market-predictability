@@ -31,11 +31,12 @@ Categorical filter (match_day_type=True):
   Fallbacks when the same-type pool is too small: saturday and sunlike merge
   into a weekend-like pool; after that, the full pool.
 
-Optional season guard (SEASON_GAP_MAX_DAYS):
-  caps |day-of-year distance| between a day and its controls. Off by default:
-  with the current one-sided window it would starve the pool. Turn it on
-  (e.g. 21) once the fetch window is widened; it is the direct guard against
-  the seasonal-drift confound documented in ROADMAP.md.
+Season guard (SEASON_GAP_MAX_DAYS):
+  caps |calendar distance| between a day and its controls, the direct guard
+  against the seasonal-drift confound documented in ROADMAP.md. On (21 days)
+  since the event studies moved to the full-year files; it degrades
+  gracefully: when fewer than k pool days fall inside the gap, the full pool
+  is used, so a narrow one-sided window is never starved.
 
 Every study exposes the chosen pairings (controls(..., detailed=True)) so the
 matching can be eyeballed instead of trusted.
@@ -50,7 +51,7 @@ from statistics import mean, pstdev
 
 HERE = Path(__file__).parent
 K_CONTROLS = 5
-SEASON_GAP_MAX_DAYS = None   # e.g. 21 once the fetch window is widened
+SEASON_GAP_MAX_DAYS = 21   # controls must be calendar neighbours (see docstring)
 
 
 def load_holidays(path=None):

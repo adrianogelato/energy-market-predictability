@@ -18,8 +18,8 @@ pipeline, and statistics that are allowed to say "no effect".
 
 **Smart timing is worth real money, and the algorithm barely matters.** Over a
 full backtested year (337 days), shifting a daily 11 kWh EV charge into the
-three cheapest hours saves about €203/yr versus charging anytime. (An earlier
-summer-only window said €307/yr; peak solar spreads inflated it.) Across a
+three cheapest hours saves about €203/yr versus charging anytime. (The
+summer-only window alone says €303/yr; peak solar spreads inflate it.) Across a
 six-rung ladder of forecasters, from a 28-day lookup table up to gradient
 boosting, the lookup table wins the whole year outright; every model
 underperforms it overall, weather models pay off only in winter, and there by
@@ -30,23 +30,27 @@ automation and UX, not ML.**
 [forecaster](#the-cheapest-hours-forecaster-milestone-5),
 [value](#the-forecasts-money-value-milestone-8))
 
-**The World Cup does not detectably move the German market.** Prices during
-match hours: +0.62 ct/kWh vs weather-comparable days (t=0.84), and +0.31 under
-a within-day contrast that nets out seasonal drift. Load forecast error: the
-once-marginal overnight subset shrank to +501 MW (t=1.39) as the window filled
-in and is consistent with chance (family-wise permutation p=0.90 over four
-subsets including Germany-only), while flipping sign under the within-day
-contrast. The study's power bounds the claim: no price effect larger than
-~2.1 ct/kWh, no load effect separable from seasonal drift. Only the 19 July
-final is still missing from the window.
+**The World Cup did not detectably move the German market.** Final verdict on
+the complete tournament window (11 June to 19 July, 35 match days, seasonal
+controls enforced): prices during match hours +0.60 ct/kWh vs
+weather-comparable days (t=0.75), +0.83 under a within-day contrast that nets
+out seasonal drift, both consistent with no effect. Load forecast error: every
+subset, the once-marginal overnight one included, is consistent with chance
+(overnight subset permutation p=0.92, family-wise p=0.94 over four subsets
+including Germany-only), and the within-day contrast still flips its sign,
+which points at drift in the error series, not matches. The study's power
+bounds the claim: no price effect larger than ~2.2 ct/kWh, no load effect
+separable from seasonal drift.
 ([details](#the-world-cup-price-study-milestone-4))
 
-**The method detects real events.** The same engine finds the weekend effect at
-−5.81 ct/kWh in daytime prices (t=−13.96, permutation p < 0.0005), so the World
-Cup null is a bounded finding from a working instrument, not a broken tool —
-with the caveat that detecting a 6 ct effect does not prove sensitivity to
-small ones, which is why every null above carries its minimum detectable
-effect. ([details](#the-generic-event-study-milestone-9))
+**The method detects real events.** On a full year of data the same engine
+finds the weekend effect at −3.93 ct/kWh in daytime prices (n=106, t=−13.52,
+permutation p < 0.0005) and now also a real public-holiday effect at
+−6.91 ct/kWh (n=9, permutation p=0.013), so the World Cup null is a bounded
+finding from a working instrument, not a broken tool — with the caveat that
+detecting a 4 ct effect does not prove sensitivity to small ones, which is why
+every null above carries its minimum detectable effect.
+([details](#the-generic-event-study-milestone-9))
 
 **Live demo:** https://adrianogelato.github.io/energy-market-predictability/
 
@@ -67,8 +71,8 @@ and anticipation can only show up in the day-ahead price, which is fixed by
 auction at noon the day before delivery (milestone 4). "Did the forecast miss
 it?" is a question about surprise, and surprise can only show up in the
 market's own forecast error, actual load minus the day-ahead load forecast
-(milestones 6 and 7). The current answers: any priced-in effect is smaller than
-~2.1 ct/kWh, and there is no forecast miss separable from seasonal drift.
+(milestones 6 and 7). The final answers: any priced-in effect is smaller than
+~2.2 ct/kWh, and there is no forecast miss separable from seasonal drift.
 
 So the milestones are not one sequence but three strands, interleaved because
 they share data. Strand A (M1-M3) builds contact with the market. Strand B
@@ -135,9 +139,9 @@ test before it means anything.
 Milestone 9 (`python event_study.py`) generalises the method into a reusable
 event-study engine and calibrates it: a method that only ever returns null
 proves nothing, so it must find the certain weekend effect. It does
-(about -6 ct/kWh, p < 0.0005), which is what supports reading the World Cup
-null as a finding, within the limits of the study's power; every null is
-reported together with its minimum detectable effect.
+(about -4 ct/kWh on the full-year window, p < 0.0005), which is what supports
+reading the World Cup null as a finding, within the limits of the study's
+power; every null is reported together with its minimum detectable effect.
 
 ### Strand C: the forecast question (M5, M8, M10)
 
@@ -402,12 +406,15 @@ daytime price discount of roughly 6 ct/kWh, silently biasing every match day
 it was paired with. (Removing it strengthened the measured weekend effect,
 which is the direction you'd expect if it had been contaminating the pool.)
 
-A season guard exists but ships off. `SEASON_GAP_MAX_DAYS` caps how far apart
-in the calendar a day and its controls may be, which is the direct defence
-against the seasonal-drift confound documented in `ROADMAP.md`. It is off by
-default as a deliberate trade: with the current one-sided window (controls
-almost all pre-tournament), enforcing it would starve the control pool. It
-should be enabled (around 21 days) as soon as the fetch window is widened.
+A season guard is on. `SEASON_GAP_MAX_DAYS` (21 days) caps how far apart in
+the calendar a day and its controls may be, which is the direct defence
+against the seasonal-drift confound documented in `ROADMAP.md`. It was off
+while the only data was the one-sided World Cup window, where enforcing it
+would have starved the control pool; it went on when the event studies moved
+to the full-year files. The guard degrades gracefully: when fewer than K pool
+days lie within the gap, the full pool is used, so the World Cup studies keep
+working on their narrow window while the year-wide studies get strictly
+seasonal controls.
 
 Mechanics, not design decisions: features are z-scored and combined by
 Euclidean distance with K=5 nearest; the matcher degrades gracefully to
@@ -472,9 +479,9 @@ Two honest footnotes on the statistics. The per-day deltas share control days
 correlated and the plain t is optimistic; the permutation test is the
 trustworthy inference. And because the control days are mostly pre-tournament,
 the analysis also reports a within-day difference-in-differences contrast that
-nets out day-level seasonal drift. On the current data it halves the
-+0.62 ct/kWh headline to +0.31, which says part of that headline is drift
-rather than a match effect.
+nets out day-level seasonal drift. On the final window the two estimators read
++0.60 and +0.83 ct/kWh, both well inside noise (t=0.75 and 1.62), so they
+agree on the verdict: no detectable price effect.
 
 The match schedule is an editable CSV, not a hard-coded list or an API call.
 There is no clean, keyless World Cup schedule API, and the knockout fixtures
@@ -596,9 +603,9 @@ harmonics and a cloud-at-midday interaction, fit with numpy, captures the daily
 shape and the solar effect without a heavy machine-learning stack. A stronger
 model is a later milestone; the point here is a correct, honest baseline.
 
-What the backtest actually found (real data, 44 test days): the model does NOT
+What the backtest actually found (real data, 45 test days): the model does NOT
 meaningfully beat the naive baselines. On the refreshed window its hit-rate
-edges ahead (0.788 vs climatology's 0.773 and persistence's 0.765), but in
+edges ahead (0.785 vs climatology's 0.770 and persistence's 0.763), but in
 money terms that is worth €0.60/yr against climatology, which is noise, not
 product value. By this section's own criterion, the forecaster did not earn its
 place, and that is the finding, not a failure to have one. The cheap hours of
@@ -725,15 +732,13 @@ subset membership along, so all subset t's come from the same draw, and
 the maximum |t| across them builds the family-wise null — the correct reference
 when the most extreme of several examined subsets is the one being reported.
 
-On the current data the overnight blip lands at a subset p of 0.513 and a
-family-wise p of 0.901 (over four subsets, the Germany-only one included), so
-it is consistent with chance; on the near-final window its t fell to 1.39
-anyway. A within-day difference-in-differences robustness check (in
-`wc_load_effect.py`) agrees for
-the opposite reason: it flips the overnight estimate to −739 MW, and two
-estimators that disagree in sign mean the drift in the forecast-error series,
-not the matches, is driving both. This is the check that keeps the null honest
-instead of hand-waved.
+On the final window the overnight blip lands at a subset p of 0.922 and a
+family-wise p of 0.938 (over four subsets, the Germany-only one included), so
+it is consistent with chance. A within-day difference-in-differences
+robustness check (in `wc_load_effect.py`) agrees for the opposite reason: it
+flips the overnight estimate to −570 MW, and two estimators that disagree in
+sign mean the drift in the forecast-error series, not the matches, is driving
+both. This is the check that keeps the null honest instead of hand-waved.
 
 ### The forecast's money value (milestone 8)
 
@@ -755,7 +760,7 @@ It uses wholesale price differences, which is legitimate. The fixed adders on a
 real bill are equal in every hour, so they cancel when comparing strategies. The
 euro figures are therefore the true savings from timing, independent of the
 tariff's fixed part. But they are annualized at summer rates: the backtest
-window is 44 early-summer days, when solar spreads are at their widest, so the
+window is 45 early-summer days, when solar spreads are at their widest, so the
 per-year numbers are a summer-rate extrapolation, not a calendar-year estimate.
 Winter would need its own window.
 
@@ -780,25 +785,33 @@ permutation p-value.
 
 #### Design decisions
 
+It runs on the full-year files when they exist. The studies read
+`year_prices.csv` and `year_weather.csv` (milestone 10) and fall back to the
+World Cup window files on a clone that only ran the short fetch. The year-wide
+pool is what turned the holiday test from n=1 into a real test, and it is the
+window where the season guard in `matching.py` (controls at most 21 calendar
+days away) has room to work.
+
 The weekend case is a positive control, not filler. A method that only ever
 returns null is useless, because you cannot tell "no effect" from "cannot detect
-anything". The weekend effect is large and certain, so finding it (here about
--6 ct/kWh in daytime price, permutation p < 0.0005 — the floor of 2000 draws;
-a permutation p is never exactly zero) proves the machinery works. One
-limitation stated plainly: detecting a 6 ct effect does not demonstrate
-sensitivity to small ones, which is why the World Cup null is reported with its
-minimum detectable effect (~2.1 ct/kWh) rather than as an unqualified "no
-effect".
+anything". The weekend effect is large and certain, so finding it (here
+−3.93 ct/kWh in daytime price over 106 weekend days, permutation p < 0.0005 —
+the floor of 2000 draws; a permutation p is never exactly zero) proves the
+machinery works. One limitation stated plainly: detecting a 4 ct effect does
+not demonstrate sensitivity to small ones, which is why the World Cup null is
+reported with its minimum detectable effect (~2.2 ct/kWh) rather than as an
+unqualified "no effect".
+
+The holiday test is now a second positive control. On the year window nine
+German public holidays carry data, and the engine finds −6.91 ct/kWh
+(t=−3.8, permutation p=0.013): holidays price like Sundays, as the grid folk
+wisdom says. The earlier summer-only window held a single holiday (Whit
+Monday, n=1, no usable t), and the engine said so rather than pretending;
+widening the window was the backlog item that fixed it.
 
 The signal is price, so it runs without a token. Weekends and holidays lower
 daytime demand and therefore daytime price, so the effect is visible in the
 aWATTar price series alone. Load can be swapped in where a token is available.
-
-It is honest about the holiday sample. Only one public holiday (Whit Monday) falls
-in the summer data window, so the holiday test has n=1 and no usable t. The engine
-says so rather than pretending. Widening the fetch window into spring (Good Friday,
-Easter Monday, Labour Day, Ascension) would give a proper holiday test, and is
-noted in the backlog.
 
 ### The value-of-complexity ladder (milestone 10)
 
@@ -931,11 +944,11 @@ LICENSE                    MIT
 
 The hypotheses and their verdicts, the limitations, and the prioritized backlog
 live in `ROADMAP.md` (this README holds the milestone descriptions; that file
-holds the working ledger). Currently parked there, in priority order: the
-post-tournament rerun, widening the fetch window into spring, the
-intraday/imbalance study, a winter backtest for the forecaster, the Winter
-Olympics as a second event, 15-minute resolution, and a cross-country
-dose-response study.
+holds the working ledger). The post-tournament rerun and the seasonal-control
+repair are done (2026-07-22); queued there, in priority order: the
+intraday/imbalance study, the Winter Olympics as a second event, pricing the
+findings for stakeholders, deployed-realism forecasts, 15-minute resolution,
+and a cross-country dose-response study.
 
 ## License
 

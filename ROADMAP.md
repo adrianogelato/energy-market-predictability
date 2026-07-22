@@ -94,18 +94,18 @@ match hours relative to weather-comparable days, robust to the weather controls
 and to a within-day difference-in-differences contrast, with permutation
 p-values (per subset and family-wise across subsets).
 
-Where H2 landed (window through 18 July; the 19 July final joins with the
-post-tournament refetch): no robust effect, and the near-final window weakened
-the earlier blips further. The price test reads +0.62 ct/kWh (t=0.84,
-MDE ≈ 2.1 ct/kWh) and halves to +0.31 under the within-day contrast. The load
-forecast-error test's once-marginal overnight subset shrank to +501 MW
-(t=1.39) and is consistent with chance (subset p=0.513, family-wise p=0.901
-over four subsets, Germany-only included), while flipping sign under the
-within-day contrast (−739 MW), which says the error series drifts across the
-window in a way neither estimator fully removes. The Germany-only subset is
-flat in both tests (+0.39 ct/kWh price, +162 MW load, n=4, MDEs 6.9 ct/kWh and
-4,600 MW). The honest summary: any World Cup effect on the German market is
-smaller than ~2.1 ct/kWh in price and not separable from seasonal drift in load.
+Where H2 landed (final; complete tournament window 11 June to 19 July 2026,
+35 match days, season guard on): no robust effect anywhere. The price test
+reads +0.60 ct/kWh (t=0.75, MDE ≈ 2.2 ct/kWh) and +0.83 under the within-day
+contrast (t=1.62), both consistent with no effect. The load forecast-error
+test's once-marginal overnight subset is consistent with chance (subset
+p=0.922, family-wise p=0.938 over four subsets, Germany-only included) and
+still flips sign under the within-day contrast (+625 MW main, −570 MW
+within-day), which says the error series drifts across the window in a way
+neither estimator fully removes. The Germany-only subset is flat in both
+tests (+0.27 ct/kWh price, +632 MW load, n=4, MDEs 6.7 ct/kWh and 5,600 MW).
+The honest summary: any World Cup effect on the German market is smaller than
+~2.2 ct/kWh in price and not separable from seasonal drift in load.
 
 ## Milestones
 
@@ -131,9 +131,12 @@ directly: on "comparable" days the midday load forecast error runs around
 part of any measured "match effect" is period drift, not matches. The
 within-day difference-in-differences contrast removes additive day-level drift,
 but the drift here changes the intraday *shape* (midday solar forecast bias),
-which is why the main estimate and the DiD disagree in sign for load. Widening
-the window into adjacent summer weeks or matching on solar radiation directly
-is the real fix (roadmap item R2).
+which is why the main estimate and the DiD disagree in sign for load. The
+season guard in `matching.py` (controls at most 21 calendar days away,
+delivered with R2) caps how far the drift can stretch, but inside the
+one-sided World Cup window the controls remain mostly pre-tournament, so the
+constraint is reduced, not removed; the sign-flipping DiD on the final window
+shows the residual drift.
 
 Per-day effect estimates share control days (a pool of ~28 controls serves ~30
 match days, 5 each), so they are positively correlated and plain t-statistics
@@ -181,36 +184,8 @@ matching as the control.
 
 ### Now
 
-**R1. Final World Cup verdict** (path two)
-- Outcome: H2 moves from interim to final on the complete tournament window,
-  with Germany's matches as their own subset.
-- Status: mostly done. The Germany subset is implemented across the chain
-  (wc_analysis.py, wc_load_effect.py, wc_permutation.py with the family-wise
-  correction over four subsets) and surfaced on worldcup.html; the fetch
-  window already ends 19 July. Germany went out in the round of 32, so the
-  subset is four group-stage/R32 matches, not a knockout run: n=4, and its
-  MDE does most of the talking.
-- Answer looks like: final effect sizes with permutation p-values and MDEs on
-  the complete window, all cited numbers reconciled per the hard rule; the
-  interim notices retire themselves once wc_results.json reaches 2026-07-19.
-- Depends on: the weather archive lagging about two days, so the rerun only
-  becomes possible on or after 22 July.
-- Who benefits: methodology, and every H2 claim on the pages.
-
-**R2. Repair the seasonal control gap** (path two)
-- Outcome: event estimates no longer confounded by the period drift documented
-  in Limitations, and the n=1 holiday test becomes a real one (Good Friday,
-  Easter Monday, Labour Day, Ascension, Whit Monday all land in March-May).
-- Why now: this is the binding limitation on every event result, and the data
-  already exists: the full-year files from M10 (`year_prices.csv`,
-  `year_weather.csv`) contain the widened control pools and the wind and
-  radiation columns the matching engine already knows how to use.
-- Answer looks like: the match-day vs control forecast-error gap at non-match
-  hours shrinks toward zero; a holiday effect estimate with MDE.
-- Depends on: pointing the event studies at the full-year files; enabling the
-  season guard in `matching.py` (SEASON_GAP_MAX_DAYS, around 21 days) so
-  controls stay seasonal neighbours.
-- Who benefits: methodology; retroactively strengthens R1.
+(Empty. R1 and R2 were delivered on 2026-07-22, see the changelog; the next
+items to pull are R3-R5.)
 
 ### Next
 
@@ -356,25 +331,14 @@ matching as the control.
 Concrete, executable work, priority top to bottom. Every task points at a
 roadmap item or names its purpose.
 
-1. (R1) One local `python run_all.py` on or after 22 July (the weather
-   archive lags about two days, so the 19 July final only becomes fetchable
-   then), then reconcile all cited numbers in README, this file, and the
-   page verdicts.
-2. (R1) Fill in the actual finalists in the last four rows of wc_matches.csv
-   (they carry placeholder labels like "Match 101 Winner"; kickoff hours are
-   real, so the analysis is unaffected).
-3. (R2) Point the event studies at `year_prices.csv` / `year_weather.csv` for
-   the widened control pool; enable SEASON_GAP_MAX_DAYS (~21 days) in
-   `matching.py`.
-4. (R2) Run the real holiday test on the five spring holidays.
-5. (R4) Fix `entsoe_fetch.py` timezone handling: ZoneInfo("Europe/Berlin")
+1. (R4) Fix `entsoe_fetch.py` timezone handling: ZoneInfo("Europe/Berlin")
    instead of the hardcoded summer +2 h CEST conversion, so it can serve a
    February window.
-6. (R4) Curate the Olympics events CSV: high-German-viewership sessions only.
-7. (R5) Define the relevant consumer configurations beyond the EV case and
+2. (R4) Curate the Olympics events CSV: high-German-viewership sessions only.
+3. (R5) Define the relevant consumer configurations beyond the EV case and
    run the cost model per configuration.
-8. (R5) Local storage sizing analysis (wall-box scale).
-9. (Ladder) One local rerun of `forecast_ladder.py` to populate the
+4. (R5) Local storage sizing analysis (wall-box scale).
+5. (Ladder) One local rerun of `forecast_ladder.py` to populate the
    window-size comparison (n=2/3/4, `by_n` aggregates plus per-day `daily`
    blocks in `forecast_ladder.json`) and the accuracy-vs-decision-value
    blocks (`accuracy`, `paired_vs_lookup`; needs scikit-learn for the gbm
@@ -398,6 +362,20 @@ exploration surface.
 ## Changelog
 
 A roadmap is a living document; the revisions are part of the record.
+
+- 2026-07-22: R1 delivered. Full pipeline rerun on the complete tournament
+  window (through the 19 July final, Spain 1-0 Argentina; finalist labels
+  filled into wc_matches.csv): H2 final verdict is a bounded null, numbers in
+  "Where H2 landed" above, all cited numbers reconciled. The interim notices
+  on index.html and worldcup.html retired themselves as designed.
+- 2026-07-22: R2 delivered. Season guard enabled in `matching.py`
+  (SEASON_GAP_MAX_DAYS=21, degrading to the full pool when fewer than K days
+  fall inside the gap, so the narrow World Cup window keeps working);
+  event_study.py now runs on `year_prices.csv`/`year_weather.csv` with a
+  fallback to the World Cup files. Result: the holiday test went from n=1 to
+  n=9 and found −6.91 ct/kWh (t=−3.8, permutation p=0.013), a second positive
+  control next to the weekend effect (−3.93 ct/kWh, n=106, p < 0.0005 on the
+  year window).
 
 - 2026-07-21: page navigation (section menu + back-to-top) added to
   ladder.html and worldcup.html, then extracted to shared `page-nav.css` and

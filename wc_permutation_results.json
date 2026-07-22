@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-21T15:01",
+  "generated_at": "2026-07-22T10:35",
   "data_source": "live",
   "n_permutations": 2000,
   "matching": {
@@ -15,47 +15,47 @@
       "saturday",
       "sunlike (Sun or public holiday)"
     ],
-    "season_gap_max_days": null,
+    "season_gap_max_days": 21,
     "distance": "euclidean over z-scored features"
   },
   "subsets": {
     "all": {
       "n_match_days": 35,
-      "real_t": 0.33,
-      "real_delta_mw": 107.9,
-      "p_value_two_sided": 0.824,
-      "p_value_one_sided": 0.365,
-      "null_t_95pct": 2.92
+      "real_t": 0.7,
+      "real_delta_mw": 245.0,
+      "p_value_two_sided": 0.649,
+      "p_value_one_sided": 0.161,
+      "null_t_95pct": 3.07
     },
     "prime": {
       "n_match_days": 35,
-      "real_t": 0.12,
-      "real_delta_mw": 46.2,
-      "p_value_two_sided": 0.944,
-      "p_value_one_sided": 0.41,
-      "null_t_95pct": 2.91
+      "real_t": 0.6,
+      "real_delta_mw": 260.0,
+      "p_value_two_sided": 0.696,
+      "p_value_one_sided": 0.187,
+      "null_t_95pct": 3.17
     },
     "overnight": {
       "n_match_days": 25,
-      "real_t": 0.88,
-      "real_delta_mw": 320.2,
-      "p_value_two_sided": 0.522,
-      "p_value_one_sided": 0.249,
-      "null_t_95pct": 2.68
+      "real_t": 0.13,
+      "real_delta_mw": 65.3,
+      "p_value_two_sided": 0.922,
+      "p_value_one_sided": 0.329,
+      "null_t_95pct": 2.56
     },
     "germany": {
       "n_match_days": 4,
-      "real_t": 0.7,
-      "real_delta_mw": 535.1,
-      "p_value_two_sided": 0.548,
-      "p_value_one_sided": 0.239,
-      "null_t_95pct": 3.78
+      "real_t": -0.05,
+      "real_delta_mw": -56.0,
+      "p_value_two_sided": 0.964,
+      "p_value_one_sided": 0.454,
+      "null_t_95pct": 3.41
     }
   },
   "family_wise": {
-    "real_max_abs_t": 0.88,
-    "p_value": 0.881,
-    "null_max_t_95pct": 4.03,
+    "real_max_abs_t": 0.7,
+    "p_value": 0.938,
+    "null_max_t_95pct": 3.98,
     "note": "null of max|t| across the 4 subsets from joint draws; this is the correct reference when the most extreme of several examined subsets is the one being reported"
   }
 }

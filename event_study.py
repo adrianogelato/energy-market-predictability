@@ -19,16 +19,25 @@ Two demonstrations run by default:
   weekends  : Saturdays and Sundays vs weather-comparable weekdays (high power,
               a large real effect is expected)
   holidays  : German public holidays (events_holidays.csv) vs comparable
-              weekdays (few fall in a summer data window, so low power; widen the
-              fetch window into spring for a proper test)
+              weekdays
 
 Signal note
 -----------
-Default signal is the day-ahead price (wc_prices.csv), so this runs without an
-ENTSO-E token. Weekends and holidays lower daytime demand and therefore daytime
-price, so the effect shows up cleanly in price.
+Default signal is the day-ahead price, so this runs without an ENTSO-E token.
+Weekends and holidays lower daytime demand and therefore daytime price, so the
+effect shows up cleanly in price.
 
-Inputs : wc_prices.csv, wc_weather.csv, events_holidays.csv
+Data note
+---------
+The studies run on the full-year files (year_prices.csv / year_weather.csv,
+milestone 10) when they exist: a year-wide pool gives the holiday test real
+n instead of the single summer holiday, and the season guard in matching.py
+keeps controls calendar neighbours. Falls back to the World Cup window files
+(wc_prices.csv / wc_weather.csv) so a clone that only ran the short fetch
+still works.
+
+Inputs : year_prices.csv + year_weather.csv (fallback wc_prices.csv +
+         wc_weather.csv), events_holidays.csv
 Outputs: event_study_results.json
 Run    : python event_study.py
 """
@@ -50,9 +59,16 @@ N_PERM = 2000
 SEED = 20260713
 
 
-def load_price():
+def data_files():
+    """Year files when present (wider pool, real holiday n), else the WC window."""
+    if (HERE / "year_prices.csv").exists() and (HERE / "year_weather.csv").exists():
+        return HERE / "year_prices.csv", HERE / "year_weather.csv"
+    return HERE / "wc_prices.csv", HERE / "wc_weather.csv"
+
+
+def load_price(path):
     out = {}
-    with open(HERE / "wc_prices.csv") as f:
+    with open(path) as f:
         for r in csv.DictReader(f):
             out[dt.datetime.fromisoformat(r["datetime"])] = float(r["ct_per_kwh"])
     return out
@@ -130,8 +146,9 @@ def run_study(name, event_days, pool_days, price, matcher, hours, rng):
 
 
 def main():
-    price = load_price()
-    feats = load_weather_daily()
+    price_file, weather_file = data_files()
+    price = load_price(price_file)
+    feats = load_weather_daily(weather_file)
     days = sorted(feats)
     price_days = {t.date() for t in price}
     eligible = [d for d in days if d in price_days]
@@ -155,6 +172,9 @@ def main():
         "generated_at": dt.datetime.now().isoformat(timespec="minutes"),
         "signal": "day-ahead price (ct/kWh)",
         "hours": f"{DAY_HOURS[0]:02d}:00-{DAY_HOURS[-1]:02d}:59",
+        "data_files": [price_file.name, weather_file.name],
+        "window": {"start": min(eligible).isoformat(),
+                   "end": max(eligible).isoformat()},
         "n_permutations": N_PERM,
         "matching": {**matcher.describe(),
                      "note": ("day-type filter disabled for these studies: "

@@ -1,7 +1,15 @@
 {
-  "generated_at": "2026-07-21T15:01",
+  "generated_at": "2026-07-22T10:34",
   "signal": "day-ahead price (ct/kWh)",
   "hours": "08:00-19:59",
+  "data_files": [
+    "year_prices.csv",
+    "year_weather.csv"
+  ],
+  "window": {
+    "start": "2025-07-12",
+    "end": "2026-07-12"
+  },
   "n_permutations": 2000,
   "matching": {
     "features": [
@@ -16,29 +24,30 @@
       "saturday",
       "sunlike (Sun or public holiday)"
     ],
-    "season_gap_max_days": null,
+    "season_gap_max_days": 21,
     "distance": "euclidean over z-scored features",
     "note": "day-type filter disabled for these studies: weekend/holiday days are deliberately matched against weekday controls; holidays are excluded from the weekday pool"
   },
   "studies": [
     {
       "name": "weekend_vs_weekday",
-      "n": 20,
-      "mean_delta_ct": -5.83,
-      "std": 1.77,
-      "t_stat": -14.75,
-      "mde_ct_80pct_power": 1.11,
+      "n": 106,
+      "mean_delta_ct": -3.93,
+      "std": 3.0,
+      "t_stat": -13.52,
+      "mde_ct_80pct_power": 0.81,
       "permutation_p": 0.0005,
       "permutation_p_str": "< 0.0005"
     },
     {
       "name": "holiday_vs_weekday",
-      "n": 1,
-      "mean_delta_ct": -6.78,
-      "std": 0.0,
-      "t_stat": null,
-      "mde_ct_80pct_power": null,
-      "permutation_p": null
+      "n": 9,
+      "mean_delta_ct": -6.91,
+      "std": 5.46,
+      "t_stat": -3.8,
+      "mde_ct_80pct_power": 5.09,
+      "permutation_p": 0.013,
+      "permutation_p_str": "0.0130"
     }
   ]
 }
