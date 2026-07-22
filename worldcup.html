@@ -168,6 +168,40 @@
     <p class="note" id="loadInterp"></p>
   </section>
 
+  <section id="placeboSec">
+    <h2>Why a placebo test, and what it changes</h2>
+    <p>One subset, overnight kickoffs, produced a t-statistic just above 2, the
+       usual line for "worth a look". Two things make that line untrustworthy here.
+       A t of 2 is crossed by pure chance about one time in twenty, and four subsets
+       were examined (all matches, prime time, overnight, Germany), so the chance
+       that at least one clears the bar by luck is well above one in twenty.
+       Reporting the best-looking of several subsets without accounting for the
+       others is the standard way an analysis fools itself.</p>
+    <p>The placebo test measures that risk directly instead of arguing about it. It
+       breaks the link between "match day" and "effect": random days are relabelled
+       as fake match days, fresh weather-comparable controls are rebuilt from the
+       remaining days, and the effect is recomputed exactly as before. Repeating this
+       a few thousand times builds a null distribution, a picture of the effect sizes
+       pure chance produces when nothing real is happening. The p-value is the share
+       of those random reruns whose result is at least as extreme as the real one. A
+       high share means chance manufactures this result routinely, so the real one
+       proves nothing.</p>
+    <p>The multiple-subsets problem gets its own correction. Each random draw
+       relabels the days once and carries every subset's membership through the same
+       draw, so all four subset results come from one shared reshuffle. Taking the
+       largest absolute t across the four, on every draw, builds a "family-wise"
+       null: the honest yardstick for "we looked several times, how impressive is the
+       best result?". The real most-extreme subset is judged against that, not
+       against its own private null.</p>
+    <p class="note">What it changes here: the overnight blip survives neither check,
+       so the honest call is no detectable effect, not a discovery. The method's
+       worth is that it is willing to kill a promising-looking result. It assumes
+       nothing about the data being bell-shaped, which matters because the
+       t-statistics on this page are optimistic (match days share control days), and
+       it is the same discipline that keeps A/B tests and product experiments from
+       shipping decisions built on noise.</p>
+  </section>
+
   <p class="note">Honest reading: this is an observational estimate, not proof
      of causation. Match scheduling correlates with weekends and holidays, which
      have their own demand patterns; the weekday-type control reduces but does
