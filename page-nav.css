@@ -5,8 +5,13 @@
 section { scroll-margin-top: 1rem; }
 
 /* Table of contents: fixed to the left of the centred text column, so it
-   stays in view while scrolling. Below 1180px there is no room beside the
-   text, so it becomes a collapsible block in the flow instead. */
+   stays in view while scrolling. Below 1320px there is no room beside the
+   text, so it becomes a collapsible block in the flow instead.
+
+   The breakpoint has to clear the geometry below: 860px of text plus a
+   12.5rem menu and a 1.5rem gap on each side needs 1308px. It used to read
+   1180px, which left the menu clipped off the left edge of the window at any
+   width between the two. */
 #toc { position:fixed; top:2rem; right:calc(50% + 430px + 1.5rem);
   width:12.5rem; max-height:calc(100vh - 4rem); overflow-y:auto;
   font-size:.82rem; line-height:1.4; }
@@ -20,7 +25,7 @@ section { scroll-margin-top: 1rem; }
 #toc a:hover { color:var(--ink); border-left-color:var(--muted); }
 #toc a.active { color:var(--ink); font-weight:600; border-left-color:var(--accent); }
 
-@media (max-width:1180px) {
+@media (max-width:1320px) {
   #toc { position:static; width:auto; max-height:none; overflow:visible;
     border:1px solid var(--line); border-radius:6px; padding:.6rem .9rem;
     margin:1.25rem 0; font-size:.9rem; }

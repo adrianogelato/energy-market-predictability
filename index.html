@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Energy market predictability — findings at a glance</title>
+  <title>Energy market predictability, findings at a glance</title>
   <!--
     The project one-pager: the summary a first-time visitor should land on.
     Every number on this page is computed live from the committed result
@@ -12,30 +12,8 @@
     The detail pages: tariff.html (the daily demo) and worldcup.html (the
     event study).
   -->
-  <style>
-    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --accent:#4c9f70; --alt:#c1436d; }
-    * { box-sizing: border-box; }
-    body { font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      color:var(--ink); max-width:860px; margin:0 auto; padding:2rem 1.25rem; line-height:1.55; }
-    h1 { margin-bottom:.2rem; }
-    h2 { margin-bottom:.4rem; }
-    .sub { color:var(--muted); margin-top:0; }
-    .finding { border:1px solid var(--line); border-radius:10px; padding:1.1rem 1.25rem; margin:1.25rem 0; }
-    .finding .verdict { font-size:1.15rem; font-weight:700; margin:0 0 .4rem; }
-    .finding p { margin:.4rem 0; }
-    .num { font-weight:700; color:var(--accent); }
-    .num.alt { color:var(--alt); }
-    .implication { background:#f7f7f5; border-left:3px solid var(--accent);
-      padding:.6rem .9rem; border-radius:6px; font-size:.95rem; margin-top:.6rem; }
-    .links a { display:inline-block; border:1px solid var(--line); border-radius:8px;
-      padding:.5rem .9rem; margin:.25rem .35rem .25rem 0; text-decoration:none; color:var(--accent); }
-    .links a.alt { color:var(--alt); }
-    .status { background:#fff5e6; border-left:3px solid #e0a458; padding:.6rem .9rem;
-      border-radius:6px; font-size:.92rem; }
-    footer { color:var(--muted); font-size:.8rem; margin-top:3rem;
-      border-top:1px solid var(--line); padding-top:1rem; }
-    .muted { color:var(--muted); font-size:.9rem; }
-  </style>
+  <link rel="stylesheet" href="site.css" />
+  <script src="bound.js" defer></script>
 </head>
 <body>
   <h1>Energy market predictability</h1>
@@ -52,50 +30,64 @@
      19 July 2026; all event-study numbers will be re-run after the final.</p>
 
   <div class="finding" id="f1">
-    <p class="verdict">1 &nbsp;Smart timing is worth real money. The algorithm barely matters.</p>
-    <p>Over a full backtested year (<span class="num" id="f1-days">…</span> days),
-       shifting a daily EV charge into the cheapest hours saves
-       <span class="num" id="f1-timing">…</span>/year versus charging anytime.
-       A 28-day lookup table wins a six-model ladder up to gradient boosting,
-       capturing <span class="num" id="f1-share">…</span> of the
-       perfect-foresight ceiling; no model beats it overall.</p>
-    <p class="implication"><strong>Product implication:</strong> a smart-charging
-       feature on this market needs automation and UX, not machine learning.
-       The algorithm choice moves a few euros a year; automated timing at all
-       moves about two hundred.</p>
-    <p class="muted">More:
-       <a href="ladder.html">the full study: reasoning, charts, critical questions</a> ·
-       <a href="https://github.com/adrianogelato/energy-market-predictability#the-value-of-complexity-ladder-milestone-10">methodology</a> ·
-       <a href="forecast_ladder.json">raw results</a></p>
+    <p class="finding__eyebrow"><strong>Finding 1</strong>Can you predict it?</p>
+    <div class="finding__body">
+      <p class="verdict"><span id="f1-headline">Smart timing is worth real money.
+         The algorithm barely matters.</span></p>
+      <p>Over a full backtested year (<span class="num" id="f1-days">…</span> days),
+         shifting a daily EV charge into the cheapest hours saves
+         <span class="num" id="f1-timing">…</span>/year versus charging anytime.
+         A 28-day lookup table wins a six-model ladder up to gradient boosting,
+         capturing <span class="num" id="f1-share">…</span> of the
+         perfect-foresight ceiling; no model beats it overall.</p>
+      <p class="implication" data-label="Product implication">A smart-charging
+         feature on this market needs automation and UX, not machine learning.
+         The algorithm choice moves a few euros a year; automated timing at all
+         moves about two hundred.</p>
+      <p class="muted">More:
+         <a href="ladder.html">the full study: reasoning, charts, critical questions</a> ·
+         <a href="https://github.com/adrianogelato/energy-market-predictability#the-value-of-complexity-ladder-milestone-10">methodology</a> ·
+         <a href="forecast_ladder.json">raw results</a></p>
+    </div>
   </div>
 
   <div class="finding" id="f2">
-    <p class="verdict">2 &nbsp;<span id="f2-headline">The World Cup did not detectably move the German market.</span></p>
-    <p>Prices during match hours: <span class="num alt" id="f2-price">…</span>
-       versus weather-comparable days, statistically unclear, and still unclear
-       at <span class="num alt" id="f2-did">…</span> under a within-day
-       contrast that nets out day-level seasonal drift. Demand: every subset,
-       overnight kickoffs included, is consistent with chance in the placebo
-       test (<span class="num alt" id="f2-perm">…</span>).</p>
-    <p>The study states its own limits: it could only have detected a price
-       effect of about <span class="num alt" id="f2-mde">…</span> or larger, so
-       the honest claim is "no large effect", not "no effect".</p>
-    <p class="muted">More:
-       <a href="worldcup.html">full study with charts</a> ·
-       <a href="https://github.com/adrianogelato/energy-market-predictability#the-world-cup-price-study-milestone-4">price-test methodology</a> ·
-       <a href="https://github.com/adrianogelato/energy-market-predictability#the-forecast-error-study-milestone-7">demand-test methodology</a></p>
+    <p class="finding__eyebrow"><strong>Finding 2</strong>Can an event move it?</p>
+    <div class="finding__body">
+      <p class="verdict"><span id="f2-headline">The World Cup did not detectably
+         move the German market.</span></p>
+      <p>Prices during match hours: <span class="num alt" id="f2-price">…</span>
+         versus weather-comparable days, statistically unclear, and still unclear
+         at <span class="num alt" id="f2-did">…</span> under a within-day
+         contrast that nets out day-level seasonal drift. Demand: every subset,
+         overnight kickoffs included, is consistent with chance in the placebo
+         test (<span class="num alt" id="f2-perm">…</span>).</p>
+      <p>The study states its own limits: it could only have detected a price
+         effect of about <span class="num alt" id="f2-mde">…</span> or larger, so
+         the honest claim is "no large effect", not "no effect".</p>
+
+      <!-- The bound bar; filled by drawBound() in bound.js from wc_results.json. -->
+      <div class="bound" id="f2-bound" hidden></div>
+      <p class="muted">More:
+         <a href="worldcup.html">full study with charts</a> ·
+         <a href="https://github.com/adrianogelato/energy-market-predictability#the-world-cup-price-study-milestone-4">price-test methodology</a> ·
+         <a href="https://github.com/adrianogelato/energy-market-predictability#the-forecast-error-study-milestone-7">demand-test methodology</a></p>
+    </div>
   </div>
 
   <div class="finding" id="f3">
-    <p class="verdict">3 &nbsp;The instrument works: it finds the effect that is certainly there.</p>
-    <p>The same engine detects the weekend effect at
-       <span class="num" id="f3-weekend">…</span> in daytime prices
-       (placebo p <span class="num" id="f3-p">…</span>). A method that can find
-       a real event is what makes the World Cup null a finding rather than a
-       broken tool.</p>
-    <p class="muted">More:
-       <a href="https://github.com/adrianogelato/energy-market-predictability#the-generic-event-study-milestone-9">event-study engine</a> ·
-       <a href="https://github.com/adrianogelato/energy-market-predictability#what-a-weather-comparable-day-means-matchingpy">what "weather-comparable" means</a></p>
+    <p class="finding__eyebrow"><strong>Finding 3</strong>Does the instrument work?</p>
+    <div class="finding__body">
+      <p class="verdict">The engine finds the effect that is certainly there.</p>
+      <p>The same engine detects the weekend effect at
+         <span class="num" id="f3-weekend">…</span> in daytime prices
+         (placebo p <span class="num" id="f3-p">…</span>). A method that can find
+         a real event is what makes the World Cup null a finding rather than a
+         broken tool.</p>
+      <p class="muted">More:
+         <a href="https://github.com/adrianogelato/energy-market-predictability#the-generic-event-study-milestone-9">event-study engine</a> ·
+         <a href="https://github.com/adrianogelato/energy-market-predictability#what-a-weather-comparable-day-means-matchingpy">what "weather-comparable" means</a></p>
+    </div>
   </div>
 
   <h2>Explore</h2>
@@ -116,6 +108,9 @@
 
   <footer id="footer">Numbers on this page are read from the committed
      result JSONs at load time.</footer>
+  <!-- Static sibling of <footer>, not a child: the pages set
+       footer.textContent from JS, which would wipe any child. -->
+  <p class="repo">Source, write-up and backlog: <a href="https://github.com/adrianogelato/energy-market-predictability">github.com/adrianogelato/energy-market-predictability</a></p>
 
   <script>
     const get = url => fetch(url).then(r => { if (!r.ok) throw 0; return r.json(); });
@@ -136,8 +131,8 @@
         o.rungs[a].regret_ct <= o.rungs[b].regret_ct ? a : b);
       if (best !== 'climatology' || l.mode !== 'full-year') {
         set('f1-share', share > 0 ? Math.round(100 * share) + '%' : '…');
-        document.querySelector('#f1 .verdict').textContent =
-          '1  Smart timing is worth real money; see the ladder results for the model verdict.';
+        set('f1-headline',
+          'Smart timing is worth real money; see the ladder results for the model verdict.');
       }
     }).catch(() => set('f1-timing', '(run year_fetch.py + forecast_ladder.py)'));
 
@@ -153,7 +148,17 @@
         const d = wc.robustness_within_day.mean_delta_ct;
         set('f2-did', sign(d) + Math.abs(d).toFixed(2) + ' ct/kWh');
       }
-      if (e.mde_ct_80pct_power) set('f2-mde', e.mde_ct_80pct_power + ' ct/kWh');
+      if (e.mde_ct_80pct_power) {
+        set('f2-mde', e.mde_ct_80pct_power + ' ct/kWh');
+        drawBound('f2-bound', {
+          effect: e.mean_delta_ct_per_kwh,
+          bound: e.mde_ct_80pct_power,
+          unit: 'ct/kWh',
+          caption: 'Scale in ct/kWh. Dot: the measured match-hour price ' +
+            'effect. Jaws: the smallest effect this study could have detected. ' +
+            'A dot inside the jaws is the finding, not a failure to find one.',
+        });
+      }
       if (perm && perm.family_wise) set('f2-perm', 'family-wise p=' + perm.family_wise.p_value);
       // Let the data overrule the hand-written headline if a rerun changes it.
       const clear = Math.abs(e.t_stat || 0) >= 2 &&

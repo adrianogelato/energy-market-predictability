@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T10:35",
+  "generated_at": "2026-07-30T16:37",
   "data_source": "live",
   "n_permutations": 2000,
   "matching": {
@@ -8,6 +8,12 @@
       "temp_max",
       "rad_mean",
       "wind_mean"
+    ],
+    "feature_labels": [
+      "daily mean temperature",
+      "daily maximum temperature",
+      "mean solar radiation",
+      "mean wind speed"
     ],
     "k_controls": 5,
     "day_type_classes": [

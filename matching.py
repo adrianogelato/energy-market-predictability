@@ -109,6 +109,15 @@ def load_weather_daily(path=None, holidays=None):
     return feats
 
 
+FEATURE_LABELS = {
+    "temp_mean": "daily mean temperature",
+    "temp_max": "daily maximum temperature",
+    "rad_mean": "mean solar radiation",
+    "cloud_mean": "mean cloud cover",
+    "wind_mean": "mean wind speed",
+}
+
+
 class Matcher:
     """K-nearest weather-comparable days over z-scored features."""
 
@@ -180,6 +189,9 @@ class Matcher:
         'comparable' meant when it was produced."""
         return {
             "features": self.cols,
+            # Column names are for code; the pages render these instead, so a
+            # reader never sees "temp_mean" as prose.
+            "feature_labels": [FEATURE_LABELS.get(c, c) for c in self.cols],
             "k_controls": self.k,
             "day_type_classes": ["weekday", "saturday", "sunlike (Sun or public holiday)"],
             "season_gap_max_days": self.gap,

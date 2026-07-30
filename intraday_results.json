@@ -1,0 +1,802 @@
+{
+  "generated_at": "2026-07-30T16:37",
+  "data_source": "live (incremental since 2026-07-07)",
+  "window": {
+    "start": "2025-07-12",
+    "end": "2026-07-28"
+  },
+  "hours": 8925,
+  "n_cheap_hours": 3,
+  "signals": {
+    "da": "day-ahead auction (year_prices.csv, aWATTar/EPEX)",
+    "imbalance": "reBAP uniform imbalance price (netztransparenz.de)"
+  },
+  "overall": {
+    "spread": {
+      "mean": 0.399,
+      "median": 0.041,
+      "std": 8.753,
+      "iqr": 4.787,
+      "p05": -6.28,
+      "p95": 8.009
+    },
+    "da_std": 5.472,
+    "imb_std": 10.435,
+    "vol_ratio_imb": 1.907,
+    "corr_da_imb": 0.5448
+  },
+  "by_hour": {
+    "full": {
+      "n_days": 372,
+      "hours": [
+        {
+          "hour": 0,
+          "median": 0.18,
+          "mean": 0.139
+        },
+        {
+          "hour": 1,
+          "median": 0.129,
+          "mean": 0.537
+        },
+        {
+          "hour": 2,
+          "median": 0.128,
+          "mean": 0.447
+        },
+        {
+          "hour": 3,
+          "median": -0.038,
+          "mean": 0.455
+        },
+        {
+          "hour": 4,
+          "median": 0.219,
+          "mean": 0.236
+        },
+        {
+          "hour": 5,
+          "median": 0.118,
+          "mean": 0.15
+        },
+        {
+          "hour": 6,
+          "median": -0.15,
+          "mean": -0.239
+        },
+        {
+          "hour": 7,
+          "median": 0.057,
+          "mean": 0.35
+        },
+        {
+          "hour": 8,
+          "median": 0.357,
+          "mean": 0.692
+        },
+        {
+          "hour": 9,
+          "median": 0.537,
+          "mean": 1.069
+        },
+        {
+          "hour": 10,
+          "median": 0.343,
+          "mean": 1.381
+        },
+        {
+          "hour": 11,
+          "median": 0.841,
+          "mean": 1.212
+        },
+        {
+          "hour": 12,
+          "median": 0.215,
+          "mean": 0.89
+        },
+        {
+          "hour": 13,
+          "median": 0.191,
+          "mean": 0.617
+        },
+        {
+          "hour": 14,
+          "median": 0.294,
+          "mean": 0.012
+        },
+        {
+          "hour": 15,
+          "median": 0.304,
+          "mean": 0.201
+        },
+        {
+          "hour": 16,
+          "median": 0.091,
+          "mean": 0.279
+        },
+        {
+          "hour": 17,
+          "median": 0.102,
+          "mean": 0.411
+        },
+        {
+          "hour": 18,
+          "median": -0.517,
+          "mean": -0.309
+        },
+        {
+          "hour": 19,
+          "median": -0.917,
+          "mean": -0.011
+        },
+        {
+          "hour": 20,
+          "median": -0.652,
+          "mean": 0.538
+        },
+        {
+          "hour": 21,
+          "median": -0.583,
+          "mean": 0.274
+        },
+        {
+          "hour": 22,
+          "median": -0.122,
+          "mean": 0.068
+        },
+        {
+          "hour": 23,
+          "median": -0.045,
+          "mean": 0.169
+        }
+      ]
+    },
+    "DJF": {
+      "n_days": 90,
+      "hours": [
+        {
+          "hour": 0,
+          "median": 1.248,
+          "mean": 1.054
+        },
+        {
+          "hour": 1,
+          "median": 0.667,
+          "mean": 0.949
+        },
+        {
+          "hour": 2,
+          "median": 0.246,
+          "mean": 0.447
+        },
+        {
+          "hour": 3,
+          "median": 0.241,
+          "mean": 0.358
+        },
+        {
+          "hour": 4,
+          "median": 0.51,
+          "mean": 0.543
+        },
+        {
+          "hour": 5,
+          "median": 0.662,
+          "mean": 0.875
+        },
+        {
+          "hour": 6,
+          "median": 0.665,
+          "mean": 0.419
+        },
+        {
+          "hour": 7,
+          "median": 1.17,
+          "mean": 0.939
+        },
+        {
+          "hour": 8,
+          "median": 0.375,
+          "mean": 0.55
+        },
+        {
+          "hour": 9,
+          "median": 0.571,
+          "mean": 1.079
+        },
+        {
+          "hour": 10,
+          "median": -0.322,
+          "mean": 1.181
+        },
+        {
+          "hour": 11,
+          "median": 0.334,
+          "mean": 0.626
+        },
+        {
+          "hour": 12,
+          "median": 0.43,
+          "mean": 0.902
+        },
+        {
+          "hour": 13,
+          "median": -0.14,
+          "mean": 0.908
+        },
+        {
+          "hour": 14,
+          "median": 0.607,
+          "mean": 1.147
+        },
+        {
+          "hour": 15,
+          "median": 0.252,
+          "mean": 0.547
+        },
+        {
+          "hour": 16,
+          "median": 0.541,
+          "mean": 1.068
+        },
+        {
+          "hour": 17,
+          "median": 0.638,
+          "mean": 1.782
+        },
+        {
+          "hour": 18,
+          "median": -0.432,
+          "mean": 2.045
+        },
+        {
+          "hour": 19,
+          "median": -0.686,
+          "mean": 1.061
+        },
+        {
+          "hour": 20,
+          "median": 0.644,
+          "mean": 0.435
+        },
+        {
+          "hour": 21,
+          "median": 0.265,
+          "mean": 1.107
+        },
+        {
+          "hour": 22,
+          "median": 0.417,
+          "mean": 0.767
+        },
+        {
+          "hour": 23,
+          "median": 0.538,
+          "mean": 0.997
+        }
+      ]
+    },
+    "MAM": {
+      "n_days": 92,
+      "hours": [
+        {
+          "hour": 0,
+          "median": -0.531,
+          "mean": -0.194
+        },
+        {
+          "hour": 1,
+          "median": -0.586,
+          "mean": -0.112
+        },
+        {
+          "hour": 2,
+          "median": -0.375,
+          "mean": -0.146
+        },
+        {
+          "hour": 3,
+          "median": -0.45,
+          "mean": -0.082
+        },
+        {
+          "hour": 4,
+          "median": -0.667,
+          "mean": -0.251
+        },
+        {
+          "hour": 5,
+          "median": -0.503,
+          "mean": -0.669
+        },
+        {
+          "hour": 6,
+          "median": -0.623,
+          "mean": -1.495
+        },
+        {
+          "hour": 7,
+          "median": -0.757,
+          "mean": -0.442
+        },
+        {
+          "hour": 8,
+          "median": 0.06,
+          "mean": 0.805
+        },
+        {
+          "hour": 9,
+          "median": 0.534,
+          "mean": 0.546
+        },
+        {
+          "hour": 10,
+          "median": 1.235,
+          "mean": 1.952
+        },
+        {
+          "hour": 11,
+          "median": 0.731,
+          "mean": 1.763
+        },
+        {
+          "hour": 12,
+          "median": 0.119,
+          "mean": 0.503
+        },
+        {
+          "hour": 13,
+          "median": 0.678,
+          "mean": -0.727
+        },
+        {
+          "hour": 14,
+          "median": 0.014,
+          "mean": -3.112
+        },
+        {
+          "hour": 15,
+          "median": 0.031,
+          "mean": -1.554
+        },
+        {
+          "hour": 16,
+          "median": -0.534,
+          "mean": -0.144
+        },
+        {
+          "hour": 17,
+          "median": -0.913,
+          "mean": -0.293
+        },
+        {
+          "hour": 18,
+          "median": -1.775,
+          "mean": -3.206
+        },
+        {
+          "hour": 19,
+          "median": -1.864,
+          "mean": -1.765
+        },
+        {
+          "hour": 20,
+          "median": -1.693,
+          "mean": -0.255
+        },
+        {
+          "hour": 21,
+          "median": -1.164,
+          "mean": 0.474
+        },
+        {
+          "hour": 22,
+          "median": -0.506,
+          "mean": -0.483
+        },
+        {
+          "hour": 23,
+          "median": -0.772,
+          "mean": -0.595
+        }
+      ]
+    },
+    "JJA": {
+      "n_days": 99,
+      "hours": [
+        {
+          "hour": 0,
+          "median": -0.452,
+          "mean": -0.592
+        },
+        {
+          "hour": 1,
+          "median": -0.048,
+          "mean": 0.469
+        },
+        {
+          "hour": 2,
+          "median": -0.277,
+          "mean": 0.456
+        },
+        {
+          "hour": 3,
+          "median": -0.101,
+          "mean": 0.668
+        },
+        {
+          "hour": 4,
+          "median": 0.396,
+          "mean": 0.046
+        },
+        {
+          "hour": 5,
+          "median": -0.322,
+          "mean": -0.048
+        },
+        {
+          "hour": 6,
+          "median": -0.704,
+          "mean": -0.05
+        },
+        {
+          "hour": 7,
+          "median": -0.003,
+          "mean": 0.749
+        },
+        {
+          "hour": 8,
+          "median": 0.722,
+          "mean": 1.59
+        },
+        {
+          "hour": 9,
+          "median": 1.236,
+          "mean": 2.127
+        },
+        {
+          "hour": 10,
+          "median": 0.317,
+          "mean": 1.518
+        },
+        {
+          "hour": 11,
+          "median": 0.311,
+          "mean": 1.0
+        },
+        {
+          "hour": 12,
+          "median": 0.053,
+          "mean": 0.517
+        },
+        {
+          "hour": 13,
+          "median": -0.366,
+          "mean": -0.186
+        },
+        {
+          "hour": 14,
+          "median": -0.586,
+          "mean": -0.221
+        },
+        {
+          "hour": 15,
+          "median": -0.001,
+          "mean": 0.137
+        },
+        {
+          "hour": 16,
+          "median": -0.007,
+          "mean": 0.304
+        },
+        {
+          "hour": 17,
+          "median": 0.148,
+          "mean": -0.024
+        },
+        {
+          "hour": 18,
+          "median": -0.084,
+          "mean": -0.621
+        },
+        {
+          "hour": 19,
+          "median": -0.505,
+          "mean": 0.553
+        },
+        {
+          "hour": 20,
+          "median": -0.873,
+          "mean": 0.569
+        },
+        {
+          "hour": 21,
+          "median": -1.718,
+          "mean": -0.059
+        },
+        {
+          "hour": 22,
+          "median": -1.268,
+          "mean": -0.663
+        },
+        {
+          "hour": 23,
+          "median": -0.456,
+          "mean": -0.29
+        }
+      ]
+    },
+    "SON": {
+      "n_days": 91,
+      "hours": [
+        {
+          "hour": 0,
+          "median": 0.513,
+          "mean": 0.357
+        },
+        {
+          "hour": 1,
+          "median": 0.433,
+          "mean": 0.86
+        },
+        {
+          "hour": 2,
+          "median": 0.391,
+          "mean": 1.029
+        },
+        {
+          "hour": 3,
+          "median": -0.024,
+          "mean": 0.864
+        },
+        {
+          "hour": 4,
+          "median": 0.139,
+          "mean": 0.633
+        },
+        {
+          "hour": 5,
+          "median": 0.201,
+          "mean": 0.477
+        },
+        {
+          "hour": 6,
+          "median": 0.308,
+          "mean": 0.174
+        },
+        {
+          "hour": 7,
+          "median": -0.184,
+          "mean": 0.134
+        },
+        {
+          "hour": 8,
+          "median": 0.311,
+          "mean": -0.261
+        },
+        {
+          "hour": 9,
+          "median": -0.013,
+          "mean": 0.437
+        },
+        {
+          "hour": 10,
+          "median": 0.961,
+          "mean": 0.851
+        },
+        {
+          "hour": 11,
+          "median": 1.616,
+          "mean": 1.467
+        },
+        {
+          "hour": 12,
+          "median": 0.385,
+          "mean": 1.675
+        },
+        {
+          "hour": 13,
+          "median": 0.596,
+          "mean": 2.56
+        },
+        {
+          "hour": 14,
+          "median": 1.643,
+          "mean": 2.302
+        },
+        {
+          "hour": 15,
+          "median": 1.245,
+          "mean": 1.701
+        },
+        {
+          "hour": 16,
+          "median": 0.062,
+          "mean": -0.1
+        },
+        {
+          "hour": 17,
+          "median": -0.248,
+          "mean": 0.242
+        },
+        {
+          "hour": 18,
+          "median": -0.403,
+          "mean": 0.632
+        },
+        {
+          "hour": 19,
+          "median": -1.432,
+          "mean": 0.087
+        },
+        {
+          "hour": 20,
+          "median": -0.877,
+          "mean": 1.407
+        },
+        {
+          "hour": 21,
+          "median": -0.129,
+          "mean": -0.387
+        },
+        {
+          "hour": 22,
+          "median": 0.843,
+          "mean": 0.731
+        },
+        {
+          "hour": 23,
+          "median": 0.482,
+          "mean": 0.62
+        }
+      ]
+    }
+  },
+  "by_season": [
+    {
+      "season": "winter",
+      "n_hours": 2160,
+      "spread_mean": 0.908,
+      "spread_median": 0.437,
+      "vol_ratio_imb": 2.245
+    },
+    {
+      "season": "spring",
+      "n_hours": 2207,
+      "spread_mean": -0.395,
+      "spread_median": -0.431,
+      "vol_ratio_imb": 2.124
+    },
+    {
+      "season": "summer",
+      "n_hours": 2374,
+      "spread_mean": 0.332,
+      "spread_median": -0.183,
+      "vol_ratio_imb": 1.565
+    },
+    {
+      "season": "autumn",
+      "n_hours": 2184,
+      "spread_mean": 0.77,
+      "spread_median": 0.295,
+      "vol_ratio_imb": 1.832
+    }
+  ],
+  "rank_stability": {
+    "n_days": 372,
+    "mean_overlap_of_3": 1.349,
+    "pct_full_overlap": 12.6,
+    "mean_jaccard": 0.353,
+    "overlap_distribution": {
+      "0": 87,
+      "1": 115,
+      "2": 123,
+      "3": 47
+    },
+    "settlement_regret_ct_per_kwh": 3.0286,
+    "settlement_regret_eur_per_yr": 121.6,
+    "settlement_regret_median_ct_per_kwh": 1.7255,
+    "settlement_regret_median_day_eur_per_yr": 69.28,
+    "regret_share_from_top_5pct_days": 32.5,
+    "daily_kwh": 11.0,
+    "regret_concentration": {
+      "n_days": 372,
+      "curve": [
+        {
+          "day_share_pct": 0,
+          "regret_share_pct": 0.0
+        },
+        {
+          "day_share_pct": 5,
+          "regret_share_pct": 33.4
+        },
+        {
+          "day_share_pct": 10,
+          "regret_share_pct": 45.7
+        },
+        {
+          "day_share_pct": 15,
+          "regret_share_pct": 55.1
+        },
+        {
+          "day_share_pct": 20,
+          "regret_share_pct": 62.4
+        },
+        {
+          "day_share_pct": 25,
+          "regret_share_pct": 69.1
+        },
+        {
+          "day_share_pct": 30,
+          "regret_share_pct": 74.8
+        },
+        {
+          "day_share_pct": 35,
+          "regret_share_pct": 79.5
+        },
+        {
+          "day_share_pct": 40,
+          "regret_share_pct": 83.8
+        },
+        {
+          "day_share_pct": 45,
+          "regret_share_pct": 87.3
+        },
+        {
+          "day_share_pct": 50,
+          "regret_share_pct": 90.5
+        },
+        {
+          "day_share_pct": 55,
+          "regret_share_pct": 93.0
+        },
+        {
+          "day_share_pct": 60,
+          "regret_share_pct": 94.9
+        },
+        {
+          "day_share_pct": 65,
+          "regret_share_pct": 96.6
+        },
+        {
+          "day_share_pct": 70,
+          "regret_share_pct": 97.8
+        },
+        {
+          "day_share_pct": 75,
+          "regret_share_pct": 98.8
+        },
+        {
+          "day_share_pct": 80,
+          "regret_share_pct": 99.5
+        },
+        {
+          "day_share_pct": 85,
+          "regret_share_pct": 99.9
+        },
+        {
+          "day_share_pct": 90,
+          "regret_share_pct": 100.0
+        },
+        {
+          "day_share_pct": 95,
+          "regret_share_pct": 100.0
+        },
+        {
+          "day_share_pct": 100,
+          "regret_share_pct": 100.0
+        }
+      ],
+      "quantiles_ct": {
+        "50": 1.725,
+        "75": 3.761,
+        "90": 6.278,
+        "95": 9.827,
+        "99": 28.432
+      },
+      "max_ct": 41.137,
+      "note": "days ranked worst first; regret_share_pct is the cumulative share of the year's total regret carried by that share of days. A straight diagonal would mean every day contributes equally."
+    }
+  },
+  "verdict": "Day-ahead and real time diverge enough to matter for delivery-close flexibility: the real-time imbalance price sits a median +0.04 ct/kWh from day-ahead (IQR 4.79, and a fat tail from p05 -6.28 to p95 8.009), the three cheapest day-ahead hours are still the three cheapest at real time on 12.6% of days, and acting on the day-ahead ranking but valuing it at real time would cost +3.029 ct/kWh (about +122 EUR/yr at 11 kWh/day). The household is billed at day-ahead regardless, so this euro figure is a flexibility hypothetical, not a bill."
+}

@@ -6,37 +6,16 @@
   <title>How advanced does a price forecaster need to be?</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2"></script>
+  <script src="chart-theme.js"></script>
+  <link rel="stylesheet" href="site.css" />
   <link rel="stylesheet" href="page-nav.css" />
   <script src="page-nav.js" defer></script>
   <style>
-    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --win:#4c9f70; --lose:#c1436d;
-      /* --accent: the page's own accent, consumed by page-nav.css */
-      --accent:#4c9f70; }
-    * { box-sizing:border-box; }
-    body { font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      color:var(--ink); max-width:860px; margin:0 auto; padding:2rem 1.25rem; line-height:1.55; }
-    a { color:var(--win); }
-    h1 { margin-bottom:.2rem; } .sub { color:var(--muted); margin-top:0; }
-    section { margin:2.25rem 0; } canvas { max-width:100%; }
-    .verdict { border:2px solid var(--win); border-radius:10px; padding:1rem 1.25rem; margin:1.25rem 0; }
-    .verdict .head { font-size:1.25rem; font-weight:700; margin:.1rem 0; }
-    ol li, ul li { margin:.5rem 0; }
-    .qa dt { font-weight:700; margin-top:1rem; }
-    .qa dd { margin:.25rem 0 0 0; }
-    .note { background:#f7f7f5; border-left:3px solid var(--win); padding:.75rem 1rem;
-      border-radius:6px; font-size:.92rem; }
-    .row { display:flex; gap:1rem; flex-wrap:wrap; } .row > div { flex:1 1 380px; }
-    footer { color:var(--muted); font-size:.8rem; margin-top:3rem;
-      border-top:1px solid var(--line); padding-top:1rem; }
-    select { font-size:1rem; padding:.15rem .4rem; }
-    figure { margin: 0; }
-    figcaption { color: var(--muted); font-size: .82rem; margin-top: .5rem; }
-    .hint { color: var(--muted); font-size: .78rem; margin: .3rem 0 0 0; }
-    table { border-collapse: collapse; width: 100%; font-size: .88rem; }
-    th, td { text-align: right; padding: .35rem .5rem; border-bottom: 1px solid var(--line); }
-    th:first-child, td:first-child { text-align: left; }
-    thead th { border-bottom: 2px solid var(--ink); }
-    td.best { font-weight: 700; color: var(--win); }
+    /* Page-specific data colours only; everything else lives in site.css.
+       --win / --lose are the best and worst rungs, matching the hues
+       forecast_ladder.py draws its figures in. */
+    :root { --win:#4c9f70; --lose:#c1436d; --accent:#4c9f70; }
+    td.best { color:var(--win); }
   </style>
 </head>
 <body>
@@ -52,7 +31,7 @@
     <p id="vText">Over <b id="vDays">…</b> backtested days, a 28-day rolling
        lookup table ("average price per hour over the last four weeks, pick the
        cheapest three") saves <b id="vEur">…</b>/year for a household shifting a
-       daily 11&nbsp;kWh EV charge — <b id="vShare">…</b> of what perfect
+       daily 11&nbsp;kWh EV charge, <b id="vShare">…</b> of what perfect
        foresight would earn (<b id="vCeil">…</b>/year). No model on the ladder
        beats it overall, including gradient boosting fed perfect weather.</p>
   </div>
@@ -61,24 +40,32 @@
 
   <section id="heroSec">
     <h2>The year, in euros</h2>
-    <p>The verdict's numbers, drawn out over the backtest year: cumulative
-       savings versus charging at the all-day average price (the zero line).
-       The endpoints are the verdict.</p>
+    <div class="summary">
+      <p>The three lines stay bunched together for the whole year. Perfect
+         foresight pulls ahead only slightly, and gradient boosting never
+         separates from the lookup table, so the ceiling on this task is low and
+         nearly all of it is reachable without a model.</p>
+    </div>
     <figure>
       <canvas id="cumChart" height="170"></canvas>
       <p class="hint">Drag a range to zoom (Ctrl+scroll also zooms,
-         Shift+drag pans) — <a href="#" id="cumReset">reset zoom</a>.
+         Shift+drag pans), <a href="#" id="cumReset">reset zoom</a>.
          Click a legend entry to hide or show a series.</p>
       <figcaption id="cumCap"></figcaption>
     </figure>
   </section>
-  <p class="note" id="staleNote" style="display:none">This
+  <p class="note" data-label="Stale data" id="staleNote" style="display:none">This
      forecast_ladder.json predates parts of this page. Rerun
      <code>python forecast_ladder.py</code> to populate the time-axis charts
      and the window-size comparison.</p>
 
   <section id="methodSec">
     <h2>How the numbers are measured</h2>
+    <div class="summary">
+      <p>Every strategy is scored on the same decision, on the same days, at real
+         prices: pick three hours in advance, pay what they actually cost. Nothing
+         below depends on forecast accuracy.</p>
+    </div>
     <ol>
       <li>Take a year of German day-ahead prices and weather. The first 28
         days serve only as history for the models.</li>
@@ -99,6 +86,12 @@
 
   <section id="stepsSec">
     <h2>The reasoning, in seven steps</h2>
+    <div class="summary">
+      <p>The argument in one line: the task is ranking hours rather than
+         predicting prices, German cheap hours are structurally pinned by solar
+         and overnight demand, so the ranking is nearly free and the engineering
+         budget belongs in automation instead.</p>
+    </div>
     <ol>
       <li><b>The action is picking hours, not predicting prices.</b> A smart
         charger must choose 3 of 24 hours; it is judged by what those hours
@@ -114,21 +107,26 @@
         midday, demand dies overnight. Weather changes <em>how cheap</em> those
         hours are, rarely <em>which</em> hours they are. Models predict price
         levels, spending their capacity on variance the hour-picking task never
-        rewards — and their level errors occasionally reshuffle the ranking,
+        rewards, and their level errors occasionally reshuffle the ranking,
         making them actively worse (see the residual chart below).</li>
       <li><b>The winter nuance.</b> Heating and scarce daylight make the winter
-        shape genuinely variable, so models do win there — by about €1 per
+        shape genuinely variable, so models do win there, by about €1 per
         winter for this household. Direction confirmed, economics irrelevant.</li>
       <li><b>The product conclusion.</b> Algorithm choice moves a few euros a
         year; automated timing at all moves about two hundred. Engineering
         budget belongs in automation, onboarding and trust, not the
-        forecaster — at household scale.</li>
+        forecaster, at household scale.</li>
     </ol>
   </section>
 
   <section id="ladderSec">
     <h2>The ladder</h2>
-    <p>Regret = what a strategy's picked hours cost beyond perfect foresight,
+    <div class="summary">
+      <p>No rung on the ladder gets below the lookup table's regret over the full
+         year. Two individual seasons go the other way, winter and summer, but the
+         margins are small enough that the annual verdict does not move.</p>
+    </div>
+    <p>Regret is what a strategy's picked hours cost beyond perfect foresight,
        in ct/kWh. Lower is better.</p>
     <p>The six models, in order of complexity:</p>
     <ul>
@@ -165,30 +163,34 @@
 
   <section id="accSec">
     <h2>Accuracy is the wrong yardstick</h2>
-    <p>A common objection: "my gradient boosting model beats a lookup table."
-       On forecast accuracy it may well. On this task it does not matter,
-       because the two rankings disagree: the models that predict price
-       <em>levels</em> best do not pick hours best. Picking hours needs only
-       the intraday <em>ranking</em>, and the German ranking is structurally
-       pinned (step 5 of the reasoning above). Both metrics, side by side:</p>
+    <div class="summary">
+      <p>The two rankings disagree: the models that predict price <em>levels</em>
+         best do not pick hours best. A gradient boosting model may well win on
+         forecast accuracy and still lose on this task, because picking hours
+         needs only the intraday <em>ranking</em>, and the German ranking is
+         structurally pinned (step 5 above).</p>
+      <p id="pairedText"></p>
+    </div>
+    <p>Both metrics, side by side:</p>
     <figure>
       <table id="accTable"></table>
       <figcaption id="accCap"></figcaption>
     </figure>
-    <p id="pairedText" style="margin-top:1rem"></p>
-    <p class="note" id="pairedNote"></p>
+    <p class="note" data-label="Method" id="pairedNote"></p>
   </section>
 
   <section id="rollSec">
     <h2>The winter nuance, on the calendar</h2>
-    <p>Step 6 of the reasoning, drawn out: what each day's picked hours
-       actually cost. For most of the year the lookup table's picked hours
-       cost about the same as perfect foresight's; in winter the daily price
-       shape varies more and the difference becomes visible.</p>
+    <div class="summary">
+      <p>For most of the year the lookup table's picked hours cost about what
+         perfect foresight's do. The gap opens only in winter, when heating and
+         scarce daylight make the daily price shape genuinely variable. That is
+         the one place a model earns anything, and it is worth about a euro.</p>
+    </div>
     <figure>
       <canvas id="rollChart" height="170"></canvas>
       <p class="hint">Drag a range to zoom (Ctrl+scroll also zooms,
-         Shift+drag pans) — <a href="#" id="rollReset">reset zoom</a>.
+         Shift+drag pans), <a href="#" id="rollReset">reset zoom</a>.
          Click a legend entry to hide or show a series.</p>
       <figcaption id="rollCap"></figcaption>
     </figure>
@@ -196,10 +198,12 @@
 
   <section id="winSec">
     <h2>Does the window size matter?</h2>
-    <p>The same backtest, asking each model for the cheapest 2, 3 or 4 hours
-       of the day. A charger that needs fewer hours can be pickier, so a
-       smaller window pays a lower price per kWh for every strategy; the
-       question is whether the ranking between strategies changes.</p>
+    <div class="summary">
+      <p>The lookup table wins at 2, 3 and 4 hours alike. A charger that needs
+         fewer hours can be pickier, so every strategy pays less per kWh at 2
+         hours than at 4, but they all move together and the top of the ranking
+         does not change.</p>
+    </div>
     <figure>
       <canvas id="winChart" height="150"></canvas>
       <figcaption id="winCap"></figcaption>
@@ -208,10 +212,13 @@
 
   <section id="residSec">
     <h2>Where the models systematically miss</h2>
-    <p>Mean predicted-minus-actual price by hour of day. The lookup table
-       (black) stays near zero; the models' errors are largest at the evening
-       peak in summer and the midday dip in spring.
-       Season: <select id="seasonSel"></select></p>
+    <div class="summary">
+      <p>The models miss in a pattern, not at random. Their errors cluster at the
+         evening peak in summer and the midday dip in spring, which are exactly
+         the hours that decide a ranking, while the lookup table stays near zero
+         all day.</p>
+    </div>
+    <p>Season: <select id="seasonSel"></select></p>
     <figure>
       <canvas id="residChart" height="150"></canvas>
       <figcaption>Mean predicted-minus-actual price (ct/kWh) by hour of day,
@@ -226,10 +233,12 @@
 
   <section id="daysSec">
     <h2>Single days, inspected</h2>
-    <p>Each strategy's worst-fit day of the year (largest price RMSE), predicted
-       versus actual. A model can miss the level badly and still rank hours
-       correctly — which is exactly why level-predicting skill buys so little
-       here.</p>
+    <div class="summary">
+      <p>A model can miss the price level badly and still rank the hours
+         correctly. These are the worst-fit days of the whole year, chosen for
+         their price error, which is the clearest way to see why level-predicting
+         skill buys so little on this task.</p>
+    </div>
     <div class="row">
       <div><figure><canvas id="day0" height="220"></canvas>
         <figcaption>One rung's single worst-fit day of the backtest year:
@@ -237,17 +246,23 @@
           error in ct/kWh between the two curves; the chart title above names
           the rung, the date and the RMSE.</figcaption></figure></div>
       <div><figure><canvas id="day1" height="220"></canvas>
-        <figcaption>Same, for a second rung's worst-fit day — see the chart
+        <figcaption>Same, for a second rung's worst-fit day, see the chart
           title above for which rung, date and RMSE.</figcaption></figure></div>
     </div>
   </section>
 
   <section id="qaSec">
     <h2>The critical questions are design decisions</h2>
+    <div class="summary">
+      <p>Every objection worth raising about this study was answered by a choice
+         made before the numbers arrived: the ceiling that bounds the upside, the
+         walk-forward split, the household scale. The answers are here rather than
+         in a footnote because the choices are the argument.</p>
+    </div>
     <dl class="qa">
       <dt>"Maybe the models were just badly built?"</dt>
       <dd>The ceiling caps the argument: perfect foresight earns the maximum,
-        the lookup table takes ~93% of it, so any model — however brilliant —
+        the lookup table takes ~93% of it, so any model, however brilliant,
         competes for the remaining few euros a year. The upside is bounded
         before the model quality debate starts. (And gradient boosting with
         perfect weather inputs is a strong baseline; it lost.)</dd>
@@ -259,7 +274,7 @@
         and still pick hours no better. Accuracy and decision value are
         different metrics, and here they rank the models differently.</dd>
       <dt>"Feeding models actual weather flatters them, no?"</dt>
-      <dd>Yes, deliberately — and they still lost. Real weather forecasts would
+      <dd>Yes, deliberately, and they still lost. Real weather forecasts would
         make every weather-using rung worse, while the lookup table needs no
         forecast at all. The conclusion is conservative by construction.</dd>
       <dt>"Is linear regression really machine learning?"</dt>
@@ -270,7 +285,7 @@
       <dd>Rolling, so a winter day is judged against winter. A full-history
         average would have been a strawman for the models to beat.</dd>
       <dt>"Does this verdict hold at scale?"</dt>
-      <dd>No — and that boundary is part of the finding. An aggregator trading
+      <dd>No, and that boundary is part of the finding. An aggregator trading
         GWh values 0.4 ct/kWh of regret very differently. This is a
         household-product verdict.</dd>
       <dt>"Only one year?"</dt>
@@ -281,12 +296,15 @@
     </dl>
   </section>
 
-  <p class="note">Method details and every design decision:
+  <p class="note" data-label="Further reading">Method details and every design decision:
      <a href="https://github.com/adrianogelato/energy-market-predictability#the-value-of-complexity-ladder-milestone-10">README, milestone 10</a>.
      Raw results: <a href="forecast_ladder.json">forecast_ladder.json</a>,
      <a href="forecast_ladder_diagnostics.json">diagnostics</a>.</p>
 
   <footer id="footer"></footer>
+  <!-- Static sibling of <footer>, not a child: the pages set
+       footer.textContent from JS, which would wipe any child. -->
+  <p class="repo">Source, write-up and backlog: <a href="https://github.com/adrianogelato/energy-market-predictability">github.com/adrianogelato/energy-market-predictability</a></p>
 
   <script>
     const COLORS = { climatology:'#1c1c1c', persistence:'#888', linear:'#4c72b0',
@@ -399,7 +417,7 @@
                           if (d) renderDiag(l, d);
                           window.syncPageNav?.(); })
       .catch(() => document.body.insertAdjacentHTML('beforeend',
-        '<p class="note">Could not load forecast_ladder.json — run ' +
+        '<p class="note">Could not load forecast_ladder.json, run ' +
         '<code>python year_fetch.py && python forecast_ladder.py</code>.</p>'));
 
     function renderVerdict(l) {
@@ -414,7 +432,7 @@
         o.rungs[a].regret_ct <= o.rungs[b].regret_ct ? a : b);
       if (best !== 'climatology' || l.mode !== 'full-year')
         document.getElementById('vHead').textContent =
-          'The answer: check the ladder below — the winner changed with the latest data.';
+          'The answer: check the ladder below, the winner changed with the latest data.';
       document.getElementById('footer').textContent =
         'Generated ' + l.generated_at + ' · ' + o.n_days + ' walk-forward test days · ' +
         'weather input: ' + l.config.weather_input +

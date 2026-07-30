@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T10:34",
+  "generated_at": "2026-07-30T16:36",
   "data_source": "live",
   "n_control_pool": 31,
   "k_controls_per_day": 5,
@@ -9,6 +9,12 @@
       "temp_max",
       "rad_mean",
       "wind_mean"
+    ],
+    "feature_labels": [
+      "daily mean temperature",
+      "daily maximum temperature",
+      "mean solar radiation",
+      "mean wind speed"
     ],
     "k_controls": 5,
     "day_type_classes": [
@@ -27,7 +33,7 @@
     "std_mw": 2082.6,
     "t_stat": 0.7,
     "mde_mw_80pct_power": 986.0,
-    "interpretation": "no statistically clear deviation from comparable days (a null result is a real finding; only deviations of about 986 MW or more were detectable at 80% power, so this rules out a large effect, not any effect)"
+    "interpretation": "Demand shows no statistically clear deviation from comparable days. Only deviations of about 986 MW or larger were detectable at 80% power."
   },
   "subsets": {
     "all": {
@@ -37,7 +43,7 @@
       "std_mw": 2082.6,
       "t_stat": 0.7,
       "mde_mw_80pct_power": 986.0,
-      "interpretation": "no statistically clear deviation from comparable days (a null result is a real finding; only deviations of about 986 MW or more were detectable at 80% power, so this rules out a large effect, not any effect)"
+      "interpretation": "Demand shows no statistically clear deviation from comparable days. Only deviations of about 986 MW or larger were detectable at 80% power."
     },
     "prime": {
       "n_match_days": 35,
@@ -46,7 +52,7 @@
       "std_mw": 2578.6,
       "t_stat": 0.6,
       "mde_mw_80pct_power": 1220.0,
-      "interpretation": "no statistically clear deviation from comparable days (a null result is a real finding; only deviations of about 1220 MW or more were detectable at 80% power, so this rules out a large effect, not any effect)"
+      "interpretation": "Demand shows no statistically clear deviation from comparable days. Only deviations of about 1220 MW or larger were detectable at 80% power."
     },
     "overnight": {
       "n_match_days": 25,
@@ -55,7 +61,7 @@
       "std_mw": 1926.4,
       "t_stat": 1.62,
       "mde_mw_80pct_power": 1079.0,
-      "interpretation": "no statistically clear deviation from comparable days (a null result is a real finding; only deviations of about 1079 MW or more were detectable at 80% power, so this rules out a large effect, not any effect)"
+      "interpretation": "Demand shows no statistically clear deviation from comparable days. Only deviations of about 1079 MW or larger were detectable at 80% power."
     },
     "germany": {
       "n_match_days": 4,
@@ -64,7 +70,7 @@
       "std_mw": 4003.2,
       "t_stat": 0.32,
       "mde_mw_80pct_power": 5604.0,
-      "interpretation": "no statistically clear deviation from comparable days (a null result is a real finding; only deviations of about 5604 MW or more were detectable at 80% power, so this rules out a large effect, not any effect)"
+      "interpretation": "Demand shows no statistically clear deviation from comparable days. Only deviations of about 5604 MW or larger were detectable at 80% power."
     }
   },
   "robustness_within_day": {

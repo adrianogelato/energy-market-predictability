@@ -17,18 +17,38 @@ pipeline, and statistics that are allowed to say "no effect".
 ## Findings at a glance
 
 **Smart timing is worth real money, and the algorithm barely matters.** Over a
-full backtested year (337 days), shifting a daily 11 kWh EV charge into the
-three cheapest hours saves about €203/yr versus charging anytime. (The
-summer-only window alone says €303/yr; peak solar spreads inflate it.) Across a
-six-rung ladder of forecasters, from a 28-day lookup table up to gradient
-boosting, the lookup table wins the whole year outright; every model
-underperforms it overall, weather models pay off only in winter, and there by
-roughly €1 per season for the household — despite being fed perfect weather.
+full backtested year (353 days), shifting a daily 11 kWh EV charge into the
+three cheapest hours saves about €210/yr versus charging anytime, against a
+€225/yr perfect-foresight ceiling. (The summer-only window alone says €303/yr;
+peak solar spreads inflate it.) Across a six-rung ladder of forecasters, from a
+28-day lookup table up to gradient boosting, the lookup table wins the whole
+year outright. Paired sign-flip tests put a number on the gap: four of the five
+models are significantly *worse* than the lookup table (linear +0.215 ct/kWh,
+p=0.001; persistence +0.207, p=0.009; richer linear +0.198, p=0.001; gradient
+boosting +0.131, p=0.022), and k-nearest-days only ties it (+0.020, p=0.613).
+All of them were fed perfect weather. Weather models pay off in winter alone,
+and there by roughly €1 per season for the household.
 **Product implication: a smart-charging feature on this market needs
 automation and UX, not ML.**
 ([ladder](#the-value-of-complexity-ladder-milestone-10),
 [forecaster](#the-cheapest-hours-forecaster-milestone-5),
 [value](#the-forecasts-money-value-milestone-8))
+
+**Day-ahead is a fair price for the household, but a poor proxy for real time.**
+Against a full year of the German real-time price (reBAP), the day-ahead price a
+dynamic-tariff household is billed carries a near-zero systematic gap (median
+reBAP-minus-day-ahead spread +0.04 ct/kWh; the largest hour-of-day bias is
+−0.92 ct/kWh, in the 19:00 evening ramp). But real time is 1.9x as volatile as
+day-ahead (2.2x in winter, 1.6x in summer), only 0.54 correlated with it, and
+the three cheapest day-ahead hours are all still cheapest at real time on just
+12.6% of days. **Product implication: no consumer-facing intraday product,
+because the household gap is zero; the real-time value is variance, capturable
+only by whoever holds the balancing position, so it is a business-to-business
+aggregation play worth about €122/yr of flexibility per household-equivalent,
+not a household saving.** That €122 is an annual total and is earned unevenly:
+the median day is worth 1.73 ct/kWh, and the top 5% of days carry 32% of the
+year.
+([details](#day-ahead-versus-real-time-how-good-is-the-markets-own-forecast-r9))
 
 **The World Cup did not detectably move the German market.** Final verdict on
 the complete tournament window (11 June to 19 July, 35 match days, seasonal
@@ -38,18 +58,24 @@ out seasonal drift, both consistent with no effect. Load forecast error: every
 subset, the once-marginal overnight one included, is consistent with chance
 (overnight subset permutation p=0.92, family-wise p=0.94 over four subsets
 including Germany-only), and the within-day contrast still flips its sign,
-which points at drift in the error series, not matches. The study's power
-bounds the claim: no price effect larger than ~2.2 ct/kWh, no load effect
-separable from seasonal drift.
+which points at drift in the error series, not matches. A third test looks at
+the real-time price, the one place an unanticipated shift could still surface
+after the auction closes (R3): match-hour reBAP-minus-day-ahead runs
++2.18 ct/kWh in the raw matched comparison (placebo p=0.005), but the within-day
+contrast that nets out day-level drift shrinks it to +1.20 at p=0.118, and the
+Germany subset's eye-catching +6.34 collapses to +1.90 at p=0.45. The study's
+power bounds the claim: no price effect larger than ~2.2 ct/kWh, no load effect
+separable from seasonal drift, and no real-time effect that survives the drift
+control.
 ([details](#the-world-cup-price-study-milestone-4))
 
 **The method detects real events.** On a full year of data the same engine
-finds the weekend effect at −3.93 ct/kWh in daytime prices (n=106, t=−13.52,
-permutation p < 0.0005) and now also a real public-holiday effect at
-−6.91 ct/kWh (n=9, permutation p=0.013), so the World Cup null is a bounded
-finding from a working instrument, not a broken tool — with the caveat that
-detecting a 4 ct effect does not prove sensitivity to small ones, which is why
-every null above carries its minimum detectable effect.
+finds the weekend effect at −4.08 ct/kWh in daytime prices (n=110, t=−14.22,
+permutation p < 0.0005) and also a public-holiday effect at −6.91 ct/kWh (n=9,
+permutation p=0.0035), so the World Cup null is a bounded finding from a working
+instrument, not a broken tool. The caveat stands that detecting a 4 ct effect
+does not prove sensitivity to small ones, which is why every null above carries
+its minimum detectable effect.
 ([details](#the-generic-event-study-milestone-9))
 
 **Live demo:** https://adrianogelato.github.io/energy-market-predictability/
@@ -160,7 +186,7 @@ Milestone 10 (`python year_fetch.py && python forecast_ladder.py`) is the
 value-of-complexity study: a full backtested year, a six-rung ladder of
 forecasters from a 28-day lookup table to gradient boosting, every rung scored
 identically per season. It answers "how advanced does the algorithm need to
-be?" with a curve — which turns out to flatten at rung one. The lookup table
+be?" with a curve, and the curve flattens at rung one. The lookup table
 wins the year outright.
 
 ## Quickstart
@@ -180,7 +206,18 @@ dependencies: the ENTSO-E stage is skipped (not clobbered with synthetic data)
 when no token is set, and it warns loudly if any fetch fell back to synthetic
 data. It also finds the project's `.venv` by itself, so it works even when
 started with the system python (an editor's Run button, for example) without
-activating the venv first. To run a single step instead, every milestone
+activating the venv first.
+
+Everyday loop: after the first full run, `python run_all.py --skip-fetch` is the
+command you use most. It rebuilds every analysis from the CSVs already on disk
+with no network call. The R9 reBAP layer is fetched separately and on demand, not
+by `run_all.py`: `python intraday_fetch.py --since` tops it up with only the new
+tail (it re-fetches a few days of overlap to catch late-published values and
+never overwrites real data with synthetic), while a plain `python
+intraday_fetch.py` backfills the whole year. After either, `run_all.py
+--skip-fetch` picks up the refreshed `intraday_prices.csv`.
+
+To run a single step instead, every milestone
 script still works on its own, e.g.:
 
 ```bash
@@ -272,28 +309,32 @@ acceptable trade for a piece meant to be shown.
 
 ### A static site on GitHub Pages, no backend
 
-The site is four small pages that read committed JSON files in the browser:
+The site is five small pages that read committed JSON files in the browser:
 `index.html` (the findings one-pager), `tariff.html` (the daily demo, charts
-via Chart.js from a CDN), `worldcup.html` (the event study), and `ladder.html`
-(the value-of-complexity study). There is no build step, no framework, and no
-server to run or pay for. GitHub Pages serves the repository directly. This
-keeps the whole thing free to host, trivial to reason about, and forkable by
-anyone.
+via Chart.js from a CDN), `worldcup.html` (the event study), `intraday.html`
+(day-ahead versus real time), and `ladder.html` (the value-of-complexity
+study). There is no build step, no framework, and no server to run or pay for.
+GitHub Pages serves the repository directly. This keeps the whole thing free to
+host, trivial to reason about, and forkable by anyone.
 
 ### Shared page furniture: page-nav.css and page-nav.js
 
 The section menu and the back-to-top button live in one CSS file and one JS
 file that pages link, instead of being copied into each page's inline `<style>`
-and `<script>`. Everything else stays inline and page-local, which is the rule
-this follows: content belongs to its page, navigation that must behave
-identically everywhere does not.
+and `<script>`. The rule this follows: content belongs to its page, behaviour
+that must be identical everywhere does not. The visual system moved out for the
+same reason (see "One stylesheet, and a design that reports its own limits").
 
 A page opts in with three lines: the stylesheet link, `<script src="page-nav.js"
 defer>`, and an empty `<nav id="toc">` placeholder marking where the menu sits
 in the flow on narrow screens. On wide screens the menu is fixed beside the
-text column, so the placeholder's position only matters below 1180px, where the
-menu becomes a collapsible block instead. A page without the placeholder gets
-neither feature, which is how `index.html` and `tariff.html` opt out today.
+text column, so the placeholder's position only matters below 1320px, where the
+menu becomes a collapsible block instead. That breakpoint is set by geometry:
+860px of text plus a 12.5rem menu and a 1.5rem gap on each side needs 1308px.
+It read 1180px until a screenshot at 1280px showed the menu clipped off the
+left edge of the window, which is what any width between the two did. A page
+without the placeholder gets neither feature, which is how `index.html` and
+`tariff.html` opt out today.
 
 The menu is built from every `section[id] > h2`, so it cannot drift from the
 page: add a section with an id and an entry appears, reword a heading and the
@@ -309,6 +350,42 @@ palette.
 
 This was extracted at the third page, not the first. Two copies were cheaper to
 read than an indirection; the third copy, plus pages still to come, flipped it.
+
+### One stylesheet, and a design that reports its own limits
+
+Every page used to carry its own copy of the same tokens and components: body
+measure, `.card`, `.note`, `figcaption`, tables, footer. Five copies had already
+drifted (one page's accent, another's warm grey, three different table rules),
+so the visual system moved into `site.css`. Pages keep an inline `<style>` for
+their DATA colours only, because those are shared with the matplotlib figures
+and belong to the study rather than to the chrome.
+
+This did not shrink the CSS. The 106 duplicated inline lines became 17 inline
+plus 317 in `site.css`, about 228 lines more. The extraction removed the
+duplication, and then the file spent the space on things no page had before: a
+type scale, visible keyboard focus, the bound bar, reduced-motion handling, and
+tables that scroll instead of pushing the page sideways. The win is one place to
+change and no drift, not fewer lines.
+
+The direction is called "bounded null", and it comes from what this project
+actually produces. Most of the findings here are nulls with a stated minimum
+detectable effect, and the standard visual grammar for a result page, a big
+coloured number, is wrong for that: it makes "no effect" look like either a
+triumph or a failure. So the chrome is deliberately monochrome, and colour is
+spent in exactly one place, when a measured effect clears its own bound.
+
+That grammar is a component, `bound.js`. It draws a caliper scale: the jaws are
+the smallest effect the study could have detected, the dot is what it measured,
+and a dot resting inside the jaws is the finding. It reads its numbers from the
+committed JSONs and derives the word "null" or "effect" from the dot's position,
+so the label cannot disagree with the data. It appears on `index.html` beside
+the World Cup finding and on `worldcup.html` in the verdict box.
+
+Typography follows the same idea: IBM Plex Sans for prose, IBM Plex Mono for
+every number, unit, label and caption. Mono is not decoration here, it marks
+measured or machine-derived text and gives tabular figures on pages built out
+of `ct/kWh` values. `chart-theme.js` pushes the same fonts and greys into
+Chart.js so figures match the page instead of carrying library defaults.
 
 ### Files as the interface, no database
 
@@ -455,9 +532,9 @@ One market-design point bounds what this test can mean: the day-ahead price is
 fixed in an auction at 12:00 the day before delivery. Nothing that happens
 during a match can move that day's day-ahead price, so this is strictly a test
 of whether traders *anticipated* a match effect, never of whether the match
-caused one. An unanticipated demand shift would surface in intraday or
-imbalance prices (a parked next step) or in the load forecast error, which is
-exactly what milestone 7 measures.
+caused one. An unanticipated demand shift would surface in the imbalance price,
+which is what the R3 study tests, or in the load forecast error, which is
+exactly what milestone 7 measures. Both come back null.
 
 Match hours are kickoff plus two clock hours. That ignores extra time and
 penalties in knockout games, and hourly data cannot resolve the classic "TV
@@ -729,7 +806,7 @@ times. The share of those random runs whose effect is at least as extreme as the
 real one is a distribution-free p-value. It answers the multiple-testing
 question properly: each draw relabels the days once and carries every day's
 subset membership along, so all subset t's come from the same draw, and
-the maximum |t| across them builds the family-wise null — the correct reference
+the maximum |t| across them builds the family-wise null, the correct reference
 when the most extreme of several examined subsets is the one being reported.
 
 On the final window the overnight blip lands at a subset p of 0.922 and a
@@ -795,16 +872,17 @@ days away) has room to work.
 The weekend case is a positive control, not filler. A method that only ever
 returns null is useless, because you cannot tell "no effect" from "cannot detect
 anything". The weekend effect is large and certain, so finding it (here
-−3.93 ct/kWh in daytime price over 106 weekend days, permutation p < 0.0005 —
-the floor of 2000 draws; a permutation p is never exactly zero) proves the
-machinery works. One limitation stated plainly: detecting a 4 ct effect does
+−4.08 ct/kWh in daytime price over 110 weekend days, permutation p < 0.0005,
+which is the floor of 2000 draws, since a permutation p is never exactly zero)
+proves the machinery works. One limitation stated plainly: detecting a 4 ct
+effect does
 not demonstrate sensitivity to small ones, which is why the World Cup null is
 reported with its minimum detectable effect (~2.2 ct/kWh) rather than as an
 unqualified "no effect".
 
 The holiday test is now a second positive control. On the year window nine
 German public holidays carry data, and the engine finds −6.91 ct/kWh
-(t=−3.8, permutation p=0.013): holidays price like Sundays, as the grid folk
+(t=−3.80, permutation p=0.0035): holidays price like Sundays, as the grid folk
 wisdom says. The earlier summer-only window held a single holiday (Whit
 Monday, n=1, no usable t), and the engine said so rather than pretending;
 widening the window was the backlog item that fixed it.
@@ -831,20 +909,30 @@ monthly), persistence, the M5 linear model, a richer linear model (annual
 harmonics, day types, wind), a dependency-free k-nearest-days kernel
 regression, and gradient boosting.
 
-The result (337 test days, 2025-07 to 2026-07): the curve flattens at rung
-one. Climatology wins the year outright — hit-rate 0.67, regret 0.40 ct/kWh,
-€203/yr saved versus charging anytime — and no model beats it overall (knn
-comes closest at 0.42; the linear models and gradient boosting trail it).
+The result (353 test days, 2025-07 to 2026-07): the curve flattens at rung one.
+Climatology wins the year outright at hit-rate 0.68 and regret 0.38 ct/kWh,
+€210/yr saved versus charging anytime against a €225/yr perfect-foresight
+ceiling, which is 93% of the ceiling captured by a monthly-refreshed lookup
+table.
+
+The paired sign-flip tests say how firm that is, and they are stronger than
+"no model beats it". Four of the five models cost significantly *more* per day
+than the lookup table: linear +0.215 ct/kWh (p=0.001, €8.63/yr), persistence
++0.207 (p=0.009, €8.33/yr), richer linear +0.198 (p=0.001, €7.94/yr), gradient
+boosting +0.131 (p=0.022, €5.24/yr). Only k-nearest-days is indistinguishable
+from it (+0.020 ct/kWh, p=0.613, minimum detectable effect 0.115 ct/kWh), and it
+ties rather than wins. Family-wise max-|t| is 3.21 (linear), p=0.003, so the
+result is not an artefact of running five comparisons.
+
 Weather models do win in winter, where the price shape genuinely varies:
-0.41 ct/kWh regret versus climatology's 0.51. That advantage is worth about
-€1 per winter for the household. In the shoulder seasons the linear models are
-actively worse than the lookup table (up to 1.02 ct/kWh regret in autumn),
-overfitting weather levels while missing the hour ranking that actually
-matters.
+0.41 ct/kWh regret versus climatology's 0.51, worth about €1 per winter for the
+household. In the shoulder seasons the linear models are actively worse than the
+lookup table (up to 1.02 ct/kWh regret in autumn), overfitting weather levels
+while missing the hour ranking that actually matters.
 
 Why does a lookup table beat gradient boosting? Because the product target is
 a selection, not a price. Weather moves price *levels* strongly, but the
-*ranking* of hours — which three are cheapest — is pinned by the daily solar
+*ranking* of hours, which three are cheapest, is pinned by the daily solar
 and demand cycle almost every day. Models spend their capacity explaining
 level variance that the selection task never rewards.
 
@@ -854,25 +942,27 @@ RMSE, and MAPE guarded against near-zero prices, plus MAE/RMSE over the picked
 hours only) next to the regret ladder, and a paired sign-flip permutation test
 of each rung's daily cost against the lookup table, with a minimum detectable
 effect for every null and a family-wise max-|t| across the five comparisons.
-Several rungs predict price levels more accurately than the lookup table and
-still pick hours no better; none beats it on the decision task. The common
-objection "a well-built model is more accurate than a lookup table" is usually
-true, and beside the point; ladder.html shows both metric families in one
-table ("Accuracy is the wrong yardstick").
+Four rungs predict price levels more accurately than the lookup table (k-nearest
+days at MAE 2.59 ct/kWh, gradient boosting 2.69, richer linear 2.79, persistence
+2.81, against climatology's 2.95) and none of them converts that into better
+hour picks; three of the four are significantly worse on the decision task. The
+common objection "a well-built model is more accurate than a lookup table" is
+usually true, and beside the point; ladder.html shows both metric families in
+one table ("Accuracy is the wrong yardstick").
 
 Two design decisions keep the comparison honest. The climatology baseline is
 rolling (28 days), not full-history, so a winter day is judged against winter;
 a full-history mean would have been a strawman. And every weather-using rung
 sees actual weather, a perfect forecast it would never have in production,
-while climatology needs no forecast at all — so the lookup table's win is
-conservative, and would widen under deployed conditions. The
+while climatology needs no forecast at all, so the lookup table's win is
+conservative and would widen under deployed conditions. The
 deployed-realism variant (archived weather forecasts) and the quarter-hourly
 version remain on the backlog.
 
 The product reading, which is the point of the study: the algorithm choice
 moves €9/yr at most; being on a dynamic tariff with *any* automated timing
-moves ~€200/yr. Engineering budget belongs in automation, onboarding, and
-trust, not in the forecaster — at household scale. (An aggregator trading
+moves ~€210/yr. At household scale, engineering budget belongs in automation,
+onboarding, and trust, not in the forecaster. (An aggregator trading
 hundreds of MW across thousands of vehicles prices the same €-per-kWh gaps
 very differently; that question is out of scope here.)
 
@@ -881,6 +971,209 @@ seven steps, the ladder curve, a residual-by-hour chart showing where each
 model systematically misses, single inspected days (each rung's worst fit),
 and the critical questions answered as design decisions. The script also
 writes `forecast_ladder_diagnostics.json` and two diagnostic PNGs.
+
+### Day-ahead versus real time: how good is the market's own forecast (R9)
+
+The whole project treats the day-ahead price as ground truth. It is, for the
+bill: a dynamic tariff settles the household at the day-ahead auction price. But
+that price is itself a forecast, the outcome of an auction that clears on
+forecast demand and forecast wind and solar. This study measures how good that
+forecast is by comparing the day-ahead price against the price that forms at
+real time, when the actual system state is known.
+
+```bash
+python intraday_fetch.py      # day-ahead (year_prices.csv) + reBAP; needs credentials
+python intraday_analysis.py   # writes intraday_results.json + intraday_analysis.png
+```
+
+Then view `intraday.html` through the local server. The reBAP fetch is a
+deliberate on-demand step and is NOT part of `run_all.py`: it backfills a full
+year from netztransparenz on every call, the source only updates a few times a
+month, and the rate limit rewards infrequent use, so re-fetching it on every
+pipeline run would be wasteful. `run_all.py` only (re)builds
+`intraday_results.json` from whatever `intraday_prices.csv` already exists; fetch
+fresh reBAP by hand when you want it, and otherwise run `run_all.py --skip-fetch`.
+
+The data source is the finding that shaped the study. The first plan compared
+day-ahead against the intraday auction and the imbalance price from ENTSO-E.
+A probe (`intraday_probe.py`) proved ENTSO-E carries neither for Germany: the
+intraday "A07" query just returns the day-ahead series, and every imbalance
+(A85) query returns "no matching data" for every German control-area domain and
+every window. Germany's real-time price, the reBAP (the uniform balancing-energy
+price the four transmission system operators settle deviations at), is published
+on netztransparenz.de instead. So R9 is day-ahead versus reBAP, a single
+zone-local real-time signal, and the ROADMAP assumption that ENTSO-E would serve
+intraday and imbalance prices under the existing token is corrected in place.
+
+The reBAP comes from the netztransparenz WebAPI, which needs its own OAuth2
+client credentials (separate from the ENTSO-E token): register for the
+"WebAPIReader" role, create a client to get an ID and secret, and put them in
+`.env` as `IPNT_CLIENT_ID` and `IPNT_CLIENT_SECRET`. The fetcher reads the
+documented endpoint `NrvSaldo/reBAP/Qualitaetsgesichert` (CSV "Format 9"),
+converts its UTC timestamps to Europe/Berlin and its EUR/MWh values to ct/kWh,
+and averages the quarter-hours to hourly (the quarter-hour version is a backlog
+item). It has the same synthetic fallback discipline as the other fetchers, and
+`python intraday_fetch.py --selftest` checks the parser against the
+documentation's own sample without any network call.
+
+Mind the rate limit. The netztransparenz firewall allows at most two requests
+per second per source IP, and a repeated breach blocks the IP for two hours. The
+fetcher spaces its requests, warns before it would approach the cap, and backs
+off if the server returns 429, so a normal yearly run (one request per monthly
+chunk) is well clear. If you script your own calls against the API, keep them
+under two per second.
+
+Official documentation, useful when the API changes or a fetch fails:
+
+- WebAPI overview and getting started: https://www.netztransparenz.de/en/Web-API
+- WebAPI FAQ (endpoints, Swagger, 401 troubleshooting): https://www.netztransparenz.de/en/FAQ/FAQ-WebAPI
+- Full WebAPI documentation (endpoint table, CSV "Format 9", rate limits), PDF v1.14:
+  https://www.netztransparenz.de/xspproxy/api/staticfiles/ntp-relaunch/dokumente/web-api/dokumentation-webserviceapi-netztransparenz_v1.14.pdf
+- Swagger (all endpoints, "Try it out"): https://api-portal.netztransparenz.de/public-swagger-ui
+- reBAP data (definition, calculation model): https://www.netztransparenz.de/en/Balancing-Capacity/Imbalance-price/Uniform-imbalance-price-reBAP
+- OAuth token endpoint: https://identity.netztransparenz.de/users/connect/token
+
+On data handling: netztransparenz.de publishes no explicit reuse licence for the
+reBAP, so the raw series is treated as not redistributable. The fetched
+`intraday_prices.csv` is gitignored and stays local; only `intraday_results.json`
+is committed, and it holds derived aggregates (median spreads by hour, volatility
+ratios, overlap counts), never the raw reBAP series.
+
+Several design decisions shape the analysis. The imbalance price is heavy-tailed,
+most hours quiet and a few scarcity hours extreme, and those tails are the
+phenomenon, not noise, so every spread is reported as a median and inter-quartile
+range alongside the mean and no outliers are trimmed. The study reports the
+systematic day-ahead bias by hour (where the day-ahead auction reliably under- or
+over-prices), the real-time volatility relative to day-ahead by season, and
+whether the three cheapest day-ahead hours are still the three cheapest at real
+time, with the extra cost of acting on the day-ahead ranking but valuing it at
+real time. That euro figure is framed throughout as a flexibility hypothetical,
+never a household saving: the household is billed at the day-ahead price no matter
+what real time does, so this study cannot move the household verdict. It answers
+the narrower, honest question of whether the day-ahead price is a good proxy for
+real-time scarcity, which matters for flexibility settled closer to delivery and
+is the zone-local signal the event work reuses (R3, below). The verdict on
+`intraday.html` is computed live from `intraday_results.json`, so it always
+matches the committed numbers.
+
+#### What it found
+
+On the full year of real reBAP (2025-07-12 to 2026-07-28, 8,925 hours),
+day-ahead is nearly unbiased in level: the median reBAP-minus-day-ahead spread is
++0.04 ct/kWh, and the systematic hour-of-day bias never exceeds about 1 ct/kWh
+(the largest is −0.92 ct/kWh at 19:00, day-ahead running slightly dear into the
+evening ramp, and slightly cheap around midday). The action is all in the
+variance. Real time is 1.9 times as volatile as day-ahead (2.2x in winter, 1.6x
+in summer), the two are only 0.54 correlated, and reBAP ranges from about -420 to
++260 ct/kWh. The three cheapest day-ahead hours are all still the three cheapest
+at real time on only 12.6% of days (87 of 372 days share none). The verdict:
+day-ahead is a good proxy for the typical hour's price level, but a poor proxy
+for real-time scarcity and for which hours are actually cheapest.
+
+The cost of that ranking failure needs two numbers, not one, because the spread
+is fat-tailed. Averaged over the year the settlement regret is 3.03 ct/kWh, about
+122 EUR/yr at 11 kWh/day. On a typical day it is 1.73 ct/kWh, about 69 EUR/yr at
+the same volume. Both are correct and they answer different questions: an annual
+figure is a sum over days, and a sum is the day count times the mean, so 122
+EUR/yr is what someone holding the position all year actually accumulates, while
+1.73 ct/kWh is what an ordinary day looks like. The gap between them is the tail:
+the worst 5% of days carry 32% of the annual total. Quoting only the mean
+overstates the typical day; quoting only the median understates the year. This
+README leads with the mean wherever the figure is annual, and says "median day"
+whenever it is not.
+
+A robustness note, since the window grew by 16 days in the 2026-07-30 refetch:
+almost nothing moved. The median spread went from +0.051 to +0.041 ct/kWh, the
+inter-quartile range from 4.777 to 4.787, the volatility ratio from 1.908 to
+1.907, the correlation from 0.5439 to 0.5448, and the cheapest-three survival
+rate stayed at 12.6%. These are year-scale aggregates over ~9,000 hours and they
+are stable, which is the reason to trust them.
+
+#### Product reading: household versus aggregator
+
+This prices the real-time slice of the product argument (ROADMAP R5), and it
+splits cleanly by who holds the balancing position. For the household, billed at
+day-ahead, the systematic gap is zero at every hour, so there is no
+consumer-facing intraday product: nothing to pass through. The consumer's value
+stays where the ladder study put it, automated day-ahead timing worth about
+210 EUR/yr, model-agnostic (M10). The real-time value is entirely in the
+variance, and a median spread of zero means there is no free arbitrage: a
+provider profits by managing its reBAP exposure well, which is skill against a
+1.9x-volatile, fat-tailed price, not a guaranteed margin. The size of that
+real-time flexibility pool is about 122 EUR/yr per household-equivalent (the
+settlement regret), roughly 58% of the day-ahead timing prize, but capturable
+only by whoever holds the position, so it is a business-to-business aggregation
+play (a virtual power plant or flexibility aggregator), not a household one. The
+tail concentration matters for that reading too: a third of the pool sits in 5%
+of days, so capturing it means being ready on the days that matter rather than
+grinding out a daily margin. The two euro figures are different pools, not
+simply additive, and the 122 EUR/yr is
+indicative rather than bankable, since reBAP is a settlement price for imbalance,
+not a quote anyone can freely trade at.
+
+### The World Cup in real time: where a surprise could still hide (R3)
+
+```bash
+python wc_intraday.py          # needs intraday_prices.csv from intraday_fetch.py
+```
+
+The day-ahead price study (M4) has a structural ceiling on what it can detect.
+The auction clears at 12:00 the day before delivery, so a day-ahead price can
+only ever show whether traders *anticipated* a match effect. An unanticipated
+demand shift arrives after the auction closes and shows up in the price that
+forms at delivery. In the German zone that is the reBAP, which R9 built the data
+layer for. So this study asks the same question against the one outcome variable
+where a genuine surprise could survive: is the reBAP-minus-day-ahead spread
+different during match hours than on weather-comparable days?
+
+It reuses the whole World Cup apparatus, the match-hour schedule, the
+`matching.py` comparable-days engine, the Germany subset and the permutation
+battery, and swaps only the outcome. Medians throughout, because the spread is
+fat-tailed for the same reason R9's is.
+
+#### What it found
+
+Nothing that survives a drift control. Coverage is 34 of 35 match days
+(2026-07-18 is still not published in the quality-assured reBAP series).
+
+The raw matched comparison looks like a hit: match-hour spread +2.18 ct/kWh
+versus comparable days, placebo p=0.005, against a null 95th percentile of
+1.55 ct/kWh. The within-day contrast, which subtracts each day's own non-match
+hours before comparing against controls and therefore removes any day-level
+shift, cuts it to +1.20 ct/kWh at p=0.118. That is the estimate to read, and it
+does not clear the bar.
+
+The reason is visible directly in the data: match days run +0.43 ct/kWh above
+the matched control days across **all 24 hours**, not just match hours (+0.32
+versus −0.11 on the day medians; against every non-match day in the surrounding
+period rather than the matched pool the gap is wider still, about
++0.69 ct/kWh). A football
+match lasting two to four hours cannot lift a whole day's imbalance spread, so
+that shift is period drift and the headline estimator absorbs it. The same
+signature shows up in the calendar split, where the effect concentrates in June
+(+2.48 ct/kWh over 20 days) and largely vanishes in July (+0.89 over 14 days),
+even though July is the knockout stage with the larger audiences. A causal
+viewing effect should run the other way.
+
+The Germany subset is the trap in this study and is worth stating plainly. Its
+headline reads +6.34 ct/kWh at placebo p=0.033, which is the only figure anywhere
+in the World Cup work that clears a significance threshold. It does not survive:
+all four Germany match days (14, 20, 25 and 29 June) fall inside the drift-heavy
+first half of the tournament, and under the same within-day contrast the effect
+drops to +1.90 ct/kWh at p=0.452. On four days the within-day inter-quartile
+range is 10.56 ct/kWh, so that subset cannot support a claim in either direction.
+The family-wise guard is reported on both estimators for exactly this reason:
+p=0.033 on the headline, p=0.455 drift-robust. The second is the one to quote.
+
+So H2 now has three independent tests and three bounded nulls: the day-ahead
+price (was it anticipated), the load forecast error (did demand actually
+deviate), and the real-time price (did the auction misprice it). None shows an
+effect that survives its drift control. Worth noting for honesty about
+multiplicity: the real-time spread is the third outcome variable tried on one
+event, and the family-wise correction only spans subsets within a study, not
+across the three studies, so a nominal p=0.005 on the third attempt is worth
+less than it reads. That does not change the conclusion here, because the
+drift-robust estimates are null anyway.
 
 ## Assumptions and limitations
 
@@ -915,6 +1208,17 @@ year_fetch.py              milestone 10: full-year price + weather fetcher
 forecast_ladder.py         milestone 10: the value-of-complexity ladder
 forecast_ladder.json       milestone 10 results, committed (index.html reads it)
 ladder.html                milestone 10: the value-of-complexity page
+intraday_fetch.py          R9: day-ahead + reBAP fetcher (netztransparenz WebAPI)
+intraday_analysis.py       R9: day-ahead vs real-time reBAP study
+intraday_results.json      R9 results, committed (intraday.html reads it)
+intraday.html              R9: day-ahead vs real-time reBAP page
+intraday_probe.py          R9 diagnostic: proves ENTSO-E lacks DE intraday/imbalance
+netztransparenz_probe.py   R9 diagnostic: finds the reBAP WebAPI endpoint
+wc_intraday.py             R3: World Cup match hours in the reBAP spread
+wc_intraday_results.json   R3 results, committed (aggregates only)
+site.css                   shared: the visual system (tokens, type, components)
+bound.js                   shared: the bound bar, effect against detectable limit
+chart-theme.js             shared: Chart.js fonts and greys, load without defer
 page-nav.css               shared: section menu + back-to-top styling
 page-nav.js                shared: builds the section menu from the headings
 events_holidays.csv        German public holidays (event study + day-typing)
@@ -945,10 +1249,41 @@ LICENSE                    MIT
 The hypotheses and their verdicts, the limitations, and the prioritized backlog
 live in `ROADMAP.md` (this README holds the milestone descriptions; that file
 holds the working ledger). The post-tournament rerun and the seasonal-control
-repair are done (2026-07-22); queued there, in priority order: the
-intraday/imbalance study, the Winter Olympics as a second event, pricing the
-findings for stakeholders, deployed-realism forecasts, 15-minute resolution,
-and a cross-country dose-response study.
+repair are done (2026-07-22); the day-ahead-versus-real-time study (R9) is built
+against the reBAP price after a probe established that ENTSO-E does not carry
+German intraday or imbalance prices; and the event-side real-time test (R3) is
+built on that layer and comes back null once day-level drift is controlled
+(2026-07-30). Queued there, in priority order: pricing the findings for
+stakeholders, a virtual home energy management system built on the lookup-table
+finding, the Winter Olympics as a second event, deployed-realism forecasts,
+15-minute resolution, and a cross-country dose-response study.
+
+## Data sources and attribution
+
+The code is MIT-licensed (below), but the data it fetches is not the project's to
+relicense, and the sources differ, so provenance is tracked explicitly here and
+in the `NOTICE` file.
+
+Electricity load and day-ahead load forecast (milestones 6 and 7) come from the
+[ENTSO-E Transparency Platform](https://transparency.entsoe.eu), which publishes
+its open-reuse data under the Creative Commons Attribution 4.0 International
+licence (CC-BY 4.0). Reuse and redistribution are permitted with attribution to
+ENTSO-E. Day-ahead prices come through the free
+[aWATTar API](https://www.awattar.de/services/api) (EPEX SPOT day-ahead prices
+passed through), and weather comes from [Open-Meteo](https://open-meteo.com),
+also CC-BY 4.0. For all three, the raw fetched CSVs are gitignored and only
+derived, aggregated results are committed.
+
+The German real-time price, the reBAP, comes from
+[netztransparenz.de](https://www.netztransparenz.de), published by the four German
+transmission system operators. It carries no explicit reuse licence, so this
+project treats the raw reBAP series as not redistributable: `intraday_prices.csv`
+is gitignored and never committed, and only `intraday_results.json` (median
+spreads by hour, volatility ratios, overlap counts, all derived aggregates, never
+the raw series) is committed. The match schedule and holiday list were compiled by
+the author from public information. None of this is legal advice; where a source
+grants no licence, the project keeps the raw data local and publishes only its own
+analysis.
 
 ## License
 

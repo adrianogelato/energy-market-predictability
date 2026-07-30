@@ -18,6 +18,22 @@ Order and dependencies
                                                               -> event_study_results.json
 9. wc_load_effect.py         offline   <- wc_load.csv         -> wc_load_results.json
 10. wc_permutation.py        offline   <- wc_load.csv         -> wc_permutation_results.json
+11. intraday_analysis.py     offline   <- intraday_prices.csv -> intraday_results.json (R9)
+12. wc_intraday.py           offline   <- intraday_prices.csv -> wc_intraday_results.json (R3)
+                                          + wc_matches/weather   World Cup in the reBAP spread
+
+Fetched separately, on demand (NOT run here):
+  year_fetch.py       -> year_prices.csv / year_weather.csv  (full-year backfill)
+  forecast_ladder.py  -> forecast_ladder.json                (year study)
+  intraday_fetch.py   -> intraday_prices.csv                 (reBAP for R9)
+
+Why intraday_fetch.py is kept out of this runner: it backfills a full year of
+reBAP from netztransparenz on every call, the source only updates a few times a
+month, and the API rate limit rewards infrequent use. Re-fetching it on every
+run_all.py would be wasteful and impolite to their servers. Fetch it by hand
+when you actually want fresh reBAP (python intraday_fetch.py); run_all.py then
+picks up the resulting intraday_prices.csv and (re)builds intraday_results.json.
+If you have nothing new to fetch, prefer 'python run_all.py --skip-fetch'.
 
 Safety logic worth knowing
 --------------------------
@@ -25,7 +41,8 @@ The fetchers fall back to SYNTHETIC data when the network or token fails, and
 that would overwrite real CSVs with test data. So this runner (a) checks the
 data_source after each fetch and warns loudly if it went synthetic, and
 (b) skips entsoe_fetch.py entirely when no ENTSOE_TOKEN is set but a real
-wc_load.csv already exists, rather than clobbering it.
+wc_load.csv already exists, rather than clobbering it. The reBAP fetch is not
+run here at all (see above).
 """
 
 import argparse
@@ -122,6 +139,10 @@ def main():
             print("\nNo ENTSOE_TOKEN set and no wc_load.csv: the load-based "
                   "studies (wc_load_effect, wc_permutation) will be skipped.")
 
+        # The reBAP fetch (intraday_fetch.py) is intentionally NOT run here; it
+        # is an on-demand full-year backfill (see the module docstring). Any
+        # existing intraday_prices.csv is analysed below.
+
     run("cost_model.py")
     run("wc_analysis.py")
     run("forecast_cheap_hours.py")
@@ -134,6 +155,15 @@ def main():
     else:
         print("\n(wc_load.csv missing: skipped wc_load_effect.py and "
               "wc_permutation.py. Set ENTSOE_TOKEN and re-run to include them.)")
+
+    if (HERE / "intraday_prices.csv").exists():
+        run("intraday_analysis.py")
+        run("wc_intraday.py")   # R3: World Cup match hours in the reBAP spread
+    else:
+        print("\n(intraday_prices.csv missing: skipped intraday_analysis.py (R9) and "
+              "wc_intraday.py (R3). Fetch reBAP on demand with "
+              "'python intraday_fetch.py' (needs year_prices.csv and "
+              "IPNT_CLIENT_ID/SECRET in .env), then re-run.)")
 
     print("\nDone. Preview the pages with:  python -m http.server 8000")
 

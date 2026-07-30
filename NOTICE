@@ -1,0 +1,62 @@
+NOTICE
+======
+
+This project (code: MIT, see LICENSE) uses data from several public sources.
+Their attribution and reuse terms differ, and this file records how each is
+handled.
+
+ENTSO-E Transparency Platform
+  Data: electricity load and day-ahead load forecast for the DE-LU zone
+  (milestones 6 and 7).
+  Terms: published for free re-use under the Creative Commons Attribution 4.0
+  International licence (CC-BY 4.0); attribution to ENTSO-E is required.
+  https://transparency.entsoe.eu
+  Handling: raw series are gitignored; the committed result JSONs
+  (wc_load_results.json, wc_permutation_results.json) contain aggregated
+  analysis derived from this data, not the raw series.
+
+aWATTar day-ahead price API
+  Data: EPEX SPOT day-ahead wholesale prices, passed through by aWATTar
+  (milestones 1-5, 8, 10, and the day-ahead side of R9).
+  https://www.awattar.de/services/api
+  Handling: raw price CSVs (prices.csv, year_prices.csv, wc_prices.csv) are
+  gitignored; committed outputs are derived aggregates.
+
+Open-Meteo
+  Data: weather (temperature, cloud, wind, shortwave radiation), historical
+  archive and forecast, used for the comparable-day matching.
+  Terms: Creative Commons Attribution 4.0 International (CC-BY 4.0).
+  https://open-meteo.com
+  Handling: raw weather CSVs are gitignored.
+
+netztransparenz.de (reBAP)
+  Data: the German uniform imbalance price (reBAP), the real-time settlement
+  price, published by the four German transmission system operators (R9).
+  Terms: NO explicit reuse licence is provided; statutory norms apply.
+  https://www.netztransparenz.de
+  Handling: because no reuse licence is granted, the raw reBAP series is treated
+  as NOT redistributable. It is fetched locally only (intraday_prices.csv is
+  gitignored) and is never committed. Two committed files hold reBAP-derived
+  analysis, and both contain aggregates only, never the source dataset:
+    - intraday_results.json (R9): median spreads by hour of day and season,
+      volatility ratios, correlation, cheapest-hour overlap counts, and the
+      regret concentration curve. All pooled over hundreds of days.
+    - wc_intraday_results.json (R3): per-match-day effect estimates, permutation
+      aggregates, the whole-day drift diagnostic, and the calendar split.
+  One reconstruction risk is handled explicitly rather than left to chance.
+  wc_results.json commits the day-ahead price per match day and hour window. Had
+  wc_intraday_results.json also published the absolute reBAP-minus-day-ahead
+  spread for those same days and windows, the two committed files could be added
+  together to recover the reBAP level (checked: exact on some days, about
+  1.4 ct/kWh mean error across the set). So wc_intraday.py publishes only the
+  effect delta per day, which is a difference of differences measured against
+  control days that are never published, and therefore cannot reconstruct a
+  level. The absolute per-day spreads stay local.
+
+Author-compiled inputs
+  wc_matches.csv (match schedule) and events_holidays.csv (German public
+  holidays) were compiled by the project author from public information.
+
+This notice is a good-faith record of data provenance, not legal advice. Where a
+source provides no explicit licence, this project errs toward keeping the raw
+data local and committing only its own derived analysis.

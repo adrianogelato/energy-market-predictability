@@ -1,0 +1,512 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ==========================================================================
+   Shared site styles. Previously each page carried its own near-identical
+   copy of these tokens and components, so they drifted; this file is the one
+   definition. Pages keep an inline <style> only for their own DATA colours.
+
+   Design direction: "bounded null". This project's product is honest nulls
+   with a stated minimum detectable effect, so the page is built around a
+   measurement device (.bound, below) rather than around big numbers. The
+   chrome is deliberately monochrome and only spends colour when a result
+   actually clears its bound. A null is not dressed up to look like a finding.
+
+   Data colours (--ctrl green, --alt pink, --imb orange, --warn amber,
+   --cool blue) are unchanged from before on purpose: analysis.py,
+   wc_intraday.py, intraday_analysis.py, wc_permutation.py and
+   forecast_ladder.py all draw figures in these exact hues, and CLAUDE.md
+   requires one palette across pages and figures.
+   ========================================================================== */
+
+:root {
+  /* chrome: cool graphite on white, instrument-like, no warm cream */
+  --ink:      #16191c;
+  --paper:    #ffffff;
+  --panel:    #f2f5f6;
+  --line:     #dfe4e6;
+  --rule:     #b9c3c8;
+  --muted:    #5b666c;
+
+  /* data: shared with the matplotlib figures, do not repoint casually */
+  --ctrl:     #4c9f70;
+  --alt:      #c1436d;
+  --imb:      #d6633c;
+  --warn:     #e0a458;
+  --cool:     #4c72b0;
+
+  /* page accent, consumed by page-nav.css; pages may override */
+  --accent:   #4c9f70;
+
+  --sans: 'IBM Plex Sans', -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --measure: 860px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+  line-height: 1.55;
+  font-size: 1rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- type scale -------------------------------------------------------- */
+
+h1 {
+  font-size: clamp(1.9rem, 1.3rem + 2.4vw, 2.7rem);
+  line-height: 1.06;
+  font-weight: 600;
+  letter-spacing: -0.021em;
+  margin: 0 0 .3rem;
+  text-wrap: balance;
+}
+h2 {
+  font-size: 1.32rem;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  margin: 0 0 .45rem;
+}
+h3 {
+  font-size: 1.06rem;
+  font-weight: 600;
+  letter-spacing: -0.008em;
+  margin: 1.6rem 0 .4rem;
+}
+p { margin: .7rem 0; }
+
+/* The standfirst under an h1. Mono, because on this site mono marks
+   machine-derived or measured text and the standfirst states the measurement. */
+.sub {
+  font-family: var(--mono);
+  font-size: .87rem;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-top: 0;
+  max-width: 62ch;
+}
+
+.muted { color: var(--muted); font-size: .9rem; }
+
+/* Every number on this site is mono, so figures line up in tables and cards
+   and so a reader can tell measured values from prose at a glance. */
+.num, .card .n, .bound__scale, td, th, code, .hint, figcaption, footer, #toc {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.num { font-weight: 500; color: var(--ink); }
+.num.alt { color: var(--alt); }
+.accent { color: var(--ctrl); }
+
+a { color: var(--ctrl); text-decoration-thickness: 1px; text-underline-offset: .18em; }
+a:hover { text-decoration-thickness: 2px; }
+
+/* Accessibility floor: the pages had no visible focus style at all. */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* --- layout ------------------------------------------------------------ */
+
+section { margin: 2.5rem 0; }
+canvas { max-width: 100%; }
+figure { margin: 0; }
+figcaption {
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.5;
+  margin-top: .55rem;
+  padding-left: .8rem;
+  border-left: 1px solid var(--line);
+}
+.hint { color: var(--muted); font-size: .76rem; margin: .3rem 0 0; }
+
+.row { display: flex; gap: 1rem; flex-wrap: wrap; }
+.row > div { flex: 1 1 380px; }
+
+/* --- cards ------------------------------------------------------------- */
+
+.cards { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1.5rem 0; }
+.card {
+  flex: 1 1 170px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: .85rem .9rem;
+  background: var(--paper);
+}
+.card .n {
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  display: block;
+}
+.card .l {
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.4;
+  margin-top: .3rem;
+  display: block;
+}
+
+/* --- the three text blocks -------------------------------------------- */
+/* One form per job, so a reader can tell what kind of statement they are
+   reading from its shape alone. These are the only three, and they never swap
+   jobs:
+
+   .summary    sits directly under a heading. The section's takeaway and the
+               argument about the data. Solid ink rule, body size or larger.
+   figcaption  sits directly under a figure. Describes that figure only: what
+               is plotted, axes and units, source, date range, sample caveats.
+               It does NOT argue, that is the summary's job.
+   .note       a grey panel. Caveats, limits, interim-data warnings and method
+               asides. Carries a data-label eyebrow naming which of those it is.
+
+   Position reinforces form: summaries follow headings, captions follow
+   figures, notes stand alone. */
+
+.summary {
+  border-left: 2px solid var(--ink);
+  padding-left: .9rem;
+  margin: .8rem 0 1.4rem;
+  font-size: 1.02rem;
+  line-height: 1.5;
+  max-width: 66ch;
+}
+.summary p { margin: .5rem 0; }
+.summary p:first-child { margin-top: 0; }
+.summary p:last-child { margin-bottom: 0; }
+/* A JSON-fed paragraph leaves no gap before its data arrives. */
+.summary p:empty { display: none; }
+/* A summary whose text is written by JS from a result JSON. Same form; the
+   marker only exists so the pages can find it. */
+.summary:empty { display: none; }
+
+/* --- notes and callouts ------------------------------------------------ */
+
+.note, .implication, .status {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--rule);
+  border-radius: 3px;
+  padding: .7rem .95rem;
+  font-size: .9rem;
+  color: var(--ink);
+}
+.implication { font-size: .92rem; margin-top: .6rem; }
+
+/* Eyebrow naming what kind of note this is ("Limitation", "Interim data",
+   "Product implication"). Notes vary in job more than the other two blocks
+   do, which is why labelling earns its place here and nowhere else. */
+.note[data-label]::before, .implication[data-label]::before,
+.status[data-label]::before {
+  content: attr(data-label);
+  display: block;
+  font-family: var(--mono);
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  margin-bottom: .35rem;
+}
+.warn, .status {
+  background: #fdf6ea;
+  border-color: #f0e0c4;
+  border-left-color: var(--warn);
+}
+
+code {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0 .22rem;
+  font-size: .86em;
+}
+
+/* --- verdict box ------------------------------------------------------- */
+/* Squared off and hairline-ruled rather than a coloured 2px box: the verdict
+   on most of these pages is a null, and a null should not shout. */
+
+.verdict, #verdictBox {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ink);
+  border-radius: 3px;
+  padding: 1.1rem 1.25rem;
+  margin: 1.5rem 0;
+  background: var(--paper);
+}
+.verdict .head, #verdictHead {
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  margin: 0 0 .1rem;
+}
+
+/* --- findings (index.html) --------------------------------------------- */
+/* Three enumerated questions, so the number and the question live in a left
+   gutter and the answer lives in its own column. The split is what stops the
+   three findings reading as one wall of text: each one now has a visible
+   left edge, and the eyebrow is scannable on its own without reading the body. */
+
+.finding {
+  display: grid;
+  grid-template-columns: 10.5rem 1fr;
+  gap: 0 2rem;
+  border-top: 1px solid var(--line);
+  padding: 2.6rem 0 2rem;
+  margin: 0;
+}
+.finding:first-of-type { border-top-width: 2px; border-top-color: var(--ink); }
+
+.finding__eyebrow {
+  grid-column: 1;
+  font-family: var(--mono);
+  font-size: .78rem;
+  line-height: 1.45;
+  color: var(--muted);
+  margin: .25rem 0 0;
+}
+.finding__eyebrow strong {
+  display: block;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: .2rem;
+}
+.finding__body { grid-column: 2; min-width: 0; }
+
+.finding .verdict {
+  border: 0;
+  padding: 0;
+  margin: 0 0 .7rem;
+  font-size: 1.22rem;
+  font-weight: 600;
+  letter-spacing: -0.014em;
+  line-height: 1.28;
+}
+.finding p { margin: .6rem 0; }
+.finding__body > p:first-child { margin-top: 0; }
+
+/* Below the gutter's usable width the eyebrow stacks above the answer. */
+@media (max-width: 700px) {
+  .finding { grid-template-columns: 1fr; gap: 0; padding: 2rem 0 1.6rem; }
+  .finding__eyebrow { grid-column: 1; margin: 0 0 .5rem; }
+  .finding__body { grid-column: 1; }
+  .finding__eyebrow strong { display: inline; margin-right: .4rem; }
+}
+
+/* --- repo link, on every page ----------------------------------------- */
+
+.repo {
+  font-family: var(--mono);
+  font-size: .78rem;
+  margin: .9rem 0 0;
+}
+.repo a { color: var(--muted); }
+.repo a:hover { color: var(--ink); }
+
+.links { display: flex; flex-wrap: wrap; gap: .4rem; }
+.links a {
+  font-family: var(--mono);
+  font-size: .82rem;
+  display: inline-block;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: .5rem .8rem;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--paper);
+}
+.links a:hover { border-color: var(--ink); background: var(--panel); }
+.links a.alt { color: var(--alt); }
+
+/* --- tables ------------------------------------------------------------ */
+
+/* Wide tables scroll inside themselves; the page body must never scroll
+   sideways. Applied to `table` rather than to a wrapper on each one, so a
+   table added later is covered without anyone remembering to wrap it.
+   display:block turns the element into its own scroll container and the rows
+   still lay out as a table inside an anonymous table box. Verified at 320,
+   360, 390, 480 and 768px on every page. */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: .84rem;
+  display: block;
+  overflow-x: auto;
+}
+th, td { text-align: right; padding: .38rem .5rem; border-bottom: 1px solid var(--line); }
+th:first-child, td:first-child { text-align: left; }
+thead th {
+  border-bottom: 1px solid var(--ink);
+  font-weight: 500;
+  color: var(--muted);
+  font-size: .76rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+td.best { font-weight: 500; color: var(--ctrl); }
+
+/* Wide tables scroll in their own box, never the page body. */
+.scroll-x { overflow-x: auto; }
+
+/* --- details / disclosure --------------------------------------------- */
+
+details { margin: 1rem 0; }
+summary { cursor: pointer; }
+summary:hover { color: var(--ink); }
+
+select { font: inherit; font-size: .92rem; padding: .2rem .4rem;
+  border: 1px solid var(--line); border-radius: 3px; background: var(--paper);
+  color: var(--ink); }
+
+ol li, ul li { margin: .5rem 0; }
+.qa dt { font-weight: 600; margin-top: 1rem; }
+.qa dd { margin: .25rem 0 0; }
+
+footer {
+  color: var(--muted);
+  font-size: .76rem;
+  line-height: 1.5;
+  margin-top: 3.5rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+
+/* ==========================================================================
+   THE SIGNATURE: the bound bar.
+
+   A measurement scale, not a chart. The bracket ends are the minimum
+   detectable effect (or a placebo ceiling); the dot is the measured effect.
+   A dot sitting well inside the brackets IS the finding on most of these
+   pages: the study measured something small and states what it could not
+   have seen. When the dot clears a bracket the bar turns --alt, which is the
+   only place the chrome is allowed colour.
+
+   Driven by one custom property, --ratio = effect / bound, set by the page's
+   JS from the committed JSONs (never hardcoded). Sign is preserved, so a
+   negative effect sits left of centre.
+   ========================================================================== */
+
+.bound {
+  --ratio: 0;
+  margin: .9rem 0 .2rem;
+  max-width: 34rem;
+}
+
+/* Not uppercased as a whole: this line carries units, and "ct/kWh" must never
+   render as "CT/KWH". Only the verdict word is set as a label. */
+.bound__label {
+  font-family: var(--mono);
+  font-size: .76rem;
+  color: var(--muted);
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  margin-bottom: .5rem;
+}
+.bound__verdict {
+  color: var(--ink);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  border-bottom: 2px solid var(--ink);
+}
+.bound.is-effect .bound__verdict { color: var(--alt); border-bottom-color: var(--alt); }
+
+/* The track: hairline rule, centre tick, bracket ends. Built from borders so
+   it prints and degrades without images. */
+.bound__track {
+  position: relative;
+  height: 1.7rem;
+  border-left: 2px solid var(--ink);
+  border-right: 2px solid var(--ink);
+}
+.bound__track::before {   /* the scale line */
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--line);
+}
+.bound__track::after {    /* zero tick */
+  content: '';
+  position: absolute;
+  top: .2rem;
+  bottom: .2rem;
+  left: 50%;
+  border-left: 1px dashed var(--rule);
+}
+
+/* Serifs on the ends, so the limits read as caliper jaws closing on the
+   measurement rather than as the edges of a plain box. */
+.bound__jaw {
+  position: absolute;
+  width: .5rem;
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  top: 0;
+  bottom: 0;
+}
+.bound__jaw--min { left: 0; }
+.bound__jaw--max { right: 0; }
+
+.bound__dot {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + var(--ratio) * 48%);
+  width: .58rem;
+  height: .58rem;
+  margin: -.29rem 0 0 -.29rem;
+  border-radius: 50%;
+  background: var(--ink);
+  transition: left .42s cubic-bezier(.2, .7, .2, 1);
+}
+.bound.is-effect .bound__dot { background: var(--alt); }
+
+.bound__scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: .7rem;
+  color: var(--muted);
+  margin-top: .2rem;
+}
+.bound__scale span:nth-child(2) { color: var(--ink); }
+
+.bound__caption {
+  font-family: var(--mono);
+  font-size: .76rem;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: .45rem 0 0;
+  max-width: 54ch;
+}
+
+/* The one orchestrated motion on the site: the dot travels out from zero on
+   load, so the bar reads as a measurement being taken. Nothing else moves. */
+@media (prefers-reduced-motion: no-preference) {
+  .bound__dot { animation: bound-settle .5s cubic-bezier(.2, .7, .2, 1) both; }
+  @keyframes bound-settle {
+    from { left: 50%; opacity: 0; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bound__dot { transition: none; }
+}
+
+/* --- narrow screens --------------------------------------------------- */
+
+@media (max-width: 560px) {
+  body { padding: 1.5rem 1rem; }
+  .card { flex-basis: 100%; }
+  .bound__label { flex-wrap: wrap; gap: .2rem .5rem; }
+}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dynamic electricity tariffs — a hands-on demo</title>
+  <title>Dynamic electricity tariffs, a hands-on demo</title>
   <!--
     The tariff demo (milestone 3). The project one-pager lives at index.html.
     Design decision: NO backend, NO live API call from the browser.
@@ -12,77 +12,59 @@
     page is just static files anyone can host. See README "Design decisions".
   -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-  <style>
-    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --accent:#4c9f70; }
-    * { box-sizing: border-box; }
-    body {
-      font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color: var(--ink); max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem;
-      line-height: 1.55;
-    }
-    h1 { margin-bottom: .2rem; }
-    .sub { color: var(--muted); margin-top: 0; }
-    .cards { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.5rem 0; }
-    .card {
-      flex: 1 1 180px; border: 1px solid var(--line); border-radius: 10px;
-      padding: 1rem;
-    }
-    .card .n { font-size: 1.6rem; font-weight: 700; }
-    .card .l { color: var(--muted); font-size: .85rem; }
-    .accent { color: var(--accent); }
-    section { margin: 2.25rem 0; }
-    canvas { max-width: 100%; }
-    .note { background:#f7f7f5; border-left:3px solid var(--accent); padding:.75rem 1rem;
-            border-radius:6px; color:#333; font-size:.92rem; }
-    footer { color: var(--muted); font-size: .8rem; margin-top: 3rem;
-             border-top:1px solid var(--line); padding-top:1rem; }
-    code { background:#f0f0ee; padding:.1rem .3rem; border-radius:4px; }
-    figure { margin: 0; }
-    figcaption { color: var(--muted); font-size: .82rem; margin-top: .5rem; }
-  </style>
+  <script src="chart-theme.js"></script>
+  <link rel="stylesheet" href="site.css" />
 </head>
 <body>
   <p><a href="index.html">&larr; project overview</a></p>
   <h1>Dynamic electricity tariffs</h1>
   <p class="sub">A hands-on look at day-ahead prices and what smart timing is worth.
      Data: aWATTar (Germany) = EPEX SPOT day-ahead. Refreshed daily.</p>
-  <p><a href="worldcup.html" style="color:#c1436d">Side study: does the World Cup move prices? &rarr;</a></p>
+  <p><a href="worldcup.html" style="color:var(--alt)">Side study: does the World Cup move prices? &rarr;</a></p>
 
   <div class="cards" id="cards"><!-- filled by JS --></div>
 
   <section>
     <h2>Today's day-ahead price</h2>
-    <p>The wholesale price for each hour, set by the merit-order auction. Dips
-       toward or below zero happen when wind and solar flood the grid — the
-       cheap hours a dynamic tariff exists to exploit.</p>
+    <div class="summary">
+      <p>The price swings by hours, not by season: the same day holds both the
+         expensive evening peak and the cheap midday hours when wind and solar
+         flood the grid. Those dips are the whole opportunity a dynamic tariff
+         exists to exploit.</p>
+    </div>
     <figure>
       <canvas id="priceChart" height="140"></canvas>
-      <figcaption>Today's day-ahead wholesale electricity price by hour, in
-        ct/kWh (the unit your bill uses).
-        "Day-ahead" means each hour's price was fixed the day before, in the
-        EPEX SPOT auction (data via aWATTar, Germany). Dips toward or below
-        zero mark hours when wind and solar generation exceeds demand.</figcaption>
+      <figcaption>Day-ahead wholesale electricity price by hour of day, in
+        ct/kWh. Each hour's price was fixed the day before in the EPEX SPOT
+        auction. One delivery day, the latest available. Source: aWATTar
+        (Germany), German-Luxembourg zone.</figcaption>
     </figure>
   </section>
 
   <section>
     <h2>What smart timing is worth</h2>
-    <p>One household over one day, including an 11 kWh EV charge, under three
-       scenarios. "Smart" means charging the EV in the cheapest hours instead
-       of the evening peak.</p>
+    <div class="summary">
+      <p>Shifting one 11 kWh EV charge into the cheapest hours is worth more
+         than switching tariff type. The flat and dynamic-with-dumb-charging
+         bars sit close together; the gap that matters opens only when the
+         charge moves.</p>
+    </div>
     <figure>
       <canvas id="costChart" height="140"></canvas>
-      <figcaption>Modelled cost in EUR for one household's electricity on one
-        day, including an 11 kWh EV charge, under three scenarios. "Flat
-        tariff" = one fixed price all day. "Dynamic" tracks the wholesale
-        day-ahead price hour by hour; "dumb charging" plugs the EV in at a
-        fixed time, "smart charging" shifts that charge into the cheapest
-        hours. Not a real bill — see the note below for the assumptions.</figcaption>
+      <figcaption>Modelled cost in EUR for one household's electricity over one
+        day, including an 11 kWh EV charge, under three scenarios. "Flat tariff"
+        is one fixed price all day. "Dynamic" tracks the wholesale day-ahead
+        price hour by hour; "dumb charging" plugs the EV in at a fixed time,
+        "smart charging" shifts that charge into the cheapest hours. Modelled
+        with stated assumptions, not a real bill. Source: aWATTar (Germany).</figcaption>
     </figure>
-    <p class="note" id="honesty"></p>
+    <p class="note" data-label="Limitation" id="honesty"></p>
   </section>
 
   <footer id="footer"></footer>
+  <!-- Static sibling of <footer>, not a child: the pages set
+       footer.textContent from JS, which would wipe any child. -->
+  <p class="repo">Source, write-up and backlog: <a href="https://github.com/adrianogelato/energy-market-predictability">github.com/adrianogelato/energy-market-predictability</a></p>
 
   <script>
     // Load the committed data and render. Kept deliberately simple.
@@ -91,7 +73,7 @@
       .then(render)
       .catch(e => {
         document.body.insertAdjacentHTML('beforeend',
-          '<p style="color:#b00">Could not load results.json — run ' +
+          '<p style="color:#b00">Could not load results.json, run ' +
           '<code>python fetch_prices.py &amp;&amp; python cost_model.py</code> first.</p>');
       });
 
@@ -103,7 +85,7 @@
       // Summary cards
       document.getElementById('cards').innerHTML = [
         card(euro(s.dynamic_smart_vs_flat_per_day) + '/day', 'Saved vs flat tariff', true),
-        card('€' + Math.round(s.dynamic_smart_vs_flat_per_year), 'Per year (today ×365 — indicative only; seasonal spreads differ)', false),
+        card('€' + Math.round(s.dynamic_smart_vs_flat_per_year), 'Per year (today ×365, indicative only; seasonal spreads differ)', false),
         card(euro(s.from_shifting_ev_per_day) + '/day', 'From shifting the EV alone', false),
       ].join('');
 
@@ -139,11 +121,13 @@
       });
 
       // Honesty note, driven by the actual assumptions
+      // The block's data-label already says "Limitation", so the sentence does
+      // not repeat it.
       document.getElementById('honesty').textContent =
-        'Honest caveat: a dynamic bill is wholesale + a fixed adder (' +
+        'A dynamic bill is wholesale plus a fixed adder (' +
         d.assumptions.fixed_adder_ct_per_kwh + ' ct/kWh of grid fees, levies, ' +
         'tax and margin) that is identical every hour. Shifting load only moves ' +
-        'the wholesale part, so savings are real but bounded — not unlimited.';
+        'the wholesale part, so savings are real but bounded, not unlimited.';
 
       document.getElementById('footer').textContent =
         'Data generated ' + (d.generated_at || 'unknown') +

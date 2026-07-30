@@ -99,16 +99,17 @@ def series_on(series, date, hours):
 
 def interpret(mean_delta, t_stat, n=None, sd=None):
     mde = (2.8 * sd / math.sqrt(n)) if (n and n > 1 and sd) else None
+    # Full sentences, not a lowercase fragment: the string used to depend on a
+    # caller prepending "Prime-time reading: " to make it grammatical.
     if t_stat is None or math.isnan(t_stat) or abs(t_stat) < 2:
-        bound = (f"; only deviations of about {mde:.0f} MW or more were "
-                 f"detectable at 80% power, so this rules out a large effect, "
-                 f"not any effect") if mde else ""
-        return ("no statistically clear deviation from comparable days "
-                "(a null result is a real finding" + bound + ")")
+        bound = (f" Only deviations of about {mde:.0f} MW or larger were "
+                 f"detectable at 80% power.") if mde else ""
+        return ("Demand shows no statistically clear deviation from comparable "
+                "days." + bound)
     direction = "above" if mean_delta > 0 else "below"
-    return (f"demand ran {abs(mean_delta):.0f} MW {direction} the forecast "
-            f"beyond comparable days (t={t_stat:.1f}); do not read anything "
-            f"into this before checking the permutation test (wc_permutation.py)")
+    return (f"Demand ran {abs(mean_delta):.0f} MW {direction} the forecast "
+            f"beyond comparable days (t={t_stat:.1f}). Check the placebo test "
+            f"below before reading anything into it.")
 
 
 def compute_effect(match_hours_by_day, err, err_days, matcher, control_days, mean_load):

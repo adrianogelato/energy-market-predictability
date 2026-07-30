@@ -28,14 +28,29 @@ year_weather.csv
 year_meta.json
 forecast_ladder.png
 
+# R9 raw fetched data: netztransparenz.de publishes NO explicit reuse licence
+# for the reBAP (statutory norms apply), so the raw reBAP series must not be
+# redistributed via git. intraday_prices.csv holds it (plus the aWattar
+# day-ahead, itself already ignored above), so it stays local and regenerable.
+intraday_prices.csv
+intraday_meta.json
+intraday_analysis.png
+wc_intraday.png
+
 # Intentionally tracked result JSONs (the pages read them in the browser):
 #   wc_load_results.json, wc_permutation_results.json  -> worldcup.html
 #   forecast_value.json, event_study_results.json      -> index.html (one-pager)
 
 # NOTE: these are intentionally NOT ignored and should be committed:
-#   results.json      demo page data, refreshed daily by the workflow
-#   wc_results.json   World Cup study output, read by worldcup.html
-#   wc_matches.csv    the (user-edited) match schedule
+#   results.json          demo page data, refreshed daily by the workflow
+#   wc_results.json       World Cup study output, read by worldcup.html
+#   wc_matches.csv        the (user-edited) match schedule
+#   intraday_results.json R9 output read by intraday.html. AGGREGATES ONLY
+#     (median spreads by hour, volatility ratios, overlap counts), derived from
+#     reBAP; it does NOT contain the raw reBAP series, so committing it is not a
+#     redistribution of the netztransparenz dataset.
+#   wc_intraday_results.json R3 output. Same reasoning: per-match-day median
+#     deltas and permutation aggregates derived from the reBAP, never the series.
 
 forecast_ladder_days.png
 forecast_ladder_residuals.png

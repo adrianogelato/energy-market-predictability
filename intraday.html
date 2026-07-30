@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Day-ahead vs real time: how good is the market's own forecast?</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="chart-theme.js"></script>
+  <link rel="stylesheet" href="site.css" />
+  <link rel="stylesheet" href="page-nav.css" />
+  <script src="page-nav.js" defer></script>
+  <style>
+    /* Page-specific data colours only; everything else lives in site.css.
+       --da / --imb are the day-ahead and imbalance series, matching the hues
+       intraday_analysis.py draws its figures in. */
+    :root { --da:#4c9f70; --imb:#d6633c; --accent:#d6633c; }
+    a { color:var(--imb); }
+  </style>
+</head>
+<body>
+  <p><a href="index.html">&larr; project overview</a> &nbsp;·&nbsp;
+     <a href="tariff.html">daily tariff demo</a> &nbsp;·&nbsp;
+     <a href="worldcup.html">World Cup study</a></p>
+  <h1>How good is the market's own day-ahead forecast?</h1>
+  <p class="sub">The day-ahead price is settlement truth for the bill, but it is
+     itself a forecast. Here it is measured against the price that forms at real
+     time: the German uniform imbalance price (reBAP). German-Luxembourg zone.</p>
+
+  <div id="banner"></div>
+
+  <section id="verdictBox">
+    <p id="verdictHead">&nbsp;</p>
+    <p id="verdictText"></p>
+  </section>
+
+  <details style="margin:1rem 0">
+    <summary><strong>How to read this page</strong> (30 seconds)</summary>
+    <p><strong>Day-ahead price</strong>: the auction that clears at noon the day
+       before delivery. A dynamic tariff bills the household at exactly this
+       price, so for the household it is not a forecast, it is the bill.</p>
+    <p><strong>Real-time (reBAP) price</strong>: the German uniform imbalance
+       price, the settlement price for deviating from schedule, published by the
+       four transmission system operators. It is zone-local and can be negative;
+       read it as what real-time scarcity cost, not as a price anyone is billed
+       directly.</p>
+    <p><strong>Spread</strong>: real-time minus day-ahead, in ct/kWh. A spread
+       near zero means the day-ahead price already knew what real time would
+       say.</p>
+    <p><strong>Why the household verdict cannot move</strong>: the household
+       settles at day-ahead no matter what real time does, so every euro figure
+       here is a hypothetical for flexibility settled closer to delivery, not a
+       household bill.</p>
+  </details>
+
+  <div class="cards" id="cards"></div>
+
+  <nav id="toc" aria-label="On this page"></nav>
+
+  <section id="methodSec">
+    <h2>The question and the method</h2>
+    <div class="summary">
+      <p>The day-ahead price is ground truth for the bill and a forecast for
+         everything else. Measuring it against the price that forms at delivery
+         turns "is the market good at predicting itself?" into a question with a
+         number attached.</p>
+    </div>
+    <p>Everything else in this project treats the day-ahead price as ground
+       truth. It is, for the bill. But that price is the outcome of an auction
+       that clears on <em>forecast</em> demand and <em>forecast</em> wind and
+       solar, so it embodies the market's own day-ahead forecast. How well that
+       forecast holds up shows in the price that forms at real time, when the
+       actual system state is known: the imbalance price.</p>
+    <p>Germany's real-time price is the reBAP, the single balancing-energy price
+       the four grid operators settle deviations at. ENTSO-E does not publish it
+       (a probe confirmed that), so it is fetched from netztransparenz.de and
+       compared per delivery hour against the same year of day-ahead prices.</p>
+    <p>The imbalance price is heavy-tailed: most hours are quiet and a few
+       scarcity hours are extreme. Those tails are the phenomenon, not noise, so
+       the spreads below are reported as medians and inter-quartile ranges
+       alongside means, and no outliers are trimmed.</p>
+  </section>
+
+  <section id="biasSec">
+    <h2>Where the day-ahead price is systematically off</h2>
+    <div class="summary">
+      <p>The bias is not spread evenly across the day. An unbiased forecast would
+         scatter around zero at every hour; a consistent sign at a given hour
+         means the day-ahead auction reliably under- or over-prices that part of
+         the day, and those hours are where a flexibility operator would look
+         first.</p>
+    </div>
+    <p>Season: <select id="biasSeason"></select>
+       <span class="sub">(DJF = Dec-Jan-Feb, MAM = Mar-Apr-May, JJA = Jun-Jul-Aug,
+       SON = Sep-Oct-Nov)</span></p>
+    <figure>
+      <canvas id="biasChart" height="150"></canvas>
+      <figcaption id="biasCap"></figcaption>
+    </figure>
+  </section>
+
+  <section id="volSec">
+    <h2>How much more variable is the real-time price?</h2>
+    <div class="summary">
+      <p>Real time is more variable than day-ahead in every season, from about
+         1.6 times in summer to 2.2 times in winter. A forecast that captures the
+         predictable shape of the day leaves the surprises for real time, so this
+         ratio is a direct read on how much of the day the auction already
+         knew.</p>
+    </div>
+    <figure>
+      <canvas id="volChart" height="150"></canvas>
+      <figcaption id="volCap">Ratio of the standard deviation of the real-time
+        reBAP price to that of the day-ahead price, by meteorological season
+        (DJF = Dec-Jan-Feb, MAM = Mar-Apr-May, JJA = Jun-Jul-Aug, SON =
+        Sep-Oct-Nov). A value of 1 means as variable as day-ahead, above 1 means
+        more variable. Source: reBAP (netztransparenz.de) and the day-ahead
+        auction (EPEX via aWATTar), German-Luxembourg zone, one year of hourly
+        data.</figcaption>
+    </figure>
+  </section>
+
+  <section id="rankSec">
+    <h2>Do the cheapest hours survive to real time?</h2>
+    <div class="summary">
+      <p>This is the product question of the whole project. If the three cheapest
+         day-ahead hours are still the three cheapest at real-time prices, picking
+         hours on day-ahead information loses nothing when value is judged closer
+         to delivery. If they are not, an operator exposed to real-time prices
+         would want to re-pick.</p>
+      <p id="rankNote"></p>
+    </div>
+    <div class="cards" id="rankCards"></div>
+    <figure>
+      <canvas id="rankChart" height="130"></canvas>
+      <figcaption id="rankCap">Distribution over days of how many of the three
+        cheapest day-ahead hours are also among the three cheapest real-time
+        hours, from 0 to 3. Source: reBAP (netztransparenz.de) and the day-ahead
+        auction (EPEX via aWATTar), German-Luxembourg zone, one year of daily
+        rankings.</figcaption>
+    </figure>
+  </section>
+
+  <section id="concSec">
+    <h2>Is that euro figure a margin or a handful of days?</h2>
+    <div class="summary">
+      <p>A small share of days carries most of the annual figure, so the yearly
+         number and a typical day are two different facts. An annual figure is a
+         sum over days, and a sum is the day count times the <em>mean</em>, so the
+         mean is the right input for anything annual: whoever holds the position
+         all year accumulates it, tail days included. But the mean says nothing
+         about an ordinary day, and on a fat-tailed series the two diverge a long
+         way.</p>
+      <p id="concNote"></p>
+    </div>
+    <div class="cards" id="concCards"></div>
+    <figure>
+      <canvas id="concChart" height="150"></canvas>
+      <figcaption id="concCap"></figcaption>
+    </figure>
+  </section>
+
+  <p class="note" data-label="Limitation">This compares an auction price with a
+     settlement price, not a live trading strategy, and it cannot change what the
+     household pays, which is the day-ahead price. It answers a narrower question,
+     whether the day-ahead price is a good proxy for real-time scarcity, which
+     matters for flexibility settled closer to real time.</p>
+
+  <footer id="footer"></footer>
+  <!-- Static sibling of <footer>, not a child: the pages set
+       footer.textContent from JS, which would wipe any child. -->
+  <p class="repo">Source, write-up and backlog: <a href="https://github.com/adrianogelato/energy-market-predictability">github.com/adrianogelato/energy-market-predictability</a></p>
+
+  <script>
+    fetch('intraday_results.json').then(r => r.json())
+      .then(d => { render(d); window.syncPageNav?.(); }).catch(() => {
+      document.getElementById('banner').innerHTML =
+        '<p class="note warn">Could not load <code>intraday_results.json</code>. Run ' +
+        '<code>python intraday_fetch.py &amp;&amp; python intraday_analysis.py</code>, then serve over http.</p>';
+    });
+
+    function card(n, l) {
+      return '<div class="card"><div class="n">' + n + '</div><div class="l">' + l + '</div></div>';
+    }
+    const sgn = x => (x > 0 ? '+' : '') + x;
+
+    function render(d) {
+      if ((d.data_source || '').startsWith('synthetic')) {
+        document.getElementById('banner').innerHTML =
+          '<p class="note warn"><strong>Synthetic data.</strong> These numbers come ' +
+          'from a generated test layer with a planted hour-of-day spread and a ' +
+          'fat-tailed real-time shock, used to validate the method. Run ' +
+          '<code>intraday_fetch.py</code> with netztransparenz credentials for real results.</p>';
+      }
+
+      const o = d.overall, r = d.rank_stability;
+      // The verdict string is "<claim>: <evidence>". The head takes the claim
+      // and the body takes the evidence, so the two do not repeat each other.
+      const cut = d.verdict.indexOf(': ');
+      const claim = cut > 0 ? d.verdict.slice(0, cut) : d.verdict;
+      const evidence = cut > 0 ? d.verdict.slice(cut + 2) : '';
+      document.getElementById('verdictHead').textContent = claim + '.';
+      document.getElementById('verdictText').textContent =
+        evidence ? evidence.charAt(0).toUpperCase() + evidence.slice(1) : '';
+
+      document.getElementById('cards').innerHTML = [
+        card(sgn(o.spread.median) + ' ct/kWh',
+             'Median real-time-minus-day-ahead spread (IQR ' + o.spread.iqr + ')'),
+        card('×' + o.vol_ratio_imb,
+             'Real-time (reBAP) volatility vs day-ahead'),
+        card(o.corr_da_imb,
+             'Correlation of day-ahead and real-time price'),
+        card(r.pct_full_overlap + '%',
+             'Days the 3 cheapest hours survive day-ahead → real time'),
+        card(sgn(r.settlement_regret_eur_per_yr) + ' EUR/yr',
+             'Cost of picking on day-ahead, valued at real time (flexibility hypothetical, ' +
+             r.daily_kwh + ' kWh/day)'),
+      ].join('');
+
+      // --- bias by hour, with a season selector (full year + DJF/MAM/JJA/SON) ---
+      const SEASON_OPTS = [['full', 'Full year'], ['DJF', 'DJF (winter)'],
+        ['MAM', 'MAM (spring)'], ['JJA', 'JJA (summer)'], ['SON', 'SON (autumn)']];
+      const biasSel = document.getElementById('biasSeason');
+      biasSel.innerHTML = SEASON_OPTS.filter(([k]) => d.by_hour[k])
+        .map(([k, label]) => '<option value="' + k + '">' + label + '</option>').join('');
+      let biasChartObj = null;
+      const drawBias = key => {
+        const blk = d.by_hour[key], hrs = blk.hours;
+        const label = SEASON_OPTS.find(o => o[0] === key)[1];
+        if (biasChartObj) biasChartObj.destroy();
+        biasChartObj = new Chart(document.getElementById('biasChart'), {
+          type: 'bar',
+          data: { labels: hrs.map(b => b.hour), datasets: [
+            { label: 'Real-time reBAP minus day-ahead (median)',
+              data: hrs.map(b => b.median),
+              backgroundColor: hrs.map(b => (b.median ?? 0) >= 0 ? '#3377aa' : '#d6633c') },
+          ]},
+          options: { plugins:{ legend:{display:true},
+              title:{display:true,
+                text:'Day-ahead bias by hour: real-time reBAP minus day-ahead (' + label + ')'} },
+            scales:{ x:{ title:{display:true,text:'Hour of day (Europe/Berlin)'} },
+                     y:{ title:{display:true,text:'Median spread (ct/kWh)'} } } }
+        });
+        document.getElementById('biasCap').textContent =
+          'Median spread by hour of day (Europe/Berlin): real-time reBAP price minus ' +
+          'day-ahead price, ct/kWh, over n=' + blk.n_days + ' days (' + label + '). Positive ' +
+          'means the day-ahead auction priced that hour below where real time settled ' +
+          '(day-ahead too cheap); negative means too expensive.';
+      };
+      biasSel.onchange = () => drawBias(biasSel.value);
+      drawBias('full');
+
+      // --- volatility by season ---
+      const bs = d.by_season;
+      new Chart(document.getElementById('volChart'), {
+        type: 'bar',
+        data: { labels: bs.map(s => s.season), datasets: [
+          { label:'Real-time (reBAP) vs day-ahead', data: bs.map(s => s.vol_ratio_imb),
+            backgroundColor:'#d6633c' },
+        ]},
+        options: { plugins:{ legend:{display:true},
+            title:{display:true,text:'Real-time volatility versus day-ahead, by season (ratio, 1 = equal)'} },
+          scales:{ x:{ title:{display:true,text:'Season'} },
+                   y:{ title:{display:true,text:'Std-dev ratio vs day-ahead'}, suggestedMin:0.9 } } }
+      });
+
+      // --- rank cards + overlap distribution ---
+      document.getElementById('rankCards').innerHTML = [
+        card(r.mean_overlap_of_3 + ' / 3', 'Mean shared cheapest hours per day'),
+        card(r.mean_jaccard, 'Mean Jaccard overlap (0–1)'),
+        card(sgn(r.settlement_regret_ct_per_kwh) + ' ct/kWh', 'Mean regret per kWh (valued at real time)'),
+        card(r.n_days, 'Days analysed'),
+      ].join('');
+
+      const od = r.overlap_distribution;
+      const ks = Object.keys(od).sort();
+      new Chart(document.getElementById('rankChart'), {
+        type: 'bar',
+        data: { labels: ks, datasets: [
+          { label:'Days', data: ks.map(k => od[k]), backgroundColor:'#d6633c' } ]},
+        options: { plugins:{ legend:{display:false},
+            title:{display:true,text:'Cheapest-3 ranking overlap: day-ahead vs real time'} },
+          scales:{ x:{ title:{display:true,text:'Number of the 3 cheapest hours shared'} },
+                   y:{ title:{display:true,text:'Days'} } } }
+      });
+      document.getElementById('rankNote').textContent =
+        'On ' + r.pct_full_overlap + '% of ' + r.n_days + ' days all three cheapest ' +
+        'day-ahead hours are also the three cheapest at real time. A household is billed ' +
+        'at day-ahead regardless; the ' + sgn(r.settlement_regret_eur_per_yr) +
+        ' EUR/yr figure is the hypothetical cost only for flexibility exposed to real-time prices.';
+
+      // --- mean vs median day, and how concentrated the total is ---
+      const w0 = d.window || {};
+      const cc = r.regret_concentration;
+      document.getElementById('concCards').innerHTML = [
+        card(sgn(r.settlement_regret_ct_per_kwh) + ' ct/kWh',
+             'Mean day. Annualises to ' + sgn(r.settlement_regret_eur_per_yr) +
+             ' EUR/yr, the figure an all-year position accumulates'),
+        card(sgn(r.settlement_regret_median_ct_per_kwh) + ' ct/kWh',
+             'Median day. What an ordinary day costs (' +
+             sgn(r.settlement_regret_median_day_eur_per_yr) + ' EUR/yr if every day were typical)'),
+        r.regret_share_from_top_5pct_days !== null
+          ? card(r.regret_share_from_top_5pct_days + '%',
+                 'Share of the annual total carried by the worst 5% of days') : '',
+        cc ? card(cc.quantiles_ct['99'] + ' ct/kWh',
+                  '99th-percentile day, against a maximum of ' + cc.max_ct) : '',
+      ].join('');
+
+      if (cc) {
+        new Chart(document.getElementById('concChart'), {
+          type: 'line',
+          data: { labels: cc.curve.map(p => p.day_share_pct), datasets: [
+            { label: 'Cumulative share of the year\'s regret',
+              data: cc.curve.map(p => p.regret_share_pct),
+              borderColor: '#d6633c', backgroundColor: 'rgba(214,99,60,.12)',
+              fill: true, tension: .2, pointRadius: 2 },
+            { label: 'If every day contributed equally',
+              data: cc.curve.map(p => p.day_share_pct),
+              borderColor: '#999', borderDash: [5, 4], borderWidth: 2,
+              pointRadius: 0, fill: false },
+          ]},
+          options: { plugins: { legend: { display: true },
+              title: { display: true,
+                text: 'Concentration of the annual settlement regret across days' } },
+            scales: { x: { title: { display: true,
+                             text: 'Share of days, worst first (%)' } },
+                      y: { title: { display: true,
+                             text: 'Cumulative share of annual regret (%)' },
+                           min: 0, max: 100 } } }
+        });
+        const at20 = cc.curve.find(p => p.day_share_pct === 20);
+        document.getElementById('concCap').textContent =
+          'Days ranked worst first. The solid curve is the cumulative share of the ' +
+          'year\'s total settlement regret; the dashed diagonal is what an evenly ' +
+          'spread cost would look like. The gap between them is the tail: the worst ' +
+          '5% of days carry ' + r.regret_share_from_top_5pct_days + '% of the year, and ' +
+          'the worst 20% carry ' + (at20 ? at20.regret_share_pct : '?') + '%. ' +
+          'n=' + cc.n_days + ' days, ' + (w0.start || '?') + ' to ' + (w0.end || '?') +
+          '. Source: reBAP (netztransparenz.de) minus day-ahead auction (EPEX via ' +
+          'aWATTar), German-Luxembourg zone. reBAP = German uniform imbalance price.';
+        document.getElementById('concNote').textContent =
+          'Product reading: this pool is not a daily margin to be earned steadily, it ' +
+          'is a readiness requirement. A flexibility operator captures it by being ' +
+          'positioned correctly on the few days that matter, which argues for ' +
+          'aggregate scale and reliable dispatch rather than for a better everyday ' +
+          'forecast. Quoting only the mean overstates a typical day; quoting only the ' +
+          'median understates the year.';
+      } else {
+        document.getElementById('concSec').style.display = 'none';
+      }
+
+      const w = d.window || {};
+      document.getElementById('footer').textContent =
+        'Window ' + (w.start||'?') + ' to ' + (w.end||'?') + '. ' + d.hours +
+        ' hours, DE-LU. Signals: day-ahead auction (EPEX via aWATTar), real-time ' +
+        'reBAP imbalance price (netztransparenz.de). Source: ' +
+        ((d.data_source||'').startsWith('synthetic') ? 'SYNTHETIC test data' : 'live') +
+        '. Generated ' + (d.generated_at || 'unknown') + '.';
+    }
+  </script>
+</body>
+</html>

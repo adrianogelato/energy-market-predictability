@@ -3,37 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>World Cup and electricity prices — a small study</title>
+  <title>World Cup and electricity prices, a small study</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="chart-theme.js"></script>
+  <link rel="stylesheet" href="site.css" />
   <link rel="stylesheet" href="page-nav.css" />
+  <script src="bound.js" defer></script>
   <script src="page-nav.js" defer></script>
   <style>
-    :root { --ink:#1c1c1c; --muted:#666; --line:#e3e3e3; --match:#c1436d; --ctrl:#4c9f70;
-      /* --accent: the page's own accent, consumed by page-nav.css */
-      --accent:#4c9f70; }
-    * { box-sizing: border-box; }
-    body { font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      color:var(--ink); max-width:860px; margin:0 auto; padding:2rem 1.25rem; line-height:1.55; }
-    a { color:var(--ctrl); }
-    h1 { margin-bottom:.2rem; }
-    .sub { color:var(--muted); margin-top:0; }
-    .cards { display:flex; flex-wrap:wrap; gap:.75rem; margin:1.5rem 0; }
-    .card { flex:1 1 170px; border:1px solid var(--line); border-radius:10px; padding:1rem; }
-    .card .n { font-size:1.5rem; font-weight:700; }
-    .card .l { color:var(--muted); font-size:.85rem; }
-    section { margin:2.25rem 0; }
-    canvas { max-width:100%; }
-    .note { background:#f7f7f5; border-left:3px solid var(--ctrl); padding:.75rem 1rem;
-      border-radius:6px; color:#333; font-size:.92rem; }
-    .warn { background:#fff5e6; border-left:3px solid #e0a458; }
-    table { border-collapse:collapse; width:100%; font-size:.9rem; }
-    th,td { border-bottom:1px solid var(--line); padding:.4rem .5rem; text-align:right; }
-    th:first-child,td:first-child { text-align:left; }
-    footer { color:var(--muted); font-size:.8rem; margin-top:3rem;
-      border-top:1px solid var(--line); padding-top:1rem; }
-    code { background:#f0f0ee; padding:.1rem .3rem; border-radius:4px; }
-    figure { margin: 0; }
-    figcaption { color: var(--muted); font-size: .82rem; margin-top: .5rem; }
+    /* Page-specific data colours only; everything else lives in site.css.
+       --match / --ctrl are the two series in every chart on this page and
+       match the hues wc_intraday.py draws its figures in. */
+    :root { --match:#c1436d; --accent:#4c9f70; }
   </style>
 </head>
 <body>
@@ -45,18 +26,19 @@
 
   <div id="banner"></div>
 
-  <section id="verdictBox" style="border:2px solid var(--ctrl); border-radius:10px;
-      padding:1rem 1.25rem; margin:1.25rem 0">
-    <p style="font-size:1.25rem; font-weight:700; margin:.1rem 0"
-       id="verdictHead">The answer: no — not detectably.</p>
-    <p style="margin:.5rem 0" id="verdictText">Across the complete tournament,
+  <section id="verdictBox">
+    <p id="verdictHead">No, not detectably.</p>
+    <p id="verdictText">Across the complete tournament,
        once weather and season are controlled for, prices during match hours
        look like prices on ordinary days, and actual demand did not measurably
        deviate from what the grid had forecast. One subset (overnight
        kickoffs) looked suggestive on the early interim data, but it faded as
        the window filled in, and a placebo test shows a blip that size appears
        by chance in random data too. The numbers below are the evidence.</p>
-    <p style="margin:.5rem 0" class="sub" id="verdictBounds"></p>
+    <p class="sub" id="verdictBounds"></p>
+
+    <!-- The bound bar; filled by drawBound() in bound.js from wc_results.json. -->
+    <div class="bound" id="wcBound" hidden></div>
   </section>
 
   <details style="margin:1rem 0">
@@ -76,7 +58,7 @@
     <p><strong>Minimum detectable effect (MDE)</strong>: what the study could
        have seen. A null result only rules out effects larger than this, so
        every "no effect" on this page really means "no effect above the MDE".</p>
-    <p><strong>Within-day diff-in-diff</strong>: a second estimate that
+    <p><strong>Within-day difference-in-differences</strong>: a second estimate that
        compares match hours against the same day's other hours, which cancels
        out the season slowly shifting under the whole window. If it disagrees
        with the main estimate, the "effect" was drift, not the event.</p>
@@ -88,9 +70,12 @@
 
   <section id="methodSec">
     <h2>The question and the method</h2>
-    <p>People watching a match shift when they cook, heat, and run appliances,
-       which changes demand. But price is mostly driven by
-       weather (sun and wind), so a fair test has to hold weather constant.</p>
+    <div class="summary">
+      <p>Match viewers shift when they cook, heat, and run appliances, which
+         changes demand. But weather (sun and wind) mostly drives price, so a
+         fair test has to hold weather constant, and the day-ahead auction's
+         timing decides what any price test can even detect.</p>
+    </div>
     <p>One timing subtlety: the day-ahead price is set in an auction at 12:00
        the day <em>before</em> delivery. Nothing that happens during a match can
        move that day's day-ahead price, so this price test measures whether
@@ -100,38 +85,46 @@
     <p>For each match day, the analysis finds the five most weather-comparable
        non-match days and compares the price during that day's match hours
        against the same clock hours on those comparable days. The average
-       difference is the estimated match effect. "Comparable" is defined in
-       one place (<code>matching.py</code>): daily temperature mean and max, a
-       solar proxy (radiation when available, otherwise cloud cover), and wind
-       when available, all z-scored; controls must share the day type
-       (weekday / Saturday / Sunday-or-holiday, so a public holiday never
-       stands in for a normal weekday). The exact pairing used is shown
-       below, <a href="#pairings">which days were compared</a>.</p>
-    <p class="note warn" id="interimNote">Interim numbers: the tournament runs
-       until 19 July 2026, so results here cover matches up to the latest data
-       fetch and will be re-run once the tournament is over.</p>
+       difference is the estimated match effect.</p>
+    <p>"Comparable" is defined in one place (<code>matching.py</code>): daily
+       temperature mean and max, a solar proxy (radiation when available,
+       otherwise cloud cover), and wind when available, all z-scored. Controls
+       must also share the day type, weekday or Saturday or Sunday-or-holiday,
+       so a public holiday never stands in for a normal weekday. See
+       <a href="#pairings">which days were compared</a>.</p>
+    <p class="note warn" data-label="Interim data" id="interimNote">The tournament
+       runs until 19 July 2026, so results here cover matches up to the latest
+       data fetch and will be re-run once the tournament is over.</p>
   </section>
 
   <section id="profileSec">
     <h2>Average price by hour: match days vs comparable days</h2>
-    <p>Bigger points mark hours that were match hours on a larger share of
-       match days (CEST). Because the 2026 tournament is in North America,
-       watchable-in-Europe matches fall in the late evening and overnight.</p>
+    <div class="summary">
+      <p>The two curves track each other through the match hours. Because the
+         2026 tournament is in North America, the matches Europe can watch fall
+         in the late evening and overnight rather than in the evening peak, so
+         the hours under test are not the ones where demand moves price most.</p>
+    </div>
     <figure>
       <canvas id="profileChart" height="150"></canvas>
-      <figcaption>Average wholesale price (ct/kWh) by hour of day, CEST
-        (Central European Summer Time). "Match days" = days with a live match;
-        "weather-comparable days" = non-match days matched on temperature,
-        solar, wind and day type (see matching.py), used as the counterfactual.
-        The shaded band spans the minimum to maximum price across match days
-        for that hour. Bigger/darker points mark hours that were live-match
-        hours on a larger share of match days; hover a point for the number
-        of matches played in that hour.</figcaption>
+      <figcaption>Average wholesale price in ct/kWh by hour of day, CEST
+        (Central European Summer Time). "Match days" are days with a live match;
+        "weather-comparable days" are non-match days matched on temperature,
+        solar, wind and day type (see <code>matching.py</code>). The shaded band
+        spans the minimum to maximum price across match days for that hour.
+        Bigger, darker points mark hours that were live-match hours on a larger
+        share of match days; hover a point for the number of matches played in
+        that hour. German day-ahead prices, 2026 tournament window.</figcaption>
     </figure>
   </section>
 
   <section id="perDaySec">
     <h2>Per match day</h2>
+    <div class="summary">
+      <p>The per-day differences scatter in both directions rather than leaning
+         one way, which is what the pooled null looks like day by day. No single
+         match day carries the result.</p>
+    </div>
     <table id="perDay"><thead><tr>
       <th>Date</th><th>Match-hour price</th><th>Comparable-day price</th><th>Difference</th>
     </tr></thead><tbody></tbody></table>
@@ -140,9 +133,9 @@
   <section id="pairings" style="display:none">
     <details>
       <summary><strong>Which days were compared?</strong> The exact control days
-        chosen for each match day, with distances — so the matching can be
+        chosen for each match day, with distances, so the matching can be
         inspected instead of trusted.</summary>
-      <p class="note" id="pairingsMeta"></p>
+      <p class="note" data-label="Matching parameters" id="pairingsMeta"></p>
       <table id="pairingsTable"><thead><tr>
         <th>Match day</th><th>Type</th><th>Control days (z-distance)</th>
       </tr></thead><tbody></tbody></table>
@@ -151,25 +144,82 @@
 
   <section id="loadSection" style="display:none">
     <h2>The more direct test: did demand beat the forecast?</h2>
-    <p>Prices only tell you whether the market anticipated an effect. The cleaner
-       measure is the day-ahead load forecast error (actual demand minus what was
-       forecast). A positive spike during match hours means real demand ran above
-       the forecast, which is the market being surprised.</p>
+    <div class="summary">
+      <p>Prices only tell you whether the market anticipated an effect. Demand
+         against its own forecast is the cleaner measure, because a match that
+         moved consumption would show up as demand running above what the grid
+         predicted, whether or not any trader saw it coming.</p>
+      <p id="loadInterp"></p>
+    </div>
     <div class="cards" id="loadCards"></div>
     <figure>
       <canvas id="loadChart" height="150"></canvas>
       <figcaption>Load forecast error by hour of day, CEST (Central European
-        Summer Time): actual grid demand minus the day-ahead demand
-        forecast, in MW. A positive spike means real demand ran
-        above what was forecast, i.e. the grid was surprised. "Match days"
-        vs. "weather-comparable days" (matched non-match days, see
-        matching.py) as above.</figcaption>
+        Summer Time): actual grid demand minus the day-ahead demand forecast, in
+        MW. Zero means the forecast was exactly right; positive means demand ran
+        above it. "Match days" versus "weather-comparable days" (matched
+        non-match days, see <code>matching.py</code>) as above. Source: ENTSO-E
+        transparency platform, German-Luxembourg zone, 2026 tournament
+        window.</figcaption>
     </figure>
-    <p class="note" id="loadInterp"></p>
+  </section>
+
+  <section id="intradaySec" style="display:none">
+    <h2>In real time: does the price move during match hours?</h2>
+    <div class="summary">
+      <p>The two tests above both use prices and forecasts set before delivery,
+         so they can only measure anticipation. This is the one test where an
+         unanticipated shift could still show up: the reBAP, the German uniform
+         imbalance price the four grid operators use to settle schedule
+         deviations, forms at delivery, so a demand shift nobody priced in lands
+         in the gap between it and the day-ahead auction.</p>
+      <p id="intradayInterp"></p>
+    </div>
+    <p class="note warn" data-label="Interim data" id="intradayCoverage"></p>
+    <div class="cards" id="intradayCards"></div>
+    <figure>
+      <canvas id="intradayChart" height="150"></canvas>
+      <figcaption>Median spread in ct/kWh (reBAP minus day-ahead) by hour of day,
+        CEST (Central European Summer Time). Zero means real time settled at the
+        day-ahead price; positive means it settled above. Medians, because the
+        imbalance price is heavy-tailed. reBAP is the German uniform imbalance
+        price, the real-time settlement price. "Match days" versus
+        "weather-comparable days" (matched non-match days, see
+        <code>matching.py</code>) as in the panels above. Bigger points mark
+        hours that were live-match hours on a larger share of match days.
+        Source: netztransparenz.de and the day-ahead auction (EPEX via aWATTar),
+        German-Luxembourg zone.</figcaption>
+    </figure>
+
+    <h3>Does any of it survive the drift control?</h3>
+    <div class="summary">
+      <p>The comparison above runs across days, which works only if match days
+         and comparable days are otherwise alike. They are not: the tournament
+         window sits at a different spread level than the mostly pre-tournament
+         controls. Once each day is compared against its own non-match hours
+         instead, nothing survives.</p>
+      <p id="intradayDriftNote"></p>
+    </div>
+    <figure>
+      <canvas id="intradayEstChart" height="150"></canvas>
+      <figcaption id="intradayEstCap"></figcaption>
+    </figure>
+
+    <figure>
+      <canvas id="intradayDriftChart" height="150"></canvas>
+      <figcaption id="intradayDriftCap"></figcaption>
+    </figure>
   </section>
 
   <section id="placeboSec">
     <h2>Why a placebo test, and what it changes</h2>
+    <div class="summary">
+      <p>The overnight blip survives neither the subset check nor the family-wise
+         one, so this page reports no detectable effect. That is the method's
+         worth: it is willing to kill a promising-looking result, and it assumes
+         nothing about the data being bell-shaped, which matters because the
+         t-statistics here are optimistic (match days share control days).</p>
+    </div>
     <p>One subset, overnight kickoffs, produced a t-statistic just above 2, the
        usual line for "worth a look". Two things make that line untrustworthy here.
        A t of 2 is crossed by pure chance about one time in twenty, and four subsets
@@ -190,24 +240,22 @@
        relabels the days once and carries every subset's membership through the same
        draw, so all four subset results come from one shared reshuffle. Taking the
        largest absolute t across the four, on every draw, builds a "family-wise"
-       null: the honest yardstick for "we looked several times, how impressive is the
+       null, the right reference for "we looked several times, how impressive is the
        best result?". The real most-extreme subset is judged against that, not
        against its own private null.</p>
-    <p class="note">What it changes here: the overnight blip survives neither check,
-       so the honest call is no detectable effect, not a discovery. The method's
-       worth is that it is willing to kill a promising-looking result. It assumes
-       nothing about the data being bell-shaped, which matters because the
-       t-statistics on this page are optimistic (match days share control days), and
-       it is the same discipline that keeps A/B tests and product experiments from
-       shipping decisions built on noise.</p>
+    <p>It is the same discipline that keeps A/B tests and product experiments
+       from shipping decisions built on noise.</p>
   </section>
 
-  <p class="note">Honest reading: this is an observational estimate, not proof
-     of causation. Match scheduling correlates with weekends and holidays, which
-     have their own demand patterns; the weekday-type control reduces but does
-     not remove that. A result near zero is a real finding, not a failure.</p>
+  <p class="note" data-label="Limitation">This is an observational estimate, not
+     proof of causation. Match scheduling correlates with weekends and holidays,
+     which have their own demand patterns; the weekday-type control reduces but
+     does not remove that. A result near zero is a real finding, not a failure.</p>
 
   <footer id="footer"></footer>
+  <!-- Static sibling of <footer>, not a child: the pages set
+       footer.textContent from JS, which would wipe any child. -->
+  <p class="repo">Source, write-up and backlog: <a href="https://github.com/adrianogelato/energy-market-predictability">github.com/adrianogelato/energy-market-predictability</a></p>
 
   <script>
     fetch('wc_results.json').then(r => r.json())
@@ -224,6 +272,195 @@
       fetch('wc_permutation_results.json').then(r => r.json()).catch(() => null),
     ]).then(([load, perm]) => { renderLoad(load, perm); window.syncPageNav?.(); })
       .catch(() => {});
+
+    // Optional R3 real-time (reBAP vs day-ahead) result. Only shows if present.
+    fetch('wc_intraday_results.json').then(r => r.json())
+      .then(d => { renderIntraday(d); window.syncPageNav?.(); }).catch(() => {});
+
+    function renderIntraday(d) {
+      document.getElementById('intradaySec').style.display = '';
+      if ((d.data_source || '').startsWith('synthetic')) {
+        document.getElementById('intradaySec').insertAdjacentHTML('afterbegin',
+          '<p class="note warn"><strong>Synthetic reBAP data.</strong> A pipeline ' +
+          'test, not a real result. Fetch real reBAP with ' +
+          '<code>python intraday_fetch.py</code>.</p>');
+      }
+      const e = d.effect, p = e.permutation, did = d.robustness_within_day,
+            g = d.germany && d.germany.effect,
+            gd = d.germany && d.germany.robustness_within_day;
+      const cov = document.getElementById('intradayCoverage');
+      const miss = d.match_days_missing_rebap || [];
+      if (miss.length) {
+        cov.textContent = 'Interim: the quality-assured reBAP series is published ' +
+          'with a lag, so this covers ' + d.n_match_days_covered + ' of ' +
+          d.n_match_days_total + ' match days. Still missing: ' + miss.join(', ') +
+          '. Re-run after the next fetch to close the gap.';
+      } else { cov.style.display = 'none'; }
+
+      const sgn = x => (x > 0 ? '+' : '') + x;
+      document.getElementById('intradayCards').innerHTML = [
+        card(sgn(e.median_effect_ct) + ' ct/kWh',
+             'Median match-hour spread effect (real time vs day-ahead)'),
+        p ? card('p=' + p.p_value_two_sided,
+             'Placebo (permutation) p, raw matched comparison') : '',
+        (did && did.median_effect_ct !== null) ? card(
+             sgn(did.median_effect_ct) + ' ct/kWh' +
+             (did.permutation ? ' · p=' + did.permutation.p_value_two_sided : ''),
+             'Within-day difference-in-differences (nets out tournament-window drift)') : '',
+        p ? card('±' + p.null_effect_p95_ct + ' ct/kWh',
+             'Detectable size: a null only rules out effects this large') : '',
+        (g && g.median_effect_ct !== null) ? card(
+             sgn(g.median_effect_ct) + ' ct/kWh' +
+             (g.permutation ? ' · p=' + g.permutation.p_value_two_sided : ''),
+             'Germany matches only, raw comparison (' + g.n_match_days +
+             ' days, small sample)') : '',
+        // The Germany headline is the most quotable number on this page and the
+        // least trustworthy, because all its match days fall in the drift-heavy
+        // first half of the tournament. Its drift-robust value sits beside it so
+        // the two are never read apart.
+        (gd && gd.median_effect_ct !== null) ? card(
+             sgn(gd.median_effect_ct) + ' ct/kWh' +
+             (gd.permutation ? ' · p=' + gd.permutation.p_value_two_sided : ''),
+             'Germany, within-day difference-in-differences (drift removed)') : '',
+      ].join('');
+
+      const hp = d.hourly_profile;
+      const share = hp.match_hour_share;
+      const pts = hp.hours.map(h => share[h] ? 2 + 5 * share[h] : 2);
+      const clr = hp.hours.map(h => share[h] ? '#c1436d' : 'rgba(193,67,109,.5)');
+      new Chart(document.getElementById('intradayChart'), {
+        type: 'line',
+        data: { labels: hp.hours, datasets: [
+          { label:'Match days', data:hp.match_days_spread_median, borderColor:'#c1436d',
+            pointRadius:pts, pointBackgroundColor:clr, tension:.25 },
+          { label:'Weather-comparable days', data:hp.comparable_days_spread_median,
+            borderColor:'#4c9f70', pointRadius:2, tension:.25 },
+        ]},
+        options: { plugins:{legend:{display:true},
+            title:{display:true,text:'Real-time minus day-ahead spread by hour: match days vs. comparable days'},
+            tooltip:{callbacks:{footer: items => {
+              if (!hp.match_count) return '';
+              const h = items[0].dataIndex, c = hp.match_count[h];
+              return c ? c + (c === 1 ? ' match' : ' matches') + ' live in this hour' : '';
+            }}}},
+          scales:{ x:{ title:{display:true,text:'Hour of day (CEST)'} },
+                   y:{ title:{display:true,text:'Median reBAP minus day-ahead (ct/kWh)'} } } }
+      });
+      document.getElementById('intradayInterp').textContent = e.interpretation;
+
+      // --- estimator comparison: each effect against its own placebo ceiling ---
+      // Plotted as bars with the null 95th percentile drawn on top as a marker,
+      // because "is it bigger than chance produced" is the only question that
+      // matters here and a p-value in prose does not show it.
+      const est = [
+        ['All matches, raw', e, p],
+        ['All matches, drift removed', did, did && did.permutation],
+        ['Germany, raw', g, g && g.permutation],
+        ['Germany, drift removed', gd, gd && gd.permutation],
+      ].filter(([, blk]) => blk && blk.median_effect_ct !== null &&
+                            blk.median_effect_ct !== undefined);
+      if (est.length) {
+        const surv = est.map(([, blk, pm]) =>
+          pm ? Math.abs(blk.median_effect_ct) >= pm.null_effect_p95_ct : null);
+        new Chart(document.getElementById('intradayEstChart'), {
+          type: 'bar',
+          data: { labels: est.map(x => x[0]), datasets: [
+            { label: 'Measured effect (ct/kWh)',
+              data: est.map(([, blk]) => blk.median_effect_ct),
+              backgroundColor: surv.map(s => s ? '#c1436d' : 'rgba(193,67,109,.45)'),
+              order: 2 },
+            { label: 'Largest effect chance produced (placebo 95th percentile)',
+              type: 'line', data: est.map(([, , pm]) => pm ? pm.null_effect_p95_ct : null),
+              borderColor: '#555', borderDash: [5, 4], borderWidth: 2,
+              pointStyle: 'rectRot', pointRadius: 7, pointBackgroundColor: '#555',
+              showLine: false, order: 1 },
+          ]},
+          options: { plugins: { legend: { display: true },
+              title: { display: true, text: 'Match-hour real-time effect versus what chance produces, by estimator' } },
+            scales: { x: { title: { display: true, text: 'Estimator and subset' } },
+                      y: { title: { display: true, text: 'Median effect, reBAP minus day-ahead (ct/kWh)' },
+                           beginAtZero: true } } }
+        });
+        // Descriptive only: what is plotted, how it is encoded, sample sizes,
+        // source and range. The argument about which estimate to believe lives
+        // in the section summary above, not here.
+        const nAll = e.n_match_days, nG = g ? g.n_match_days : null;
+        document.getElementById('intradayEstCap').textContent =
+          'Bars: the measured median match-hour effect for each estimator. ' +
+          'Diamonds: the largest effect that same estimator produced by chance in ' +
+          'its own placebo test (95th percentile). Solid bars reach their diamond, ' +
+          'pale bars do not. The two "raw" estimators compare match hours across ' +
+          'days; the two "drift removed" estimators compare each day against its ' +
+          'own non-match hours first. Germany rests on n=' + nG + ' match days ' +
+          'against n=' + nAll + ' for all matches, so its bar is the least precise ' +
+          'on the chart. Source: reBAP (netztransparenz.de) minus day-ahead auction ' +
+          '(EPEX via aWATTar), German-Luxembourg zone; reBAP window ' +
+          (d.window ? d.window.start : '?') + ' to ' + (d.window ? d.window.end : '?') +
+          ', covering ' + d.n_match_days_covered + ' of ' + d.n_match_days_total +
+          ' match days. reBAP = German uniform imbalance price.';
+      }
+
+      // --- the drift diagnostic: whole-day level, and the calendar split ---
+      const dl = d.day_level_drift, cs = d.calendar_split || [];
+      if (dl || cs.length) {
+        const labels = [], vals = [], colors = [];
+        if (dl) {
+          labels.push('Match days, all 24 h', 'Comparable days, all 24 h');
+          vals.push(dl.match_days_median_ct, dl.control_days_median_ct);
+          colors.push('#c1436d', '#4c9f70');
+        }
+        cs.forEach(m => {
+          labels.push(m.month + ' match hours (n=' + m.n_match_days + ')');
+          vals.push(m.median_effect_ct);
+          colors.push('rgba(193,67,109,.6)');
+        });
+        new Chart(document.getElementById('intradayDriftChart'), {
+          type: 'bar',
+          data: { labels, datasets: [
+            { label: 'Median spread or effect (ct/kWh)', data: vals,
+              backgroundColor: colors } ]},
+          options: { plugins: { legend: { display: false },
+              title: { display: true,
+                text: 'Why the raw estimate is suspect: whole-day drift, and the effect by month' } },
+            scales: { x: { title: { display: true, text: 'Comparison' } },
+                      y: { title: { display: true, text: 'ct/kWh' }, beginAtZero: true } } }
+        });
+        // Descriptive only; the reading of these bars is in the summary above.
+        const capBits = [];
+        if (dl) capBits.push('First two bars: the median spread over all 24 hours of ' +
+          'a day, for match days (n=' + dl.n_match_days + ') and for their ' +
+          'comparable days (n=' + dl.n_control_days + '). Most hours of a day hold ' +
+          'no match, so the distance between these two bars measures day-level ' +
+          'drift rather than anything a match did.');
+        if (cs.length) capBits.push('Remaining bars: the match-hour effect split by ' +
+          'calendar month.');
+        capBits.push('Each month holds only 14 to 20 match days, so read the ' +
+          'direction, not the exact heights. Source: reBAP (netztransparenz.de) ' +
+          'minus day-ahead auction, German-Luxembourg zone. Scale in ct/kWh.');
+        document.getElementById('intradayDriftCap').textContent = capBits.join(' ');
+        if (dl && cs.length === 2) {
+          document.getElementById('intradayDriftNote').textContent =
+            'Read together: a football match lasting two to four hours cannot lift a ' +
+            'whole day\'s median by ' + sgn(dl.difference_ct) + ' ct/kWh, and the effect ' +
+            'is ' + sgn(cs[0].median_effect_ct) + ' ct/kWh in ' + cs[0].month + ' against ' +
+            sgn(cs[1].median_effect_ct) + ' in ' + cs[1].month + ', the wrong way round for ' +
+            'a viewing story. That is what the drift-removed estimates are correcting, ' +
+            'and once corrected nothing survives.';
+        } else {
+          document.getElementById('intradayDriftNote').style.display = 'none';
+        }
+      }
+
+      // Flip the top verdict only if the real-time effect survives BOTH the raw
+      // placebo test AND the drift-robust within-day contrast.
+      const robust = p && p.p_value_two_sided < 0.05 &&
+                     did && did.permutation && did.permutation.p_value_two_sided < 0.05;
+      if (robust) {
+        flipVerdict('The real-time (reBAP) price test shows a match-hour effect of ' +
+          e.median_effect_ct + ' ct/kWh that survives both the placebo test and the ' +
+          'drift-robust within-day contrast. Read the panel below.');
+      }
+    }
 
     function renderLoad(d, perm) {
       document.getElementById('loadSection').style.display = '';
@@ -243,9 +480,9 @@
         S.prime ? card(fmt(S.prime, 'prime'), 'Prime-time 18–24h CEST (' + S.prime.n_match_days + ')') : '',
         S.overnight ? card(fmt(S.overnight, 'overnight'), 'Overnight 0–7h CEST (' + S.overnight.n_match_days + ')') : '',
         (S.germany && S.germany.n_match_days) ? card(fmt(S.germany, 'germany'),
-          'Germany matches only (' + S.germany.n_match_days + ' days — small sample)') : '',
+          'Germany matches only (' + S.germany.n_match_days + ' days, small sample)') : '',
         (perm && perm.family_wise) ? card('p=' + perm.family_wise.p_value,
-          'Family-wise placebo p (max|t| over all subsets — the honest reference ' +
+          'Family-wise placebo p (max|t| over all subsets, the right reference ' +
           'when reporting the most extreme of several examined subsets)') : '',
       ].join('');
 
@@ -265,16 +502,18 @@
           scales:{ x:{ title:{display:true,text:'Hour of day (CEST)'} },
                    y:{ title:{display:true,text:'Actual minus forecast (MW)'} } } }
       });
+      // interpret() in wc_load_effect.py returns full sentences, so nothing is
+      // prepended to make it grammatical.
       let interp =
-        'Prime-time matches are where any TV effect would show. Prime-time reading: ' +
+        'Prime-time matches are where any TV effect would show. ' +
         (S.prime ? S.prime.interpretation : S.all.interpretation);
       const did = d.robustness_within_day;
       if (did && did.overnight) {
         interp += ' Robustness: a within-day difference-in-differences contrast ' +
           '(which nets out day-level drift) flips the overnight estimate to ' +
-          did.overnight.mean_delta_mw + ' MW — the two estimators disagree in sign, ' +
+          did.overnight.mean_delta_mw + ' MW. The two estimators disagree in sign, ' +
           'which means the forecast-error series drifts across the window in a way ' +
-          'neither contrast fully removes. No robust match effect can be claimed.';
+          'neither contrast fully removes. Nothing here supports a match effect.';
       }
       document.getElementById('loadInterp').textContent = interp;
 
@@ -310,18 +549,18 @@
         card(e.t_stat === null ? 'n/a' : e.t_stat,
              't-statistic (optimistic: per-day deltas share control days)'),
         e.mde_ct_80pct_power ? card('±' + e.mde_ct_80pct_power + ' ct/kWh',
-             'Minimum detectable effect (80% power) — a null only rules out effects this large') : '',
+             'Minimum detectable effect (80% power), a null only rules out effects this large') : '',
         card(d.n_match_days, 'Match days analysed'),
         d.robustness_within_day ? card(
              (d.robustness_within_day.mean_delta_ct > 0 ? '+' : '') +
              d.robustness_within_day.mean_delta_ct + ' ct/kWh',
-             'Within-day diff-in-diff (nets out seasonal drift) · t=' +
+             'Within-day difference-in-differences (nets out seasonal drift) · t=' +
              d.robustness_within_day.t_stat) : '',
         (g && g.n_match_days) ? card(
              (g.mean_delta_ct_per_kwh > 0 ? '+' : '') + g.mean_delta_ct_per_kwh +
              ' ct/kWh',
              'Germany matches only (' + g.n_match_days + ' days · t=' + g.t_stat +
-             ') — the best-followed team, but a small sample') : '',
+             '), the best-followed team, but a small sample') : '',
       ].join('');
 
       const hp = d.hourly_profile;
@@ -367,14 +606,16 @@
         document.getElementById('pairings').style.display = '';
         if (d.matching) {
           document.getElementById('pairingsMeta').textContent =
-            'Matched on: ' + d.matching.features.join(', ') +
+            'Matched on: ' +
+            (d.matching.feature_labels || d.matching.features).join(', ') +
             ' (z-scored, Euclidean distance). Day types: ' +
-            d.matching.day_type_classes.join(' / ') + '. ' +
+            d.matching.day_type_classes.map(c =>
+              dayType(c.split(' ')[0])).join(' / ') + '. ' +
             d.matching.k_controls + ' controls per match day.';
         }
         document.querySelector('#pairingsTable tbody').innerHTML =
           d.pairings.map(p =>
-            '<tr><td>' + p.date + '</td><td>' + p.day_type + '</td>' +
+            '<tr><td>' + p.date + '</td><td>' + dayType(p.day_type) + '</td>' +
             '<td style="text-align:left">' + p.controls.map(c =>
               c.date + ' (' + c.distance.toFixed(2) + ')').join(', ') +
             '</td></tr>').join('');
@@ -391,6 +632,13 @@
           e.mde_ct_80pct_power + ' ct/kWh or larger would have been detected; ' +
           'anything smaller is below the resolution of this study.' +
           (interim ? ' Interim until the tournament ends on 19 July 2026.' : '');
+        drawBound('wcBound', {
+          effect: e.mean_delta_ct_per_kwh,
+          bound: e.mde_ct_80pct_power,
+          unit: 'ct/kWh',
+          caption: 'Scale in ct/kWh. Dot: the measured match-hour price effect. ' +
+            'Jaws: the minimum detectable effect at 80% power.',
+        });
       }
       if (Math.abs(e.t_stat || 0) >= 2) {
         flipVerdict('The price test shows a statistically clear difference of ' +
@@ -398,6 +646,12 @@
           'within-day contrast and the placebo test below before believing it.');
       }
     }
+
+    // The JSONs carry raw day-type enum values (code compares against them);
+    // the page renders these labels so a reader never sees "sunlike".
+    const DAY_TYPE_LABELS = { weekday:'weekday', saturday:'Saturday',
+      sunlike:'Sunday or public holiday' };
+    const dayType = v => DAY_TYPE_LABELS[v] || v;
 
     function card(n, l) {
       return '<div class="card"><div class="n">' + n + '</div><div class="l">' + l + '</div></div>';
@@ -408,7 +662,7 @@
     // the headline flips rather than misreporting the numbers below it.
     function flipVerdict(reason) {
       document.getElementById('verdictHead').textContent =
-        'The answer so far: possibly — the evidence below needs reading.';
+        'Possibly. The evidence below needs reading.';
       document.getElementById('verdictText').textContent = reason;
     }
   </script>

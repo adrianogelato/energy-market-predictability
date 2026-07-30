@@ -280,16 +280,20 @@ def main():
 def interpret(mean_delta, t_stat, n=None, sd=None):
     mde = (2.8 * sd / math.sqrt(n)) if (n and n > 1 and sd) else None
     if math.isnan(t_stat) or abs(t_stat) < 2:
+        # One phrasing of the MDE bound across all three studies (this file,
+        # wc_load_effect.py, wc_intraday.py), so a page showing two of them
+        # does not state the same idea three different ways. The "a null is a
+        # real finding" framing lives once, in worldcup.html; repeating it in
+        # every generated string put it on the page three times over.
         bound = (f" With n={n} days, only effects of about {mde:.1f} ct/kWh or "
-                 f"larger were detectable (80% power), so this rules out a "
-                 f"large effect, not any effect.") if mde else ""
-        return ("No statistically clear effect: match hours look like "
-                "weather-comparable days. A null result is still a real finding."
-                + bound)
+                 f"larger were detectable at 80% power.") if mde else ""
+        return ("Match hours look like weather-comparable days, with no "
+                "statistically clear effect." + bound)
     direction = "higher" if mean_delta > 0 else "lower"
     return (f"Prices during match hours run {abs(mean_delta):.2f} ct/kWh {direction} "
-            f"than weather-comparable days (t={t_stat:.1f}). Suggestive at best: "
-            f"the per-day deltas share control days, so this t is optimistic.")
+            f"than weather-comparable days (t={t_stat:.1f}). Read this as "
+            f"suggestive at best, because the per-day deltas share control days, "
+            f"so this t is optimistic.")
 
 
 def within_day_did(prices, match_days, match_hours_by_day, matcher, control_days,

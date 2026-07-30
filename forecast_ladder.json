@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-21T16:49",
+  "generated_at": "2026-07-30T10:12",
   "mode": "full-year",
   "config": {
     "n_cheap_hours": 3,
@@ -21,140 +21,140 @@
   "accuracy": {
     "note": "MAE/RMSE/MAPE over all predicted hours; picked_* over each rung's chosen cheapest hours only. MAPE excludes hours with |actual| < 1.0 ct/kWh (prices cross zero).",
     "mape_guard_ct": 1.0,
-    "mape_excluded_share": 0.085,
+    "mape_excluded_share": 0.088,
     "rungs": {
       "climatology": {
-        "mae_ct": 2.949,
-        "rmse_ct": 4.36,
-        "mape_pct": 35.9,
-        "picked_hours_mae_ct": 3.303,
-        "picked_hours_rmse_ct": 5.081
+        "mae_ct": 2.947,
+        "rmse_ct": 4.325,
+        "mape_pct": 35.8,
+        "picked_hours_mae_ct": 3.304,
+        "picked_hours_rmse_ct": 5.024
       },
       "persistence": {
-        "mae_ct": 2.821,
-        "rmse_ct": 4.504,
-        "mape_pct": 35.4,
-        "picked_hours_mae_ct": 3.073,
-        "picked_hours_rmse_ct": 5.367
+        "mae_ct": 2.806,
+        "rmse_ct": 4.473,
+        "mape_pct": 35.3,
+        "picked_hours_mae_ct": 3.012,
+        "picked_hours_rmse_ct": 5.284
       },
       "linear": {
-        "mae_ct": 3.13,
-        "rmse_ct": 4.524,
-        "mape_pct": 36.3,
-        "picked_hours_mae_ct": 3.253,
-        "picked_hours_rmse_ct": 4.955
+        "mae_ct": 3.166,
+        "rmse_ct": 4.521,
+        "mape_pct": 36.5,
+        "picked_hours_mae_ct": 3.24,
+        "picked_hours_rmse_ct": 4.901
       },
       "linear_rich": {
-        "mae_ct": 2.761,
-        "rmse_ct": 4.049,
-        "mape_pct": 32.6,
-        "picked_hours_mae_ct": 2.849,
-        "picked_hours_rmse_ct": 4.55
+        "mae_ct": 2.793,
+        "rmse_ct": 4.045,
+        "mape_pct": 32.7,
+        "picked_hours_mae_ct": 2.816,
+        "picked_hours_rmse_ct": 4.481
       },
       "knn": {
-        "mae_ct": 2.565,
-        "rmse_ct": 3.808,
-        "mape_pct": 31.0,
-        "picked_hours_mae_ct": 2.79,
-        "picked_hours_rmse_ct": 4.533
+        "mae_ct": 2.586,
+        "rmse_ct": 3.793,
+        "mape_pct": 31.1,
+        "picked_hours_mae_ct": 2.765,
+        "picked_hours_rmse_ct": 4.47
       },
       "gbm": {
-        "mae_ct": 2.63,
-        "rmse_ct": 3.852,
-        "mape_pct": 31.4,
-        "picked_hours_mae_ct": 2.86,
-        "picked_hours_rmse_ct": 4.585
+        "mae_ct": 2.685,
+        "rmse_ct": 3.873,
+        "mape_pct": 31.6,
+        "picked_hours_mae_ct": 2.825,
+        "picked_hours_rmse_ct": 4.511
       }
     }
   },
   "paired_vs_lookup": {
     "note": "mean_diff_ct = daily cost of the rung minus the lookup table, paired on the same test days; positive = the rung costs more. Sign-flip permutation test; t is descriptive, p_two_sided is the inference. mde_ct is the minimum detectable effect at 80% power, two-sided alpha 0.05.",
-    "n_days": 337,
+    "n_days": 353,
     "n_permutations": 2000,
     "seed": 20260713,
     "rungs": {
       "persistence": {
-        "mean_diff_ct": 0.216,
-        "eur_yr_diff": 8.68,
-        "t_stat": 2.49,
-        "p_two_sided": 0.008,
-        "mde_ct_80pct_power": 0.243
+        "mean_diff_ct": 0.207,
+        "eur_yr_diff": 8.33,
+        "t_stat": 2.51,
+        "p_two_sided": 0.009,
+        "mde_ct_80pct_power": 0.232
       },
       "linear": {
-        "mean_diff_ct": 0.207,
-        "eur_yr_diff": 8.32,
-        "t_stat": 2.97,
-        "p_two_sided": 0.002,
-        "mde_ct_80pct_power": 0.195
+        "mean_diff_ct": 0.215,
+        "eur_yr_diff": 8.63,
+        "t_stat": 3.21,
+        "p_two_sided": 0.001,
+        "mde_ct_80pct_power": 0.187
       },
       "linear_rich": {
-        "mean_diff_ct": 0.182,
-        "eur_yr_diff": 7.31,
-        "t_stat": 2.69,
-        "p_two_sided": 0.004,
-        "mde_ct_80pct_power": 0.19
+        "mean_diff_ct": 0.198,
+        "eur_yr_diff": 7.94,
+        "t_stat": 3.03,
+        "p_two_sided": 0.001,
+        "mde_ct_80pct_power": 0.183
       },
       "knn": {
-        "mean_diff_ct": 0.021,
-        "eur_yr_diff": 0.85,
+        "mean_diff_ct": 0.02,
+        "eur_yr_diff": 0.81,
         "t_stat": 0.49,
-        "p_two_sided": 0.663,
-        "mde_ct_80pct_power": 0.12
+        "p_two_sided": 0.613,
+        "mde_ct_80pct_power": 0.115
       },
       "gbm": {
-        "mean_diff_ct": 0.115,
-        "eur_yr_diff": 4.6,
-        "t_stat": 1.9,
-        "p_two_sided": 0.06,
-        "mde_ct_80pct_power": 0.169
+        "mean_diff_ct": 0.131,
+        "eur_yr_diff": 5.24,
+        "t_stat": 2.23,
+        "p_two_sided": 0.022,
+        "mde_ct_80pct_power": 0.164
       }
     },
     "family_wise": {
-      "max_abs_t": 2.97,
+      "max_abs_t": 3.21,
       "strongest_rung": "linear",
-      "p_value": 0.007
+      "p_value": 0.003
     }
   },
   "overall": {
-    "n_days": 337,
-    "perfect_cost": 3.998,
-    "all_day_cost": 9.449,
+    "n_days": 353,
+    "perfect_cost": 3.919,
+    "all_day_cost": 9.523,
     "rungs": {
       "climatology": {
-        "hit_rate": 0.67,
-        "avg_cost_ct": 4.396,
-        "regret_ct": 0.398,
-        "eur_yr_saved_vs_anytime": 202.86
+        "hit_rate": 0.677,
+        "avg_cost_ct": 4.302,
+        "regret_ct": 0.383,
+        "eur_yr_saved_vs_anytime": 209.61
       },
       "persistence": {
-        "hit_rate": 0.62,
-        "avg_cost_ct": 4.613,
-        "regret_ct": 0.615,
-        "eur_yr_saved_vs_anytime": 194.18
+        "hit_rate": 0.628,
+        "avg_cost_ct": 4.51,
+        "regret_ct": 0.591,
+        "eur_yr_saved_vs_anytime": 201.28
       },
       "linear": {
-        "hit_rate": 0.6,
-        "avg_cost_ct": 4.604,
-        "regret_ct": 0.606,
-        "eur_yr_saved_vs_anytime": 194.53
+        "hit_rate": 0.604,
+        "avg_cost_ct": 4.517,
+        "regret_ct": 0.598,
+        "eur_yr_saved_vs_anytime": 200.98
       },
       "linear_rich": {
-        "hit_rate": 0.583,
-        "avg_cost_ct": 4.578,
-        "regret_ct": 0.58,
-        "eur_yr_saved_vs_anytime": 195.55
+        "hit_rate": 0.584,
+        "avg_cost_ct": 4.5,
+        "regret_ct": 0.581,
+        "eur_yr_saved_vs_anytime": 201.67
       },
       "knn": {
-        "hit_rate": 0.66,
-        "avg_cost_ct": 4.418,
-        "regret_ct": 0.42,
-        "eur_yr_saved_vs_anytime": 202.01
+        "hit_rate": 0.67,
+        "avg_cost_ct": 4.323,
+        "regret_ct": 0.404,
+        "eur_yr_saved_vs_anytime": 208.79
       },
       "gbm": {
-        "hit_rate": 0.614,
-        "avg_cost_ct": 4.511,
-        "regret_ct": 0.513,
-        "eur_yr_saved_vs_anytime": 198.26
+        "hit_rate": 0.619,
+        "avg_cost_ct": 4.433,
+        "regret_ct": 0.514,
+        "eur_yr_saved_vs_anytime": 204.37
       }
     }
   },
@@ -203,45 +203,45 @@
       }
     },
     "JJA": {
-      "n_days": 65,
-      "perfect_cost": 2.424,
-      "all_day_cost": 9.629,
+      "n_days": 81,
+      "perfect_cost": 2.391,
+      "all_day_cost": 9.916,
       "rungs": {
         "climatology": {
-          "hit_rate": 0.79,
-          "avg_cost_ct": 2.655,
-          "regret_ct": 0.231,
-          "eur_yr_saved_vs_anytime": 280.0
+          "hit_rate": 0.798,
+          "avg_cost_ct": 2.589,
+          "regret_ct": 0.198,
+          "eur_yr_saved_vs_anytime": 294.18
         },
         "persistence": {
-          "hit_rate": 0.8,
-          "avg_cost_ct": 2.685,
-          "regret_ct": 0.261,
-          "eur_yr_saved_vs_anytime": 278.81
+          "hit_rate": 0.798,
+          "avg_cost_ct": 2.618,
+          "regret_ct": 0.227,
+          "eur_yr_saved_vs_anytime": 293.03
         },
         "linear": {
-          "hit_rate": 0.79,
-          "avg_cost_ct": 2.741,
-          "regret_ct": 0.317,
-          "eur_yr_saved_vs_anytime": 276.54
+          "hit_rate": 0.77,
+          "avg_cost_ct": 2.732,
+          "regret_ct": 0.341,
+          "eur_yr_saved_vs_anytime": 288.45
         },
         "linear_rich": {
-          "hit_rate": 0.769,
-          "avg_cost_ct": 2.743,
-          "regret_ct": 0.319,
-          "eur_yr_saved_vs_anytime": 276.49
+          "hit_rate": 0.737,
+          "avg_cost_ct": 2.764,
+          "regret_ct": 0.373,
+          "eur_yr_saved_vs_anytime": 287.16
         },
         "knn": {
-          "hit_rate": 0.821,
-          "avg_cost_ct": 2.61,
-          "regret_ct": 0.186,
-          "eur_yr_saved_vs_anytime": 281.8
+          "hit_rate": 0.831,
+          "avg_cost_ct": 2.557,
+          "regret_ct": 0.166,
+          "eur_yr_saved_vs_anytime": 295.48
         },
         "gbm": {
-          "hit_rate": 0.8,
-          "avg_cost_ct": 2.629,
-          "regret_ct": 0.205,
-          "eur_yr_saved_vs_anytime": 281.05
+          "hit_rate": 0.782,
+          "avg_cost_ct": 2.66,
+          "regret_ct": 0.269,
+          "eur_yr_saved_vs_anytime": 291.32
         }
       }
     },
@@ -318,10 +318,10 @@
           "eur_yr_saved_vs_anytime": 140.29
         },
         "knn": {
-          "hit_rate": 0.546,
-          "avg_cost_ct": 5.617,
-          "regret_ct": 0.696,
-          "eur_yr_saved_vs_anytime": 135.45
+          "hit_rate": 0.549,
+          "avg_cost_ct": 5.615,
+          "regret_ct": 0.694,
+          "eur_yr_saved_vs_anytime": 135.57
         },
         "gbm": {
           "hit_rate": 0.527,
@@ -334,131 +334,131 @@
   },
   "by_n": {
     "2": {
-      "n_days": 337,
-      "perfect_cost": 3.797,
-      "all_day_cost": 9.449,
+      "n_days": 353,
+      "perfect_cost": 3.72,
+      "all_day_cost": 9.523,
       "rungs": {
         "climatology": {
-          "hit_rate": 0.607,
-          "avg_cost_ct": 4.186,
-          "regret_ct": 0.389,
-          "eur_yr_saved_vs_anytime": 211.32
+          "hit_rate": 0.615,
+          "avg_cost_ct": 4.093,
+          "regret_ct": 0.373,
+          "eur_yr_saved_vs_anytime": 218.0
         },
         "persistence": {
-          "hit_rate": 0.524,
-          "avg_cost_ct": 4.486,
-          "regret_ct": 0.689,
-          "eur_yr_saved_vs_anytime": 199.26
+          "hit_rate": 0.534,
+          "avg_cost_ct": 4.38,
+          "regret_ct": 0.66,
+          "eur_yr_saved_vs_anytime": 206.48
         },
         "linear": {
-          "hit_rate": 0.433,
-          "avg_cost_ct": 4.523,
-          "regret_ct": 0.726,
-          "eur_yr_saved_vs_anytime": 197.8
+          "hit_rate": 0.438,
+          "avg_cost_ct": 4.426,
+          "regret_ct": 0.706,
+          "eur_yr_saved_vs_anytime": 204.64
         },
         "linear_rich": {
-          "hit_rate": 0.438,
-          "avg_cost_ct": 4.539,
-          "regret_ct": 0.742,
-          "eur_yr_saved_vs_anytime": 197.14
+          "hit_rate": 0.442,
+          "avg_cost_ct": 4.449,
+          "regret_ct": 0.729,
+          "eur_yr_saved_vs_anytime": 203.71
         },
         "knn": {
-          "hit_rate": 0.599,
-          "avg_cost_ct": 4.217,
-          "regret_ct": 0.42,
-          "eur_yr_saved_vs_anytime": 210.07
+          "hit_rate": 0.606,
+          "avg_cost_ct": 4.124,
+          "regret_ct": 0.404,
+          "eur_yr_saved_vs_anytime": 216.77
         },
         "gbm": {
-          "hit_rate": 0.497,
-          "avg_cost_ct": 4.381,
-          "regret_ct": 0.584,
-          "eur_yr_saved_vs_anytime": 203.48
+          "hit_rate": 0.507,
+          "avg_cost_ct": 4.29,
+          "regret_ct": 0.57,
+          "eur_yr_saved_vs_anytime": 210.12
         }
       }
     },
     "3": {
-      "n_days": 337,
-      "perfect_cost": 3.998,
-      "all_day_cost": 9.449,
+      "n_days": 353,
+      "perfect_cost": 3.919,
+      "all_day_cost": 9.523,
       "rungs": {
         "climatology": {
-          "hit_rate": 0.67,
-          "avg_cost_ct": 4.396,
-          "regret_ct": 0.398,
-          "eur_yr_saved_vs_anytime": 202.86
+          "hit_rate": 0.677,
+          "avg_cost_ct": 4.302,
+          "regret_ct": 0.383,
+          "eur_yr_saved_vs_anytime": 209.61
         },
         "persistence": {
-          "hit_rate": 0.62,
-          "avg_cost_ct": 4.613,
-          "regret_ct": 0.615,
-          "eur_yr_saved_vs_anytime": 194.18
+          "hit_rate": 0.628,
+          "avg_cost_ct": 4.51,
+          "regret_ct": 0.591,
+          "eur_yr_saved_vs_anytime": 201.28
         },
         "linear": {
-          "hit_rate": 0.6,
-          "avg_cost_ct": 4.604,
-          "regret_ct": 0.606,
-          "eur_yr_saved_vs_anytime": 194.53
+          "hit_rate": 0.604,
+          "avg_cost_ct": 4.517,
+          "regret_ct": 0.598,
+          "eur_yr_saved_vs_anytime": 200.98
         },
         "linear_rich": {
-          "hit_rate": 0.583,
-          "avg_cost_ct": 4.578,
-          "regret_ct": 0.58,
-          "eur_yr_saved_vs_anytime": 195.55
+          "hit_rate": 0.584,
+          "avg_cost_ct": 4.5,
+          "regret_ct": 0.581,
+          "eur_yr_saved_vs_anytime": 201.67
         },
         "knn": {
-          "hit_rate": 0.66,
-          "avg_cost_ct": 4.418,
-          "regret_ct": 0.42,
-          "eur_yr_saved_vs_anytime": 202.01
+          "hit_rate": 0.67,
+          "avg_cost_ct": 4.323,
+          "regret_ct": 0.404,
+          "eur_yr_saved_vs_anytime": 208.79
         },
         "gbm": {
-          "hit_rate": 0.614,
-          "avg_cost_ct": 4.511,
-          "regret_ct": 0.513,
-          "eur_yr_saved_vs_anytime": 198.26
+          "hit_rate": 0.619,
+          "avg_cost_ct": 4.433,
+          "regret_ct": 0.514,
+          "eur_yr_saved_vs_anytime": 204.37
         }
       }
     },
     "4": {
-      "n_days": 337,
-      "perfect_cost": 4.231,
-      "all_day_cost": 9.449,
+      "n_days": 353,
+      "perfect_cost": 4.153,
+      "all_day_cost": 9.523,
       "rungs": {
         "climatology": {
-          "hit_rate": 0.723,
-          "avg_cost_ct": 4.596,
-          "regret_ct": 0.365,
-          "eur_yr_saved_vs_anytime": 194.84
+          "hit_rate": 0.732,
+          "avg_cost_ct": 4.502,
+          "regret_ct": 0.349,
+          "eur_yr_saved_vs_anytime": 201.59
         },
         "persistence": {
-          "hit_rate": 0.665,
-          "avg_cost_ct": 4.828,
-          "regret_ct": 0.597,
-          "eur_yr_saved_vs_anytime": 185.53
+          "hit_rate": 0.676,
+          "avg_cost_ct": 4.725,
+          "regret_ct": 0.572,
+          "eur_yr_saved_vs_anytime": 192.62
         },
         "linear": {
-          "hit_rate": 0.646,
-          "avg_cost_ct": 4.874,
-          "regret_ct": 0.643,
-          "eur_yr_saved_vs_anytime": 183.67
+          "hit_rate": 0.652,
+          "avg_cost_ct": 4.785,
+          "regret_ct": 0.632,
+          "eur_yr_saved_vs_anytime": 190.22
         },
         "linear_rich": {
-          "hit_rate": 0.65,
-          "avg_cost_ct": 4.828,
-          "regret_ct": 0.597,
-          "eur_yr_saved_vs_anytime": 185.54
+          "hit_rate": 0.654,
+          "avg_cost_ct": 4.743,
+          "regret_ct": 0.59,
+          "eur_yr_saved_vs_anytime": 191.91
         },
         "knn": {
-          "hit_rate": 0.715,
-          "avg_cost_ct": 4.622,
-          "regret_ct": 0.391,
-          "eur_yr_saved_vs_anytime": 193.8
+          "hit_rate": 0.724,
+          "avg_cost_ct": 4.529,
+          "regret_ct": 0.376,
+          "eur_yr_saved_vs_anytime": 200.52
         },
         "gbm": {
-          "hit_rate": 0.694,
-          "avg_cost_ct": 4.667,
+          "hit_rate": 0.698,
+          "avg_cost_ct": 4.589,
           "regret_ct": 0.436,
-          "eur_yr_saved_vs_anytime": 192.0
+          "eur_yr_saved_vs_anytime": 198.1
         }
       }
     }
@@ -1721,7 +1721,7 @@
           "persistence": 8.384,
           "linear": 8.558,
           "linear_rich": 8.558,
-          "knn": 9.096,
+          "knn": 8.725,
           "gbm": 8.443
         }
       },
@@ -1917,7 +1917,7 @@
           "persistence": 8.691,
           "linear": 8.756,
           "linear_rich": 8.756,
-          "knn": 8.691,
+          "knn": 8.697,
           "gbm": 8.691
         }
       },
@@ -5182,6 +5182,230 @@
           "knn": -1.038,
           "gbm": -1.038
         }
+      },
+      {
+        "date": "2026-07-13",
+        "season": "JJA",
+        "perfect_cost": 3.572,
+        "all_day_cost": 11.911,
+        "rungs": {
+          "climatology": 3.572,
+          "persistence": 3.572,
+          "linear": 4.176,
+          "linear_rich": 4.176,
+          "knn": 4.176,
+          "gbm": 5.351
+        }
+      },
+      {
+        "date": "2026-07-14",
+        "season": "JJA",
+        "perfect_cost": 5.478,
+        "all_day_cost": 12.397,
+        "rungs": {
+          "climatology": 5.478,
+          "persistence": 5.478,
+          "linear": 5.478,
+          "linear_rich": 5.478,
+          "knn": 5.478,
+          "gbm": 5.478
+        }
+      },
+      {
+        "date": "2026-07-15",
+        "season": "JJA",
+        "perfect_cost": 6.326,
+        "all_day_cost": 13.643,
+        "rungs": {
+          "climatology": 6.326,
+          "persistence": 6.326,
+          "linear": 6.897,
+          "linear_rich": 8.53,
+          "knn": 6.326,
+          "gbm": 6.897
+        }
+      },
+      {
+        "date": "2026-07-16",
+        "season": "JJA",
+        "perfect_cost": 9.108,
+        "all_day_cost": 15.986,
+        "rungs": {
+          "climatology": 9.197,
+          "persistence": 9.197,
+          "linear": 9.197,
+          "linear_rich": 9.197,
+          "knn": 9.197,
+          "gbm": 9.197
+        }
+      },
+      {
+        "date": "2026-07-17",
+        "season": "JJA",
+        "perfect_cost": 9.832,
+        "all_day_cost": 14.063,
+        "rungs": {
+          "climatology": 9.832,
+          "persistence": 10.104,
+          "linear": 10.221,
+          "linear_rich": 10.221,
+          "knn": 9.832,
+          "gbm": 9.832
+        }
+      },
+      {
+        "date": "2026-07-18",
+        "season": "JJA",
+        "perfect_cost": -0.247,
+        "all_day_cost": 8.246,
+        "rungs": {
+          "climatology": -0.158,
+          "persistence": -0.158,
+          "linear": -0.065,
+          "linear_rich": -0.065,
+          "knn": -0.158,
+          "gbm": -0.106
+        }
+      },
+      {
+        "date": "2026-07-19",
+        "season": "JJA",
+        "perfect_cost": -0.498,
+        "all_day_cost": 7.096,
+        "rungs": {
+          "climatology": -0.384,
+          "persistence": -0.498,
+          "linear": -0.285,
+          "linear_rich": -0.285,
+          "knn": -0.384,
+          "gbm": -0.498
+        }
+      },
+      {
+        "date": "2026-07-20",
+        "season": "JJA",
+        "perfect_cost": 0.002,
+        "all_day_cost": 10.316,
+        "rungs": {
+          "climatology": 0.002,
+          "persistence": 0.049,
+          "linear": 0.049,
+          "linear_rich": 0.756,
+          "knn": 0.002,
+          "gbm": 0.756
+        }
+      },
+      {
+        "date": "2026-07-21",
+        "season": "JJA",
+        "perfect_cost": 0.101,
+        "all_day_cost": 11.296,
+        "rungs": {
+          "climatology": 0.101,
+          "persistence": 0.101,
+          "linear": 0.403,
+          "linear_rich": 0.734,
+          "knn": 0.101,
+          "gbm": 0.734
+        }
+      },
+      {
+        "date": "2026-07-22",
+        "season": "JJA",
+        "perfect_cost": 0.027,
+        "all_day_cost": 10.044,
+        "rungs": {
+          "climatology": 0.067,
+          "persistence": 0.067,
+          "linear": 0.521,
+          "linear_rich": 0.521,
+          "knn": 0.067,
+          "gbm": 0.067
+        }
+      },
+      {
+        "date": "2026-07-23",
+        "season": "JJA",
+        "perfect_cost": 0.002,
+        "all_day_cost": 11.766,
+        "rungs": {
+          "climatology": 0.215,
+          "persistence": 0.002,
+          "linear": 1.554,
+          "linear_rich": 1.554,
+          "knn": 0.215,
+          "gbm": 0.002
+        }
+      },
+      {
+        "date": "2026-07-24",
+        "season": "JJA",
+        "perfect_cost": 1.039,
+        "all_day_cost": 13.053,
+        "rungs": {
+          "climatology": 1.376,
+          "persistence": 1.039,
+          "linear": 1.376,
+          "linear_rich": 1.376,
+          "knn": 1.376,
+          "gbm": 1.376
+        }
+      },
+      {
+        "date": "2026-07-25",
+        "season": "JJA",
+        "perfect_cost": -1.111,
+        "all_day_cost": 9.112,
+        "rungs": {
+          "climatology": -1.111,
+          "persistence": -0.781,
+          "linear": -1.111,
+          "linear_rich": -1.111,
+          "knn": -1.111,
+          "gbm": -1.111
+        }
+      },
+      {
+        "date": "2026-07-26",
+        "season": "JJA",
+        "perfect_cost": -0.076,
+        "all_day_cost": 9.017,
+        "rungs": {
+          "climatology": -0.047,
+          "persistence": -0.047,
+          "linear": -0.005,
+          "linear_rich": -0.034,
+          "knn": -0.047,
+          "gbm": -0.047
+        }
+      },
+      {
+        "date": "2026-07-27",
+        "season": "JJA",
+        "perfect_cost": -0.043,
+        "all_day_cost": 7.709,
+        "rungs": {
+          "climatology": -0.043,
+          "persistence": -0.039,
+          "linear": -0.043,
+          "linear_rich": -0.043,
+          "knn": -0.043,
+          "gbm": -0.043
+        }
+      },
+      {
+        "date": "2026-07-28",
+        "season": "JJA",
+        "perfect_cost": -0.006,
+        "all_day_cost": 11.682,
+        "rungs": {
+          "climatology": -0.006,
+          "persistence": -0.006,
+          "linear": -0.005,
+          "linear_rich": -0.005,
+          "knn": -0.006,
+          "gbm": -0.006
+        }
       }
     ],
     "3": [
@@ -6441,7 +6665,7 @@
           "persistence": 8.428,
           "linear": 9.022,
           "linear_rich": 9.022,
-          "knn": 9.127,
+          "knn": 8.863,
           "gbm": 8.428
         }
       },
@@ -9902,6 +10126,230 @@
           "knn": -0.931,
           "gbm": -0.931
         }
+      },
+      {
+        "date": "2026-07-13",
+        "season": "JJA",
+        "perfect_cost": 4.069,
+        "all_day_cost": 11.911,
+        "rungs": {
+          "climatology": 4.069,
+          "persistence": 4.069,
+          "linear": 4.917,
+          "linear_rich": 5.255,
+          "knn": 4.069,
+          "gbm": 5.255
+        }
+      },
+      {
+        "date": "2026-07-14",
+        "season": "JJA",
+        "perfect_cost": 5.787,
+        "all_day_cost": 12.397,
+        "rungs": {
+          "climatology": 5.787,
+          "persistence": 5.787,
+          "linear": 5.787,
+          "linear_rich": 5.787,
+          "knn": 5.787,
+          "gbm": 5.985
+        }
+      },
+      {
+        "date": "2026-07-15",
+        "season": "JJA",
+        "perfect_cost": 6.653,
+        "all_day_cost": 13.643,
+        "rungs": {
+          "climatology": 6.696,
+          "persistence": 6.696,
+          "linear": 7.807,
+          "linear_rich": 7.807,
+          "knn": 6.696,
+          "gbm": 7.807
+        }
+      },
+      {
+        "date": "2026-07-16",
+        "season": "JJA",
+        "perfect_cost": 9.288,
+        "all_day_cost": 15.986,
+        "rungs": {
+          "climatology": 9.288,
+          "persistence": 9.785,
+          "linear": 9.288,
+          "linear_rich": 9.288,
+          "knn": 9.288,
+          "gbm": 9.288
+        }
+      },
+      {
+        "date": "2026-07-17",
+        "season": "JJA",
+        "perfect_cost": 10.017,
+        "all_day_cost": 14.063,
+        "rungs": {
+          "climatology": 10.017,
+          "persistence": 10.017,
+          "linear": 10.087,
+          "linear_rich": 10.277,
+          "knn": 10.017,
+          "gbm": 10.017
+        }
+      },
+      {
+        "date": "2026-07-18",
+        "season": "JJA",
+        "perfect_cost": -0.223,
+        "all_day_cost": 8.246,
+        "rungs": {
+          "climatology": -0.11,
+          "persistence": -0.11,
+          "linear": -0.11,
+          "linear_rich": -0.11,
+          "knn": -0.11,
+          "gbm": -0.11
+        }
+      },
+      {
+        "date": "2026-07-19",
+        "season": "JJA",
+        "perfect_cost": -0.421,
+        "all_day_cost": 7.096,
+        "rungs": {
+          "climatology": -0.281,
+          "persistence": -0.413,
+          "linear": -0.279,
+          "linear_rich": -0.192,
+          "knn": -0.281,
+          "gbm": -0.357
+        }
+      },
+      {
+        "date": "2026-07-20",
+        "season": "JJA",
+        "perfect_cost": 0.033,
+        "all_day_cost": 10.316,
+        "rungs": {
+          "climatology": 0.256,
+          "persistence": 0.033,
+          "linear": 0.033,
+          "linear_rich": 0.536,
+          "knn": 0.033,
+          "gbm": 0.536
+        }
+      },
+      {
+        "date": "2026-07-21",
+        "season": "JJA",
+        "perfect_cost": 0.302,
+        "all_day_cost": 11.296,
+        "rungs": {
+          "climatology": 0.302,
+          "persistence": 0.523,
+          "linear": 1.723,
+          "linear_rich": 1.944,
+          "knn": 0.302,
+          "gbm": 2.563
+        }
+      },
+      {
+        "date": "2026-07-22",
+        "season": "JJA",
+        "perfect_cost": 0.061,
+        "all_day_cost": 10.044,
+        "rungs": {
+          "climatology": 0.391,
+          "persistence": 0.391,
+          "linear": 1.379,
+          "linear_rich": 2.455,
+          "knn": 0.061,
+          "gbm": 0.061
+        }
+      },
+      {
+        "date": "2026-07-23",
+        "season": "JJA",
+        "perfect_cost": 0.144,
+        "all_day_cost": 11.766,
+        "rungs": {
+          "climatology": 0.144,
+          "persistence": 0.144,
+          "linear": 1.037,
+          "linear_rich": 1.037,
+          "knn": 0.144,
+          "gbm": 1.037
+        }
+      },
+      {
+        "date": "2026-07-24",
+        "season": "JJA",
+        "perfect_cost": 1.394,
+        "all_day_cost": 13.053,
+        "rungs": {
+          "climatology": 1.394,
+          "persistence": 1.394,
+          "linear": 2.409,
+          "linear_rich": 2.409,
+          "knn": 2.409,
+          "gbm": 3.439
+        }
+      },
+      {
+        "date": "2026-07-25",
+        "season": "JJA",
+        "perfect_cost": -0.94,
+        "all_day_cost": 9.112,
+        "rungs": {
+          "climatology": -0.853,
+          "persistence": -0.853,
+          "linear": -0.94,
+          "linear_rich": -0.94,
+          "knn": -0.94,
+          "gbm": -0.853
+        }
+      },
+      {
+        "date": "2026-07-26",
+        "season": "JJA",
+        "perfect_cost": -0.06,
+        "all_day_cost": 9.017,
+        "rungs": {
+          "climatology": -0.06,
+          "persistence": -0.034,
+          "linear": -0.025,
+          "linear_rich": -0.025,
+          "knn": -0.034,
+          "gbm": -0.034
+        }
+      },
+      {
+        "date": "2026-07-27",
+        "season": "JJA",
+        "perfect_cost": -0.031,
+        "all_day_cost": 7.709,
+        "rungs": {
+          "climatology": -0.031,
+          "persistence": -0.031,
+          "linear": -0.029,
+          "linear_rich": -0.029,
+          "knn": -0.031,
+          "gbm": -0.031
+        }
+      },
+      {
+        "date": "2026-07-28",
+        "season": "JJA",
+        "perfect_cost": -0.004,
+        "all_day_cost": 11.682,
+        "rungs": {
+          "climatology": 0.109,
+          "persistence": 0.109,
+          "linear": -0.004,
+          "linear_rich": 0.111,
+          "knn": -0.004,
+          "gbm": -0.004
+        }
       }
     ],
     "4": [
@@ -11161,7 +11609,7 @@
           "persistence": 8.606,
           "linear": 8.859,
           "linear_rich": 8.859,
-          "knn": 8.945,
+          "knn": 8.827,
           "gbm": 8.501
         }
       },
@@ -14621,6 +15069,230 @@
           "linear_rich": -0.752,
           "knn": -0.846,
           "gbm": -0.752
+        }
+      },
+      {
+        "date": "2026-07-13",
+        "season": "JJA",
+        "perfect_cost": 4.651,
+        "all_day_cost": 11.911,
+        "rungs": {
+          "climatology": 4.651,
+          "persistence": 4.651,
+          "linear": 5.54,
+          "linear_rich": 5.54,
+          "knn": 4.904,
+          "gbm": 5.54
+        }
+      },
+      {
+        "date": "2026-07-14",
+        "season": "JJA",
+        "perfect_cost": 6.09,
+        "all_day_cost": 12.397,
+        "rungs": {
+          "climatology": 6.09,
+          "persistence": 6.09,
+          "linear": 6.671,
+          "linear_rich": 6.632,
+          "knn": 6.09,
+          "gbm": 6.09
+        }
+      },
+      {
+        "date": "2026-07-15",
+        "season": "JJA",
+        "perfect_cost": 6.849,
+        "all_day_cost": 13.643,
+        "rungs": {
+          "climatology": 6.849,
+          "persistence": 6.849,
+          "linear": 7.428,
+          "linear_rich": 7.428,
+          "knn": 7.428,
+          "gbm": 7.428
+        }
+      },
+      {
+        "date": "2026-07-16",
+        "season": "JJA",
+        "perfect_cost": 9.646,
+        "all_day_cost": 15.986,
+        "rungs": {
+          "climatology": 9.706,
+          "persistence": 9.706,
+          "linear": 9.706,
+          "linear_rich": 9.646,
+          "knn": 9.646,
+          "gbm": 9.706
+        }
+      },
+      {
+        "date": "2026-07-17",
+        "season": "JJA",
+        "perfect_cost": 10.162,
+        "all_day_cost": 14.063,
+        "rungs": {
+          "climatology": 10.162,
+          "persistence": 10.357,
+          "linear": 10.162,
+          "linear_rich": 10.162,
+          "knn": 10.162,
+          "gbm": 10.162
+        }
+      },
+      {
+        "date": "2026-07-18",
+        "season": "JJA",
+        "perfect_cost": -0.197,
+        "all_day_cost": 8.246,
+        "rungs": {
+          "climatology": -0.156,
+          "persistence": -0.156,
+          "linear": -0.156,
+          "linear_rich": -0.083,
+          "knn": -0.156,
+          "gbm": -0.156
+        }
+      },
+      {
+        "date": "2026-07-19",
+        "season": "JJA",
+        "perfect_cost": -0.377,
+        "all_day_cost": 7.096,
+        "rungs": {
+          "climatology": -0.335,
+          "persistence": -0.377,
+          "linear": -0.335,
+          "linear_rich": -0.211,
+          "knn": -0.335,
+          "gbm": -0.335
+        }
+      },
+      {
+        "date": "2026-07-20",
+        "season": "JJA",
+        "perfect_cost": 0.216,
+        "all_day_cost": 10.316,
+        "rungs": {
+          "climatology": 0.216,
+          "persistence": 0.402,
+          "linear": 0.402,
+          "linear_rich": 0.402,
+          "knn": 0.216,
+          "gbm": 0.797
+        }
+      },
+      {
+        "date": "2026-07-21",
+        "season": "JJA",
+        "perfect_cost": 0.568,
+        "all_day_cost": 11.296,
+        "rungs": {
+          "climatology": 0.568,
+          "persistence": 0.568,
+          "linear": 1.634,
+          "linear_rich": 1.634,
+          "knn": 0.568,
+          "gbm": 1.948
+        }
+      },
+      {
+        "date": "2026-07-22",
+        "season": "JJA",
+        "perfect_cost": 0.275,
+        "all_day_cost": 10.044,
+        "rungs": {
+          "climatology": 0.305,
+          "persistence": 0.305,
+          "linear": 1.263,
+          "linear_rich": 2.07,
+          "knn": 0.305,
+          "gbm": 0.275
+        }
+      },
+      {
+        "date": "2026-07-23",
+        "season": "JJA",
+        "perfect_cost": 0.658,
+        "all_day_cost": 11.766,
+        "rungs": {
+          "climatology": 0.886,
+          "persistence": 0.658,
+          "linear": 2.766,
+          "linear_rich": 2.766,
+          "knn": 0.886,
+          "gbm": 2.766
+        }
+      },
+      {
+        "date": "2026-07-24",
+        "season": "JJA",
+        "perfect_cost": 2.164,
+        "all_day_cost": 13.053,
+        "rungs": {
+          "climatology": 2.164,
+          "persistence": 2.77,
+          "linear": 2.164,
+          "linear_rich": 2.164,
+          "knn": 2.164,
+          "gbm": 3.698
+        }
+      },
+      {
+        "date": "2026-07-25",
+        "season": "JJA",
+        "perfect_cost": -0.788,
+        "all_day_cost": 9.112,
+        "rungs": {
+          "climatology": -0.788,
+          "persistence": -0.788,
+          "linear": -0.788,
+          "linear_rich": -0.788,
+          "knn": -0.77,
+          "gbm": -0.788
+        }
+      },
+      {
+        "date": "2026-07-26",
+        "season": "JJA",
+        "perfect_cost": -0.047,
+        "all_day_cost": 9.017,
+        "rungs": {
+          "climatology": -0.047,
+          "persistence": -0.047,
+          "linear": -0.026,
+          "linear_rich": -0.026,
+          "knn": -0.047,
+          "gbm": -0.026
+        }
+      },
+      {
+        "date": "2026-07-27",
+        "season": "JJA",
+        "perfect_cost": -0.024,
+        "all_day_cost": 7.709,
+        "rungs": {
+          "climatology": -0.024,
+          "persistence": -0.024,
+          "linear": 0.003,
+          "linear_rich": 0.003,
+          "knn": -0.024,
+          "gbm": -0.024
+        }
+      },
+      {
+        "date": "2026-07-28",
+        "season": "JJA",
+        "perfect_cost": 0.082,
+        "all_day_cost": 11.682,
+        "rungs": {
+          "climatology": 0.082,
+          "persistence": 0.082,
+          "linear": 0.083,
+          "linear_rich": 0.083,
+          "knn": 0.082,
+          "gbm": 0.082
         }
       }
     ]

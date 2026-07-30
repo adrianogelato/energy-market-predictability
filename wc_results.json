@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T10:34",
+  "generated_at": "2026-07-30T16:36",
   "data_source": "live",
   "window": {
     "start": "2026-05-15",
@@ -14,6 +14,12 @@
       "temp_max",
       "rad_mean",
       "wind_mean"
+    ],
+    "feature_labels": [
+      "daily mean temperature",
+      "daily maximum temperature",
+      "mean solar radiation",
+      "mean wind speed"
     ],
     "k_controls": 5,
     "day_type_classes": [
@@ -30,7 +36,7 @@
     "std_ct": 4.7,
     "t_stat": 0.75,
     "mde_ct_80pct_power": 2.23,
-    "interpretation": "No statistically clear effect: match hours look like weather-comparable days. A null result is still a real finding. With n=35 days, only effects of about 2.2 ct/kWh or larger were detectable (80% power), so this rules out a large effect, not any effect.",
+    "interpretation": "Match hours look like weather-comparable days, with no statistically clear effect. With n=35 days, only effects of about 2.2 ct/kWh or larger were detectable at 80% power.",
     "t_caveat": "per-day deltas share control days (pool smaller than the match-day count), so they are positively correlated and this t is optimistic"
   },
   "robustness_within_day": {
@@ -47,7 +53,7 @@
       "std_ct": 4.77,
       "t_stat": 0.12,
       "mde_ct_80pct_power": 6.67,
-      "interpretation": "No statistically clear effect: match hours look like weather-comparable days. A null result is still a real finding. With n=4 days, only effects of about 6.7 ct/kWh or larger were detectable (80% power), so this rules out a large effect, not any effect."
+      "interpretation": "Match hours look like weather-comparable days, with no statistically clear effect. With n=4 days, only effects of about 6.7 ct/kWh or larger were detectable at 80% power."
     },
     "robustness_within_day": {
       "n": 4,

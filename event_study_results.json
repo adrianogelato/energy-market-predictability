@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T10:34",
+  "generated_at": "2026-07-30T16:36",
   "signal": "day-ahead price (ct/kWh)",
   "hours": "08:00-19:59",
   "data_files": [
@@ -8,7 +8,7 @@
   ],
   "window": {
     "start": "2025-07-12",
-    "end": "2026-07-12"
+    "end": "2026-07-28"
   },
   "n_permutations": 2000,
   "matching": {
@@ -17,6 +17,12 @@
       "temp_max",
       "rad_mean",
       "wind_mean"
+    ],
+    "feature_labels": [
+      "daily mean temperature",
+      "daily maximum temperature",
+      "mean solar radiation",
+      "mean wind speed"
     ],
     "k_controls": 5,
     "day_type_classes": [
@@ -31,11 +37,11 @@
   "studies": [
     {
       "name": "weekend_vs_weekday",
-      "n": 106,
-      "mean_delta_ct": -3.93,
-      "std": 3.0,
-      "t_stat": -13.52,
-      "mde_ct_80pct_power": 0.81,
+      "n": 110,
+      "mean_delta_ct": -4.08,
+      "std": 3.01,
+      "t_stat": -14.22,
+      "mde_ct_80pct_power": 0.8,
       "permutation_p": 0.0005,
       "permutation_p_str": "< 0.0005"
     },
@@ -46,8 +52,8 @@
       "std": 5.46,
       "t_stat": -3.8,
       "mde_ct_80pct_power": 5.09,
-      "permutation_p": 0.013,
-      "permutation_p_str": "0.0130"
+      "permutation_p": 0.0035,
+      "permutation_p_str": "0.0035"
     }
   ]
 }
