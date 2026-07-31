@@ -303,15 +303,32 @@ code {
   .finding__eyebrow strong { display: inline; margin-right: .4rem; }
 }
 
-/* --- repo link, on every page ----------------------------------------- */
+/* --- the two utility nav rows ----------------------------------------- */
+/* .pagenav sits above the h1 (sibling pages), .repo below the footer (the
+   source). Same job, so one rule: mono and muted, because neither should
+   compete with the headline or the findings. Without this the pagenav links
+   inherit the green `a` colour and four of them stack up louder than the h1
+   they sit above. */
 
-.repo {
+.pagenav, .repo {
   font-family: var(--mono);
   font-size: .78rem;
-  margin: .9rem 0 0;
+  line-height: 1.7;
+  color: var(--muted);
 }
-.repo a { color: var(--muted); }
-.repo a:hover { color: var(--ink); }
+.pagenav { margin: 0 0 1.4rem; }
+.repo { margin: .9rem 0 0; }
+
+.pagenav a, .repo a {
+  color: var(--muted);
+  text-decoration-color: var(--line);
+}
+/* Specificity note: (0,1,1) here deliberately outranks intraday.html's own
+   `a { color: var(--imb) }`, so the nav row stays quiet on every page. */
+.pagenav a:hover, .repo a:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
 
 .links { display: flex; flex-wrap: wrap; gap: .4rem; }
 .links a {

@@ -9,8 +9,9 @@
     Every number on this page is computed live from the committed result
     JSONs (the same files the analyses write), so the page updates itself
     when the pipeline reruns. Only the verdict sentences are hand-written.
-    The detail pages: tariff.html (the daily demo) and worldcup.html (the
-    event study).
+    One page per finding, in the order the questions arose: ladder.html
+    (forecasting), intraday.html (day-ahead vs real time), worldcup.html
+    (event effects), plus tariff.html as the daily demo.
   -->
   <link rel="stylesheet" href="site.css" />
   <script src="bound.js" defer></script>
@@ -21,24 +22,25 @@
      where forecasts fail. Real market data, explicit baselines, statistics
      that are allowed to say "no effect".</p>
 
-  <p>Three questions drove this project: can you predict tomorrow's cheapest
-     electricity hours, what is that prediction worth in euros, and can a
-     scheduled mega-event (the 2026 World Cup) move the market? The answers,
-     computed live from the latest pipeline run:</p>
+  <p>Three questions drove this project, each one raised by the answer to the
+     last. Can you predict tomorrow's cheapest electricity hours, and what is
+     that worth? Is the day-ahead price even the right thing to predict? And can
+     a scheduled mega-event, the 2026 World Cup, move the market at all? The
+     answers, computed live from the latest pipeline run:</p>
 
   <p class="status" id="status">Interim results: the World Cup runs until
      19 July 2026; all event-study numbers will be re-run after the final.</p>
 
-  <div class="finding" id="f1">
+  <div class="finding" id="finding-forecast">
     <p class="finding__eyebrow"><strong>Finding 1</strong>Can you predict it?</p>
     <div class="finding__body">
-      <p class="verdict"><span id="f1-headline">Smart timing is worth real money.
+      <p class="verdict"><span id="ladder-headline">Smart timing is worth real money.
          The algorithm barely matters.</span></p>
-      <p>Over a full backtested year (<span class="num" id="f1-days">…</span> days),
+      <p>Over a full backtested year (<span class="num" id="ladder-days">…</span> days),
          shifting a daily EV charge into the cheapest hours saves
-         <span class="num" id="f1-timing">…</span>/year versus charging anytime.
+         <span class="num" id="ladder-timing">…</span>/year versus charging anytime.
          A 28-day lookup table wins a six-model ladder up to gradient boosting,
-         capturing <span class="num" id="f1-share">…</span> of the
+         capturing <span class="num" id="ladder-share">…</span> of the
          perfect-foresight ceiling; no model beats it overall.</p>
       <p class="implication" data-label="Product implication">A smart-charging
          feature on this market needs automation and UX, not machine learning.
@@ -46,54 +48,85 @@
          moves about two hundred.</p>
       <p class="muted">More:
          <a href="ladder.html">the full study: reasoning, charts, critical questions</a> ·
-         <a href="https://github.com/adrianogelato/energy-market-predictability#the-value-of-complexity-ladder-milestone-10">methodology</a> ·
+         <a href="https://github.com/adrianogelato/energy-market-predictability/blob/main/docs/design-decisions.md">design decisions</a> ·
          <a href="forecast_ladder.json">raw results</a></p>
     </div>
   </div>
 
-  <div class="finding" id="f2">
-    <p class="finding__eyebrow"><strong>Finding 2</strong>Can an event move it?</p>
+  <div class="finding" id="finding-target">
+    <p class="finding__eyebrow"><strong>Finding 2</strong>Is it the right target?</p>
     <div class="finding__body">
-      <p class="verdict"><span id="f2-headline">The World Cup did not detectably
-         move the German market.</span></p>
-      <p>Prices during match hours: <span class="num alt" id="f2-price">…</span>
-         versus weather-comparable days, statistically unclear, and still unclear
-         at <span class="num alt" id="f2-did">…</span> under a within-day
-         contrast that nets out day-level seasonal drift. Demand: every subset,
-         overnight kickoffs included, is consistent with chance in the placebo
-         test (<span class="num alt" id="f2-perm">…</span>).</p>
-      <p>The study states its own limits: it could only have detected a price
-         effect of about <span class="num alt" id="f2-mde">…</span> or larger, so
-         the honest claim is "no large effect", not "no effect".</p>
-
-      <!-- The bound bar; filled by drawBound() in bound.js from wc_results.json. -->
-      <div class="bound" id="f2-bound" hidden></div>
+      <p class="verdict">Day-ahead is a fair price for the household, and a poor
+         proxy for real time.</p>
+      <p>Finding 1 picks hours against the day-ahead price, which is what a
+         dynamic tariff bills. But that price is itself a forecast, so it can be
+         checked against the price that forms at delivery: the German imbalance
+         price (reBAP). Over <span class="num" id="r9-hours">…</span> hours the
+         systematic gap is near zero (median
+         <span class="num" id="r9-spread">…</span>), so the household is billed
+         fairly. The variance is another matter. Real time is
+         <span class="num" id="r9-vol">…</span> as volatile as day-ahead and only
+         <span class="num" id="r9-corr">…</span> correlated with it, and the three
+         cheapest day-ahead hours are still the cheapest at real time on just
+         <span class="num" id="r9-overlap">…</span> of days.</p>
+      <p class="implication" data-label="Product implication">No consumer-facing
+         intraday product: the household gap is zero, so there is nothing to pass
+         through. The real-time value is variance, capturable only by whoever
+         holds the balancing position, which makes it a business-to-business
+         aggregation play worth about <span class="num" id="r9-eur">…</span> per
+         household-equivalent. It is also earned unevenly, with
+         <span class="num" id="r9-tail">…</span> of it sitting in the worst 5% of
+         days, so capturing it is a readiness requirement rather than a daily
+         margin.</p>
       <p class="muted">More:
-         <a href="worldcup.html">full study with charts</a> ·
-         <a href="https://github.com/adrianogelato/energy-market-predictability#the-world-cup-price-study-milestone-4">price-test methodology</a> ·
-         <a href="https://github.com/adrianogelato/energy-market-predictability#the-forecast-error-study-milestone-7">demand-test methodology</a></p>
+         <a href="intraday.html">the full study: bias, volatility, concentration</a> ·
+         <a href="https://github.com/adrianogelato/energy-market-predictability/blob/main/NOTICE">data provenance</a> ·
+         <a href="intraday_results.json">raw results</a></p>
     </div>
   </div>
 
-  <div class="finding" id="f3">
-    <p class="finding__eyebrow"><strong>Finding 3</strong>Does the instrument work?</p>
+  <div class="finding" id="finding-event">
+    <p class="finding__eyebrow"><strong>Finding 3</strong>Can an event move it?</p>
     <div class="finding__body">
-      <p class="verdict">The engine finds the effect that is certainly there.</p>
-      <p>The same engine detects the weekend effect at
-         <span class="num" id="f3-weekend">…</span> in daytime prices
-         (placebo p <span class="num" id="f3-p">…</span>). A method that can find
-         a real event is what makes the World Cup null a finding rather than a
-         broken tool.</p>
+      <p class="verdict"><span id="wc-headline">The World Cup did not detectably
+         move the German market.</span></p>
+      <p>Prices during match hours: <span class="num alt" id="wc-price">…</span>
+         versus weather-comparable days, statistically unclear, and still unclear
+         at <span class="num alt" id="wc-did">…</span> under a within-day
+         contrast that nets out day-level seasonal drift. Demand: every subset,
+         overnight kickoffs included, is consistent with chance in the placebo
+         test (<span class="num alt" id="wc-perm">…</span>).</p>
+      <p>The study states its own limits: it could only have detected a price
+         effect of about <span class="num alt" id="wc-mde">…</span> or larger, so
+         the honest claim is "no large effect", not "no effect".</p>
+
+      <!-- The bound bar; filled by drawBound() in bound.js from wc_results.json. -->
+      <div class="bound" id="wc-bound" hidden></div>
+
+      <!-- The positive control sits inside this finding rather than beside it.
+           It is evidence that the null above is trustworthy, not a separate
+           claim about the market, and as its own block it competed with the
+           actual results for the reader's attention. -->
+      <p class="implication" data-label="Why believe the null">The same engine
+         finds the effect that is certainly there: the weekend effect at
+         <span class="num" id="instr-weekend">…</span> in daytime prices, placebo
+         p <span class="num" id="instr-p">…</span>. A method that can detect a
+         real event is what makes this null a finding rather than a broken tool.
+         It does not prove sensitivity to small effects, which is why the bound
+         above is stated rather than implied.</p>
       <p class="muted">More:
-         <a href="https://github.com/adrianogelato/energy-market-predictability#the-generic-event-study-milestone-9">event-study engine</a> ·
-         <a href="https://github.com/adrianogelato/energy-market-predictability#what-a-weather-comparable-day-means-matchingpy">what "weather-comparable" means</a></p>
+         <a href="worldcup.html">full study with charts</a> ·
+         <a href="https://github.com/adrianogelato/energy-market-predictability/blob/main/ROADMAP.md">hypothesis ledger and limitations</a></p>
     </div>
   </div>
 
   <h2>Explore</h2>
+  <p>One page per finding, in the order the questions were asked, plus a live
+     demo of what a dynamic tariff looks like day to day.</p>
   <p class="links">
-    <a href="ladder.html">The forecaster ladder study &rarr;</a>
-    <a class="alt" href="worldcup.html">The World Cup study &rarr;</a>
+    <a href="ladder.html">1 &middot; The forecaster ladder study &rarr;</a>
+    <a href="intraday.html">2 &middot; Day-ahead versus real time &rarr;</a>
+    <a class="alt" href="worldcup.html">3 &middot; The World Cup study &rarr;</a>
     <a href="tariff.html">Daily tariff demo (auto-refreshing) &rarr;</a>
     <a href="https://github.com/adrianogelato/energy-market-predictability">
       Source, write-up &amp; backlog on GitHub &rarr;</a>
@@ -118,39 +151,59 @@
     const eur = n => '€' + Math.round(Math.abs(n));
     const sign = n => (n > 0 ? '+' : n < 0 ? '−' : '±');
 
-    // Finding 1: the full-year value-of-complexity ladder (milestone 10)
+    // Finding 1: the full-year value-of-complexity ladder (M5/M8/M10)
     get('forecast_ladder.json').then(l => {
       const o = l.overall, clim = o.rungs.climatology;
-      set('f1-days', o.n_days);
-      set('f1-timing', eur(clim.eur_yr_saved_vs_anytime));
+      set('ladder-days', o.n_days);
+      set('ladder-timing', eur(clim.eur_yr_saved_vs_anytime));
       const share = (o.all_day_cost - clim.avg_cost_ct) /
                     (o.all_day_cost - o.perfect_cost);
-      set('f1-share', Math.round(100 * share) + '%');
+      set('ladder-share', Math.round(100 * share) + '%');
       // keep the hand-written claim honest if a rerun changes the winner
       const best = l.ladder_order.reduce((a, b) =>
         o.rungs[a].regret_ct <= o.rungs[b].regret_ct ? a : b);
       if (best !== 'climatology' || l.mode !== 'full-year') {
-        set('f1-share', share > 0 ? Math.round(100 * share) + '%' : '…');
-        set('f1-headline',
+        set('ladder-share', share > 0 ? Math.round(100 * share) + '%' : '…');
+        set('ladder-headline',
           'Smart timing is worth real money; see the ladder results for the model verdict.');
       }
-    }).catch(() => set('f1-timing', '(run year_fetch.py + forecast_ladder.py)'));
+    }).catch(() => set('ladder-timing', '(run year_fetch.py + forecast_ladder.py)'));
 
-    // Finding 2: the World Cup studies
+    // Finding 2: day-ahead versus real time (R9). Every figure here is read from
+    // the same committed JSON intraday.html renders, so the two cannot disagree.
+    get('intraday_results.json').then(d => {
+      const o = d.overall, r = d.rank_stability;
+      set('r9-hours', d.hours.toLocaleString('en-US'));
+      set('r9-spread', sign(o.spread.median) +
+        Math.abs(o.spread.median).toFixed(2) + ' ct/kWh');
+      set('r9-vol', o.vol_ratio_imb.toFixed(1) + 'x');
+      set('r9-corr', o.corr_da_imb.toFixed(2));
+      set('r9-overlap', r.pct_full_overlap + '%');
+      // The annual figure is a sum over days, so it takes the mean; the tail
+      // share is what stops that mean reading as a steady daily margin.
+      set('r9-eur', eur(r.settlement_regret_eur_per_yr) + '/yr');
+      // One decimal, not rounded: JS rounds 32.5 up and Python rounds it down,
+      // so rounding here made the index and the README disagree on the same
+      // JSON field. Print the stored value and the question cannot arise.
+      if (r.regret_share_from_top_5pct_days !== null)
+        set('r9-tail', r.regret_share_from_top_5pct_days + '%');
+    }).catch(() => set('r9-spread', '(run intraday_fetch.py + intraday_analysis.py)'));
+
+    // Finding 3: the World Cup studies
     Promise.all([
       get('wc_results.json'),
       get('wc_permutation_results.json').catch(() => null),
     ]).then(([wc, perm]) => {
       const e = wc.effect;
-      set('f2-price', sign(e.mean_delta_ct_per_kwh) +
+      set('wc-price', sign(e.mean_delta_ct_per_kwh) +
         Math.abs(e.mean_delta_ct_per_kwh).toFixed(2) + ' ct/kWh (t=' + e.t_stat + ')');
       if (wc.robustness_within_day) {
         const d = wc.robustness_within_day.mean_delta_ct;
-        set('f2-did', sign(d) + Math.abs(d).toFixed(2) + ' ct/kWh');
+        set('wc-did', sign(d) + Math.abs(d).toFixed(2) + ' ct/kWh');
       }
       if (e.mde_ct_80pct_power) {
-        set('f2-mde', e.mde_ct_80pct_power + ' ct/kWh');
-        drawBound('f2-bound', {
+        set('wc-mde', e.mde_ct_80pct_power + ' ct/kWh');
+        drawBound('wc-bound', {
           effect: e.mean_delta_ct_per_kwh,
           bound: e.mde_ct_80pct_power,
           unit: 'ct/kWh',
@@ -159,20 +212,20 @@
             'A dot inside the jaws is the finding, not a failure to find one.',
         });
       }
-      if (perm && perm.family_wise) set('f2-perm', 'family-wise p=' + perm.family_wise.p_value);
+      if (perm && perm.family_wise) set('wc-perm', 'family-wise p=' + perm.family_wise.p_value);
       // Let the data overrule the hand-written headline if a rerun changes it.
       const clear = Math.abs(e.t_stat || 0) >= 2 &&
                     perm && perm.family_wise && perm.family_wise.p_value < 0.05;
-      if (clear) set('f2-headline',
+      if (clear) set('wc-headline',
         'The World Cup measurably moved the German market (see the full study).');
-    }).catch(() => set('f2-price', '(run the pipeline)'));
+    }).catch(() => set('wc-price', '(run the pipeline)'));
 
-    // Finding 3: the weekend positive control
+    // The weekend positive control, shown inside finding 3 as its warrant.
     get('event_study_results.json').then(es => {
       const w = es.studies.find(s => s.name === 'weekend_vs_weekday');
-      set('f3-weekend', w.mean_delta_ct.toFixed(2) + ' ct/kWh (t=' + w.t_stat + ')');
-      set('f3-p', w.permutation_p_str || w.permutation_p);
-    }).catch(() => set('f3-weekend', '(run the pipeline)'));
+      set('instr-weekend', w.mean_delta_ct.toFixed(2) + ' ct/kWh (t=' + w.t_stat + ')');
+      set('instr-p', w.permutation_p_str || w.permutation_p);
+    }).catch(() => set('instr-weekend', '(run the pipeline)'));
 
     // Footer freshness. Also: the tournament ended 19 July 2026, so once the
     // event-study window reaches that date the interim notice hides itself.

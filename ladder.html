@@ -19,9 +19,13 @@
   </style>
 </head>
 <body>
-  <p><a href="index.html">&larr; project overview</a> &nbsp;·&nbsp;
-     <a href="tariff.html">daily tariff demo</a> &nbsp;·&nbsp;
-     <a href="worldcup.html">World Cup study</a></p>
+  <p class="pagenav"><a href="index.html">&larr; project overview</a>
+     &nbsp;·&nbsp;
+     <a href="intraday.html">2 &middot; day-ahead vs real time</a>
+     &nbsp;·&nbsp;
+     <a href="worldcup.html">3 &middot; World Cup study</a>
+     &nbsp;·&nbsp;
+     <a href="tariff.html">daily tariff demo</a></p>
   <h1>How advanced does a price forecaster need to be?</h1>
   <p class="sub">Six models, from a lookup table to gradient boosting, one full
      backtested year, identical scoring. The value-of-complexity study.</p>
@@ -296,8 +300,13 @@
     </dl>
   </section>
 
-  <p class="note" data-label="Further reading">Method details and every design decision:
-     <a href="https://github.com/adrianogelato/energy-market-predictability#the-value-of-complexity-ladder-milestone-10">README, milestone 10</a>.
+  <p class="note" data-label="Further reading">The method and the reasoning are on
+     this page, above. How the repository is built and run:
+     <a href="https://github.com/adrianogelato/energy-market-predictability">README</a>;
+     the engineering decisions behind it:
+     <a href="https://github.com/adrianogelato/energy-market-predictability/blob/main/docs/design-decisions.md">docs/design-decisions.md</a>;
+     the hypothesis ledger and backlog:
+     <a href="https://github.com/adrianogelato/energy-market-predictability/blob/main/ROADMAP.md">ROADMAP.md</a>.
      Raw results: <a href="forecast_ladder.json">forecast_ladder.json</a>,
      <a href="forecast_ladder_diagnostics.json">diagnostics</a>.</p>
 

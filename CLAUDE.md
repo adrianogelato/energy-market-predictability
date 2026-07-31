@@ -109,9 +109,15 @@ real-time reBAP, R9; verdict computed live from the JSON, no hardcoded numbers).
 - Tables are scroll containers (`display:block; overflow-x:auto` in
   `site.css`); the page body must never scroll sideways. Verified at 320, 360,
   390, 480 and 768px.
-- Every page carries a repo link in `<p class="repo">`, placed as a SIBLING
-  after `</footer>` because the pages set `footer.textContent` from JS, which
-  would wipe a child.
+- Two utility nav rows share one rule in `site.css`, because they do the same
+  job and neither may compete with the headline: `<p class="pagenav">` above
+  the `h1` (links to sibling pages, self-omitting, studies numbered 1/2/3 to
+  match index.html's findings) and `<p class="repo">` after the footer (the
+  source link). Both render mono and muted. The `.pagenav a` selector is
+  deliberately (0,1,1) so it outranks `intraday.html`'s own
+  `a { color: var(--imb) }`.
+- The repo link goes as a SIBLING after `</footer>`, never a child: the pages
+  set `footer.textContent` from JS, which would wipe a child.
 
 ## The three text blocks
 

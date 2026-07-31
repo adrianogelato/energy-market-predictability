@@ -124,8 +124,8 @@ raw matched comparison reads +2.18 ct/kWh with placebo p=0.005, and the Germany
 subset +6.34 with p=0.033, the only significant figure anywhere in the World Cup
 work. Neither survives the within-day contrast: +1.20 ct/kWh at p=0.118 pooled,
 +1.90 at p=0.452 for Germany, drift-robust family-wise p=0.455. The mechanism is
-visible in the raw data rather than inferred: match days sit about +0.69 ct/kWh
-above non-match days across all 24 hours, which a two-to-four-hour match cannot
+visible in the raw data rather than inferred: match days sit +0.43 ct/kWh
+above their matched control days across all 24 hours, which a two-to-four-hour match cannot
 cause, and the effect concentrates in June (+2.48 over 20 days) while nearly
 vanishing in July (+0.89 over 14 days) even though July is the knockout stage
 with the larger audiences. All four Germany match days fall in June, which is
@@ -477,7 +477,7 @@ A roadmap is a living document; the revisions are part of the record.
   typical day, 365 times", which nobody experiences. Both numbers are now
   reported with their scope attached, mean for annual totals and "median day"
   otherwise, plus the concentration statistic that explains the gap between
-  them: the worst 5% of days carry 32% of the annual total.
+  them: the worst 5% of days carry 32.5% of the annual total.
   `intraday_analysis.py` emits `settlement_regret_median_ct_per_kwh` and
   `regret_share_from_top_5pct_days` so the pages can state both without
   hardcoding either.
